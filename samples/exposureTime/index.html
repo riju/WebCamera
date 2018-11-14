@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Exposure time demo for Image Capture</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <p><button id="start" onclick="start()">start camera!</button></p>
+
+  <div>
+    <div style="float:left;margin-right:5px;">
+      <p><video id="video-tag" width="240" height="180" autoplay=true /></p>
+    </div>
+    <div style="float:left">
+      <p><img id="image-tag" width="240"> </img></p>
+    </div>
+  </div>
+
+  <div style="width: 240px">
+    <p><button onclick="takePhoto()">take photo</button></p>
+    <input type="range" id="exposureTime-slider" min="0" , max="0">
+    <output id="exposureTime-slider-value"></output>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+
+</html>

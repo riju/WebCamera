@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>OpenCV.js Video Processing (WebAssembly)</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div id="info" class="text-center">
+    OpenCV.js is loading...
+  </div>
+  <div id="container" class="invisible">
+    <table cellpadding="0" cellspacing="0" width="100%" border="0">
+      <tr>
+        <td></td>
+        <td>
+          <div class="text-center">
+            <span>Current Filter: </span><span id="filterName">Pass Through</span>
+          </div>
+        </td>
+        <td>
+          <div>Select Filter:</div>
+        </td>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <canvas class="center-block" id="canvasOutput" width=320 height=240></canvas>
+        </td>
+        <td>
+          <div id="guiContainer"></div>
+        </td>
+        <td></td>
+      </tr>
+    </table>
+    <div class="invisible">
+      <video id="video" class="hidden">Your browser does not support the video tag.</video>
+    </div>
+  </div>
+  <script src="../libs/adapter-latest.js"></script>
+  <script src="../libs/stats.min.js"></script>
+  <script src="../libs/dat.gui.min.js"></script>
+  <script src="../libs/utils.js"></script>
+  <script>
+    var featuresReady = checkFeatures(document.getElementById("info"), {
+      webrtc: true,
+      wasm: true
+    });
+  </script>
+  <script src="js/index.js"></script>
+  <script>
+    var Module = {
+      wasmBinaryFile: '../../build/wasm/opencv_js.wasm',
+      _main: function() {
+        opencvIsReady();
+      }
+    };
+  </script>
+  <script async src="../../build/wasm/opencv.js"></script>
+</body>
+
+</html>
