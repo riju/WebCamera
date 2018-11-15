@@ -11,7 +11,7 @@ var exposureTimeSlider = document.getElementById("exposureTime-slider");
 var exposureTimeSliderValue = document.getElementById("exposureTime-slider-value");
 var imageCapturer;
 
-function start() {
+function startCamera() {
   navigator.mediaDevices.getUserMedia(constraints)
     .then(gotMedia)
     .catch(e => {
@@ -20,7 +20,7 @@ function start() {
 }
 
 function gotMedia(mediastream) {
-  videoTag.src = URL.createObjectURL(mediastream);
+  videoTag.srcObject = mediastream;
   document.getElementById('start').disabled = true;
 
   var videoTrack = mediastream.getVideoTracks()[0];

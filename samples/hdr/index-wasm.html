@@ -9,38 +9,29 @@
 </head>
 
 <body>
-  <div id="info" class="text-center">
-    OpenCV.js is loading...
-  </div>
-  <div id="container" class="invisible">
-    <table cellpadding="0" cellspacing="0" width="100%" border="0">
-      <tr>
-        <td></td>
-        <td>
-          <div class="text-center">
-            <span>Current Filter: </span><span id="filterName">Pass Through</span>
-          </div>
-        </td>
-        <td>
-          <div>Select Filter:</div>
-        </td>
-        <td></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td>
-          <canvas class="center-block" id="canvasOutput" width=320 height=240></canvas>
-        </td>
-        <td>
-          <div id="guiContainer"></div>
-        </td>
-        <td></td>
-      </tr>
-    </table>
-    <div class="invisible">
-      <video id="video" class="hidden">Your browser does not support the video tag.</video>
+  <p><button id="start" onclick="startCamera()">start camera!</button></p>
+
+  <div>
+    <div style="float:left">
+      <p><video id="video-tag" width="240" height="180" autoplay=true /></p>
+    </div>
+    <div style="float:left">
+      <p><img id="image-tag1" width="240" height="180"> </img></p>
+    </div>
+    <div style="float:left">
+      <p><img id="image-tag2" width="240" height="180"> </img></p>
+    </div>
+    <div style="float:left">
+      <p><img id="image-tag3" width="240" height="180"> </img></p>
     </div>
   </div>
+
+  <div style="width: 240px">
+    <p><button id="takePhotoButton" onclick="takePhoto()">take photo</button></p>
+    <input type="range" id="exposureTime-slider" min="0" , max="0">
+    <output id="exposureTime-slider-value"></output>
+  </div>
+
   <script src="../libs/adapter-latest.js"></script>
   <script src="../libs/stats.min.js"></script>
   <script src="../libs/dat.gui.min.js"></script>
@@ -55,7 +46,7 @@
   <script>
     var Module = {
       wasmBinaryFile: '../../build/wasm/opencv_js.wasm',
-      _main: function() {
+      _main: function () {
         opencvIsReady();
       }
     };
