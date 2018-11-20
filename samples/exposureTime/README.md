@@ -1,8 +1,8 @@
-#Goal.
+# Goal
 
 Demonstrate how to use manual exposureMode to set the exposureTime.
 
-#Motivation
+# Motivation
 
 Image Capture API has an API for setting exposureMode to manual,
 but it is not very useful if the exposure time (aka shutter speed,
@@ -14,7 +14,7 @@ Shutter speed needs to be controlled to take low-light pictures or
 create motion-blur effects. This can also be used to create HDR images.
 
 
-#Useful Links
+## Useful Links
 
 Chromium Implementation:
 Intent to Implement and Ship:

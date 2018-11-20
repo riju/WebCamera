@@ -22,8 +22,6 @@ var counter = 0;
 var exposureTimeArray = new Float32Array(3);
 
 // Assume there is a list of 3 images at various exposure time.
-// TODO: check data is within range.
-var arrayExposureTime = [0.1, 1, 2, 3];
 
 function startCamera() {
   navigator.mediaDevices.getUserMedia(constraints)

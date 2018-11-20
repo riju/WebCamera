@@ -1,8 +1,8 @@
-#Goal.
+# Goal
 
 Demonstrate how to use manual focusMode to set the focusDistance.
 
-#Motivation
+# Motivation
 
 Image Capture API has an API for setting focusMode to manual, 
 but it is not very useful if the focus distance cannot be set. 
@@ -12,7 +12,7 @@ well as setting focus distance value.
 This can be used to create Depth of Field or "bokeh" effect, and 
 will also be useful foc Focus Stacking.
 
-#Useful Links
+## Useful Links
 
 Chromium Implementation:
 Intent to Implement and Ship:
