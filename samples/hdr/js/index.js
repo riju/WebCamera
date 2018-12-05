@@ -73,30 +73,56 @@ function createHDR() {
   }
 
   console.log("createHDR is called !");
-  let srcArray = new Array();
-  srcArray = [cv.imread(takePhotoCanvas1),
+  let srcArray = new cv.Mat  
+  [cv.imread(takePhotoCanvas1),
     cv.imread(takePhotoCanvas2),
     cv.imread(takePhotoCanvas3)
   ];
 
+  let src = cv.imread(takePhotoCanvas1);
+  console.log('image width: ' + src.cols + '\n' +
+            'image height: ' + src.rows + '\n' +
+            'image size: ' + src.size().width + '*' + src.size().height + '\n' +
+            'image depth: ' + src.depth() + '\n' +
+            'image channels ' + src.channels() + '\n' +
+            'image type: ' + src.type() + '\n');
+
   let dest = new cv.Mat();
+
+  let times = exposureTimeArray.slice();
+
+  exposureTimeArray.forEach(function(element){
+    console.log(element);
+  })
+
+  let response = new cv.Mat();
+  let calibration = new cv.CalibrateDebevec();
+  // process (InputArrayOfArrays src, OutputArray dst, InputArray times)
+  /*
+  type_dict = {
+    'InputArray': 'const cv::Mat&',
+    'OutputArray': 'cv::Mat&',
+    'InputOutputArray': 'cv::Mat&',
+    'InputArrayOfArrays': 'const std::vector<cv::Mat>&',
+    'OutputArrayOfArrays': 'std::vector<cv::Mat>&',
+    'String': 'std::string',
+    'const String&':'const std::string&'
+  }
+  */
+  calibration.process(srcArray, response, times);
 
   // Merge exposures to HDR image.
   console.log("MergeDebevec is called");
-  merge_debevec = cv.createMergeDebevec();
-  //merge_debevec = cv.MergeDebevec();
-  hdr_debevec = merge_debevec.process(srcArray, times = exposureTimeArray.slice());
-  console.log("Merge Robertson is called");
-  merge_robertson = cv.createMergeRobertson();
-  hdr_robertson = merge_robertson.process(srcArray, times = exposureTimeArray.slice());
-
-  // Tonemap HDR image.
+  let hdr_debevec = new cv.Mat();
+  let merge_debevec = new cv.MergeDebevec();
+  hdr_debevec = merge_debevec.process(srcArray, hdr, times, response);
+  
+  // Tonemap HDR image if you don't have HDR screen to display.
   console.log("Tonemap Durand is called");
-  tonemap1 = cv.createTonemapDurand(gamma = 2.2)
-  res_debevec = tonemap1.process(hdr_debevec.copy())
-  tonemap2 = cv.createTonemapDurand(gamma = 1.3)
-  res_robertson = tonemap2.process(hdr_robertson.copy())
-
+  let ldr = new cv.Mat();
+  tonemap1 = new cv.TonemapDurand(gamma = 2.2);
+  res_debevec = tonemap1.process(hdr_debevec.copy(), ldr);
+  
   // Convert to 8-bit and save.
   /*
   # Convert datatype to 8-bit and save
@@ -134,6 +160,7 @@ function takePhoto() {
       if (checkCounter()) {
         drawCanvas(takePhotoCanvasArray[counter - 1], imageBitmap);
         exposureTimeArray[counter - 1] = exposureTimeSlider.value;
+        console.log("exposure Time = ", exposureTimeSlider.value);
       }
     })
     .catch((err) => {
