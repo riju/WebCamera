@@ -73,23 +73,27 @@ function createHDR() {
   }
 
   console.log("createHDR is called !");
-  let srcArray = new cv.Mat  
-  [cv.imread(takePhotoCanvas1),
-    cv.imread(takePhotoCanvas2),
-    cv.imread(takePhotoCanvas3)
-  ];
 
-  let src = cv.imread(takePhotoCanvas1);
-  console.log('image width: ' + src.cols + '\n' +
-            'image height: ' + src.rows + '\n' +
-            'image size: ' + src.size().width + '*' + src.size().height + '\n' +
-            'image depth: ' + src.depth() + '\n' +
-            'image channels ' + src.channels() + '\n' +
-            'image type: ' + src.type() + '\n');
+  let src1 = cv.imread(takePhotoCanvas1);
+  let src2 = cv.imread(takePhotoCanvas2);
+  let src3 = cv.imread(takePhotoCanvas3);
+  console.log('image width: ' + src1.cols + '\n' +
+            'image height: ' + src1.rows + '\n' +
+            'image size: ' + src1.size().width + '*' + src1.size().height + '\n' +
+            'image depth: ' + src1.depth() + '\n' +
+            'image channels ' + src1.channels() + '\n' +
+            'image type: ' + src1.type() + '\n');
+
+  let srcArray = new cv.MatVector();
+  srcArray.push_back(src1);
+  srcArray.push_back(src2);
+  srcArray.push_back(src3);
 
   let dest = new cv.Mat();
 
-  let times = exposureTimeArray.slice();
+  // let times = exposureTimeArray.slice();
+
+  let times = new cv.Mat();
 
   exposureTimeArray.forEach(function(element){
     console.log(element);
@@ -98,17 +102,6 @@ function createHDR() {
   let response = new cv.Mat();
   let calibration = new cv.CalibrateDebevec();
   // process (InputArrayOfArrays src, OutputArray dst, InputArray times)
-  /*
-  type_dict = {
-    'InputArray': 'const cv::Mat&',
-    'OutputArray': 'cv::Mat&',
-    'InputOutputArray': 'cv::Mat&',
-    'InputArrayOfArrays': 'const std::vector<cv::Mat>&',
-    'OutputArrayOfArrays': 'std::vector<cv::Mat>&',
-    'String': 'std::string',
-    'const String&':'const std::string&'
-  }
-  */
   calibration.process(srcArray, response, times);
 
   // Merge exposures to HDR image.
@@ -137,7 +130,12 @@ function createHDR() {
   src1.delete();
   src2.delete();
   src3.delete();
+  srcArray.delete();
   dest.delete();
+  hdr_debevec.delete();
+  merge_debevec.delete();
+  ldr.delete();
+  tonemap1.delete();
 }
 
 function checkCounter() {
