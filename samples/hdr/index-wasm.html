@@ -4,32 +4,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>OpenCV.js Video Processing (WebAssembly)</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>OpenCV.js HDR by combining multiple exposure time photos</title>
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 
 <body>
   <p><button id="start" onclick="startCamera()">start camera!</button></p>
 
-  <div>
+  <div class="media">
     <div style="float:left">
       <p><video id="video-tag" width="240" height="180" autoplay=true /></p>
     </div>
-    <div style="float:left">
-      <p><img id="image-tag1" width="240" height="180"> </img></p>
-    </div>
-    <div style="float:left">
-      <p><img id="image-tag2" width="240" height="180"> </img></p>
-    </div>
-    <div style="float:left">
-      <p><img id="image-tag3" width="240" height="180"> </img></p>
-    </div>
+    <canvas id='takePhotoCanvas1' width="240" height="180"></canvas>
+    <canvas id='takePhotoCanvas2' width="240" height="180"></canvas>
+    <canvas id='takePhotoCanvas3' width="240" height="180"></canvas>
   </div>
 
   <div style="width: 240px">
     <p><button id="takePhotoButton" onclick="takePhoto()">take photo</button></p>
     <input type="range" id="exposureTime-slider" min="0" , max="0">
     <output id="exposureTime-slider-value"></output>
+    <p><button id="createHDRButton" onclick="createHDR()">Create HDR</button></p>
+  </div>
+  <div>
+    <canvas id='outputCanvas' width="240" height="180"></canvas>
+  </div>
   </div>
 
   <script src="../libs/adapter-latest.js"></script>
