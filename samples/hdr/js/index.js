@@ -93,20 +93,24 @@ function createHDR() {
   srcArray.push_back(src2);
   srcArray.push_back(src3);
 
-  let dest = new cv.Mat();
-
-
+  // Align images , need to expose in Photo module JS bindings.
+  /*
+  let alignMTB = new cv.AlignMTB();
+  alignMTB.process(srcArray, srcArray);
+  console.log("Aligning the images are done !");
+  */
 
   let response = new cv.Mat();
   let calibration = new cv.CalibrateDebevec();
-  // process (InputArrayOfArrays src, OutputArray dst, InputArray times)
-  console.log("call calibration.process");
   // let times = exposureTimeArray.slice();
   let times = new cv.matFromArray(exposureTimeArray.length, 1, cv.CV_32F,
       exposureTimeArray);
   exposureTimeArray.forEach(function(element) {
       console.log(element);
   });
+
+  // process (InputArrayOfArrays src, OutputArray dst, InputArray times)
+  console.log("call calibration.process");
   calibration.process(srcArray, response, times);
 
   // Merge exposures to HDR image.
@@ -119,18 +123,37 @@ function createHDR() {
   // Tonemap HDR image if you don't have HDR screen to display.
   console.log("TonemapReinhard is called");
   let ldr = new cv.Mat();
-  tonemap1 = new cv.TonemapReinhard(gamma = 2.2);
-  res_debevec = tonemap1.process(hdr_debevec, ldr);
+  tonemap_reinhard = new cv.TonemapReinhard(gamma = 2.2);
+  res_debevec = tonemap_reinhard.process(hdr_debevec, ldr);
   console.log("Tonemapping done !! woooo ");
-  // Convert to 8-bit and save.
-  /*
-  # Convert datatype to 8-bit and save
-  res_debevec_8bit = np.clip(res_debevec*255, 0, 255).astype('uint8')
-  res_robertson_8bit = np.clip(res_robertson*255, 0, 255).astype('uint8')
 
-  cv.imwrite("ldr_debevec.jpg", res_debevec_8bit)
-  cv.imwrite("ldr_robertson.jpg", res_robertson_8bit)
+  // Fusion : First align and then merge.
+  // Align not properly exposed in JS, so ignore the align call now.
+  //console.log("MergeMertens is called");
+  //let fusion = new cv.Mat();
+  //let merge_mertens = new cv.MergeMertens();
+  //merge_mertens.process(srcArray, fusion);
+
+  // Convert the tye to cv.CV_8UC4
+  let dest = new cv.Mat();
+
+  // Display in canvas.
+  /*
+  let output_canvas = document.getElementById(outputCanvas);
+  let ctx = output_canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, output_canvas.width, output_canvas.height);
+  output_canvas.width = imgData.width;
+  output_canvas.height = imgData.height;
+  ctx.putImageData(imgData, 0, 0);
   */
+  //cv.imwrite('fusion.png', fusion * 255);
+  /*
+  cv.imwrite('ldr.png', ldr * 255);
+  cv.imwrite('hdr.png', hdr * 255);
+  cv.imshow('outputCanvas', ldr);
+  */
+  cv.imshow('outputCanvas', ldr);
 
   // Cleanup.
   src1.delete();
@@ -140,8 +163,10 @@ function createHDR() {
   dest.delete();
   hdr_debevec.delete();
   merge_debevec.delete();
-  ldr.delete();
-  tonemap1.delete();
+  //merge_mertens.delete();
+  //fusion.delete();
+  //ldr.delete();
+  tonemap_reinhard.delete();
 }
 
 function checkCounter() {
