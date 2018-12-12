@@ -217,7 +217,8 @@ function takePhoto() {
       .then((imageBitmap) => {
           if (checkCounter()) {
               drawCanvas(takePhotoCanvasArray[counter - 1], imageBitmap);
-              exposureTimeArray[counter - 1] = (1 / exposureTimeSlider.value);
+              // exposure time values are in 100 µs units.
+              exposureTimeArray[counter - 1] = (10000 / exposureTimeSlider.value);
               console.log("exposure Time = ", exposureTimeSlider.value);
           }
       })
