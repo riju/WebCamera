@@ -1,10 +1,19 @@
-const constraints = {
+const constraints_general = {
   "video": {
       width: {
           exact: 240
       }
   }
 };
+
+const constraints_mobile = {
+    video: {
+        facingMode: { exact: "environment" },
+        width : { exact:240
+        }
+    }
+};
+
 var videoTag = document.getElementById('video-tag');
 
 var takePhotoCanvas1 = document.getElementById('takePhotoCanvas1');
@@ -26,11 +35,21 @@ var exposureTimeArray = new Float32Array(3);
 // Assume there is a list of 3 images at various exposure time.
 
 function startCamera() {
-  navigator.mediaDevices.getUserMedia(constraints)
+  //Right now only chrome on Android and Chrome on Linux/CrOS will work.
+
+  if (navigator.userAgent.match(/Android/i)) {
+    navigator.mediaDevices.getUserMedia(constraints_mobile)
       .then(gotMedia)
       .catch(e => {
           console.error('getUserMedia() failed: ', e);
       });
+  } else {
+      navigator.mediaDevices.getUserMedia(constraints_general)
+      .then(gotMedia)
+      .catch(e => {
+          console.error('getUserMedia() failed: ', e);
+      });
+    }
 }
 
 function gotMedia(mediastream) {
@@ -153,7 +172,8 @@ function createHDR() {
   cv.imwrite('hdr.png', hdr * 255);
   cv.imshow('outputCanvas', ldr);
   */
-  cv.imshow('outputCanvas', ldr);
+  cv.imshow('outputCanvasLDR', ldr);
+  cv.imshow('outputCanvasHDR', hdr_debevec);
 
   // Cleanup.
   src1.delete();
