@@ -130,20 +130,29 @@ function createHDR() {
 
   // process (InputArrayOfArrays src, OutputArray dst, InputArray times)
   console.log("call calibration.process");
+  var t0 = performance.now();
   calibration.process(srcArray, response, times);
+  var t1 = performance.now();
+  console.log("calibration.process took " + (t1 - t0) + " milliseconds.");
 
   // Merge exposures to HDR image.
   console.log("MergeDebevec is called");
   let hdr_debevec = new cv.Mat();
   let merge_debevec = new cv.MergeDebevec();
+  t0 = performance.now();
   merge_debevec.process(srcArray, hdr_debevec, times, response);
+  t1 = performance.now();
+  console.log("merge_debevec.process took " + (t1 - t0) + " milliseconds.");
   console.log("HDR done !! woooo ");
 
   // Tonemap HDR image if you don't have HDR screen to display.
   console.log("TonemapReinhard is called");
   let ldr = new cv.Mat();
   tonemap_reinhard = new cv.TonemapReinhard(gamma = 2.2);
+  t0 = performance.now();
   res_debevec = tonemap_reinhard.process(hdr_debevec, ldr);
+  t1 = performance.now();
+  console.log("tonemap_reinhard took " + (t1 - t0) + " milliseconds.");
   console.log("Tonemapping done !! woooo ");
 
   // Fusion : First align and then merge.
