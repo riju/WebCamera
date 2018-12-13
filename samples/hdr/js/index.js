@@ -188,6 +188,8 @@ function createHDR() {
   cv.imshow('outputCanvasHDR', dst);
   cv.imshow('outputCanvasLDR', ldr);
 
+  //cv.imwrite("hdr.png", hdr_debevec);
+
   // Cleanup.
   src1.delete();
   src2.delete();
