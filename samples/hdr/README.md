@@ -27,7 +27,8 @@ photos[5] using the debevec algorithm[6].
 We had to supply OpenCV with an array of images at different exposures and 
 wooo ... magic happened !!
 With capturing different exposure levels now possible on the Web(chromium), we 
-can now create HDR using opencv.js[7].
+can now create HDR using opencv.js, we need to compile opencvJS with the "photo" module as described in this PR[7].
+
 So capturing -> processing -> display all within your favourite browser.
 
 ---
@@ -46,4 +47,4 @@ So capturing -> processing -> display all within your favourite browser.
 
 [6] http://www.pauldebevec.com/Research/HDR/debevec-siggraph97.pdf
 
-[5] https://github.com/ucisysarch/opencvjs
+[7] https://github.com/opencv/opencv/commit/e70786e05e605074b33e4c00842009847c32f17a
