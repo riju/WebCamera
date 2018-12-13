@@ -181,8 +181,12 @@ function createHDR() {
   cv.imwrite('hdr.png', hdr * 255);
   cv.imshow('outputCanvas', ldr);
   */
+  // Fix colorspace
+  // https://docs.opencv.org/3.1.0/d7/d1b/group__imgproc__misc.html
+  let dst = new cv.Mat();
+  cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGRA2RGBA, 0);
+  cv.imshow('outputCanvasHDR', dst);
   cv.imshow('outputCanvasLDR', ldr);
-  cv.imshow('outputCanvasHDR', hdr_debevec);
 
   // Cleanup.
   src1.delete();
@@ -196,6 +200,7 @@ function createHDR() {
   //fusion.delete();
   //ldr.delete();
   tonemap_reinhard.delete();
+  dst.delete();
 }
 
 function checkCounter() {
