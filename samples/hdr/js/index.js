@@ -184,6 +184,7 @@ function createHDR() {
   // Fix colorspace
   // https://docs.opencv.org/3.1.0/d7/d1b/group__imgproc__misc.html
   let dst = new cv.Mat();
+  cv.imshow('outputCanvasHDRnoColorspaceConversion', hdr_debevec);
   cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGRA2RGBA, 0);
   cv.imshow('outputCanvasHDR', dst);
   cv.imshow('outputCanvasLDR', ldr);
