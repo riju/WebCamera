@@ -181,11 +181,14 @@ function createHDR() {
   cv.imwrite('hdr.png', hdr * 255);
   cv.imshow('outputCanvas', ldr);
   */
-  // Fix colorspace
-  // https://docs.opencv.org/3.1.0/d7/d1b/group__imgproc__misc.html
+  /* Fix colorspace
+   https://docs.opencv.org/3.1.0/d7/d1b/group__imgproc__misc.html
+   data read from canvas is a Uint8ClampedArray.
+   Mat used here is CV_32F
+   */
   let dst = new cv.Mat();
   cv.imshow('outputCanvasHDRnoColorspaceConversion', hdr_debevec);
-  cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGRA2RGBA, 0);
+  cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGR2RGBA, 0);
   cv.imshow('outputCanvasHDR', dst);
   cv.imshow('outputCanvasLDR', ldr);
 
