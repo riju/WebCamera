@@ -30,7 +30,8 @@ var exposureTimeSliderValue = document.getElementById(
 var takePhotoButton = document.getElementById('takePhotoButton');
 var imageCapturer;
 var counter = 0;
-var exposureTimeArray = new Float32Array(3);
+//var exposureTimeArray = new Float32Array(3);
+var exposureTimeArray = new Uint8Array(3);
 
 // Assume there is a list of 3 images at various exposure time.
 
@@ -96,6 +97,7 @@ function createHDR() {
 
   console.log("createHDR is called !");
 
+  // STEP 1. Capture multiple images with various exposure levels.
   let src1 = cv.imread(takePhotoCanvas1);
   let src2 = cv.imread(takePhotoCanvas2);
   let src3 = cv.imread(takePhotoCanvas3);
@@ -112,13 +114,14 @@ function createHDR() {
   srcArray.push_back(src2);
   srcArray.push_back(src3);
 
-  // Align images , need to expose in Photo module JS bindings.
+  // STEP 2. Align images , need to expose properly in Photo module JS bindings.
   /*
   let alignMTB = new cv.AlignMTB();
   alignMTB.process(srcArray, srcArray);
   console.log("Aligning the images are done !");
   */
 
+  // STEP 3. Estimate Camera Response Function (CRF).
   let response = new cv.Mat();
   let calibration = new cv.CalibrateDebevec();
   // let times = exposureTimeArray.slice();
@@ -135,7 +138,7 @@ function createHDR() {
   var t1 = performance.now();
   console.log("calibration.process took " + (t1 - t0) + " milliseconds.");
 
-  // Merge exposures to HDR image.
+  // STEP 4. Merge exposures to HDR image.
   console.log("MergeDebevec is called");
   let hdr_debevec = new cv.Mat();
   let merge_debevec = new cv.MergeDebevec();
@@ -145,7 +148,7 @@ function createHDR() {
   console.log("merge_debevec.process took " + (t1 - t0) + " milliseconds.");
   console.log("HDR done !! woooo ");
 
-  // Tonemap HDR image if you don't have HDR screen to display.
+  // STEP 5. Tonemap HDR image if you don't have HDR screen to display.
   console.log("TonemapReinhard is called");
   let ldr = new cv.Mat();
   tonemap_reinhard = new cv.TonemapReinhard(gamma = 2.2);
@@ -175,6 +178,7 @@ function createHDR() {
   output_canvas.height = imgData.height;
   ctx.putImageData(imgData, 0, 0);
   */
+  // https://github.com/opencv/opencv/issues/13459
   //cv.imwrite('fusion.png', fusion * 255);
   /*
   cv.imwrite('ldr.png', ldr * 255);
@@ -186,9 +190,10 @@ function createHDR() {
    data read from canvas is a Uint8ClampedArray.
    Mat used here is CV_32F
    */
+  // STEP 6. Display
   let dst = new cv.Mat();
   cv.imshow('outputCanvasHDRnoColorspaceConversion', hdr_debevec);
-  cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGR2RGBA, 0);
+  cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGRA2RGBA, 0);
   cv.imshow('outputCanvasHDR', dst);
   cv.imshow('outputCanvasLDR', ldr);
 
