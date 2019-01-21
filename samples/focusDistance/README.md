@@ -10,7 +10,7 @@ This API provides an interface for getting focus range values as
 well as setting focus distance value.
 
 This can be used to create Depth of Field or "bokeh" effect, and 
-will also be useful foc Focus Stacking.
+will also be useful for Focus Stacking.
 
 ## Useful Links
 
