@@ -2,6 +2,9 @@ const constraints = {
   "video": {
     width: {
       exact: 480
+    },
+    height: {
+      ideal: 360
     }
   }
 };
