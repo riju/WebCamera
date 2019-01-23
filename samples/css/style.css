@@ -1,5 +1,8 @@
 canvas {
-  border: 1px solid black;
+  box-shadow: 0px 0px 40px 0px rgba(0,0,0,0.75);
+}
+video {
+  box-shadow: 0px 0px 40px 0px rgba(0,0,0,0.75);
 }
 .invisible {
   display: none;

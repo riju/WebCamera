@@ -9,3 +9,7 @@ They are mostly used for ImageCapture/MediaStream and WebRTC APIs.
 Try out the demos (Chrome 72+):
 
 [Sample Demo page](https://riju.github.io/WebCamera/samples/)
+
+![](exposureDemo.gif)
+
+![](focusDistance.gif)
