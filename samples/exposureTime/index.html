@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -9,25 +9,23 @@
 </head>
 
 <body>
-
-  <p><button id="start" onclick="startCamera()">start camera!</button></p>
-
-  <div>
-    <div style="float:left;margin-right:5px;">
-      <p><video id="video-tag" width="240" height="180" autoplay=true /></p>
-    </div>
-    <div style="float:left">
-      <p><img id="image-tag" width="240"> </img></p>
-    </div>
+  <div class="controls">
+    <button id="start">🎬 Start camera</button>
   </div>
-
-  <div style="width: 240px">
-    <p><button onclick="takePhoto()">take photo</button></p>
-    <input type="range" id="exposureTime-slider" min="0" , max="0">
+  <div class="centered">
+      <video id="video-tag" width="480" height="360" autoplay></video>
+    <img src="#" id="image-tag" width="480" height="360" alt="">
+  </div>
+  <div class="controls">
+    <button id="take">📷 Take photo</button>
+    <input type="range" id="exposureTime-slider" min="0" max="0">
     <output id="exposureTime-slider-value"></output>
   </div>
-
   <script src="index.js"></script>
-</body>
+  <script>
+      document.querySelector('#start').addEventListener('click', () => { startCamera() });
+      document.querySelector('#take').addEventListener('click', () => { takePhoto() });
+  </script>
+  </body>
 
 </html>

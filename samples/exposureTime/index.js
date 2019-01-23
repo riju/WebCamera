@@ -1,7 +1,7 @@
 const constraints = {
   "video": {
     width: {
-      exact: 320
+      exact: 480
     }
   }
 };
@@ -22,6 +22,9 @@ function startCamera() {
 function gotMedia(mediastream) {
   videoTag.srcObject = mediastream;
   document.getElementById('start').disabled = true;
+  document.querySelector('#start').style.display = 'none';
+  document.querySelector('#take').style.display = 'block';
+  document.querySelector('input[type=range]').style.display = 'block';
 
   var videoTrack = mediastream.getVideoTracks()[0];
   imageCapturer = new ImageCapture(videoTrack);
