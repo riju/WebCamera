@@ -1,63 +1,10 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>OpenCV.js HDR by combining multiple exposure time photos</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <meta http-equiv="refresh" content="0; url=https://riju.github.io/WebCamera/samples/hdr/" />
+  <title>Redirecting</title>
 </head>
-
 <body>
-  <p><button id="start" onclick="startCamera()">start camera!</button></p>
-
-  <div class="media">
-    <div style="float:left">
-      <p><video id="video-tag" width="240" height="180" autoplay=true /></p>
-    </div>
-    <canvas id='takePhotoCanvas1' width="240" height="180"></canvas>
-    <canvas id='takePhotoCanvas2' width="240" height="180"></canvas>
-    <canvas id='takePhotoCanvas3' width="240" height="180"></canvas>
-  </div>
-
-  <div style="width: 240px">
-    <p><button id="takePhotoButton" onclick="takePhoto()">take photo</button></p>
-    <input type="range" id="exposureTime-slider" min="0" , max="0">
-    <output id="exposureTime-slider-value"></output>
-    <p><button id="createHDRButton" onclick="createHDR()">Create HDR</button></p>
-  </div>
-  <div>
-    <canvas id='outputCanvasHDR' width="240" height="180"></canvas>
-    <canvas id='outputCanvasHDRnoColorspaceConversion' width="240" height="180"></canvas>
-    <canvas id='outputCanvasLDR' width="240" height="180"></canvas>
-  </div>
-  <div>
-    <label id='label_outputCanvasHDR' width="240"> outputCanvasHDR </label>
-    <label id='label_outputCanvasHDRnoColorspaceConversion' width="240"> outputCanvasHDRnoColorspaceConversion </label>
-    <label id='label_outputCanvasLDR' width="240"> outputCanvasLDR </label>
-  </div>
-  </div>
-
-  <script src="../libs/adapter-latest.js"></script>
-  <script src="../libs/stats.min.js"></script>
-  <script src="../libs/dat.gui.min.js"></script>
-  <script src="../libs/utils.js"></script>
-  <script>
-    var featuresReady = checkFeatures(document.getElementById("info"), {
-      webrtc: true,
-      wasm: true
-    });
-  </script>
-  <script src="js/index.js"></script>
-  <script>
-    var Module = {
-      wasmBinaryFile: '../../build/wasm/opencv_js.wasm',
-      _main: function () {
-        opencvIsReady();
-      }
-    };
-  </script>
-  <script async src="../../build/wasm/opencv.js"></script>
 </body>
-
 </html>

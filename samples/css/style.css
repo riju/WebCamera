@@ -26,7 +26,7 @@ label {
   vertical-align: top;
   font: 16px 'Lucida Grande', sans-serif;
 }
-video, img {
+video, img, canvas {
   margin: 10px;
   box-shadow: 0px 0px 81px 0px rgba(0,0,0,0.75);
 }
