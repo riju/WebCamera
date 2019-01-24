@@ -36,6 +36,7 @@ var exposureTimeArray = new Uint8Array(3);
 // Assume there is a list of 3 images at various exposure time.
 
 function startCamera() {
+  document.querySelector('#start').style.display = 'none';
   //Right now only chrome on Android and Chrome on Linux/CrOS will work.
 
   if (navigator.userAgent.match(/Android/i)) {
@@ -88,6 +89,7 @@ function gotMedia(mediastream) {
   }, 500);
 }
 
+// TODO: process HDR in a dedicated worker to not block the main thread
 // process HDR
 function createHDR() {
   if (counter < 3) {
@@ -270,3 +272,12 @@ function drawCanvas(canvas, img) {
   canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height,
       x, y, img.width * ratio, img.height * ratio);
 }
+
+function addTextToCanvas(text, canvasId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext("2d");
+    ctx.font= "14px Arial";
+    ctx.fillStyle = "gray";
+    ctx.textAlign = "center";
+    ctx.fillText(text, canvas.width/2, canvas.height/2);
+  }

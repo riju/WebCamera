@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -9,45 +9,66 @@
 </head>
 
 <body>
-  <p><button id="start" onclick="startCamera()">start camera!</button></p>
-
+  <div class="controls">
+    <button id="start">🎬 Start camera</button>
+  </div>
+  <div>
+    <video id="video-tag" width="240" height="180" autoplay></video>
+  </div>
   <div class="media">
-    <div style="float:left">
-      <p><video id="video-tag" width="240" height="180" autoplay=true /></p>
-    </div>
     <canvas id='takePhotoCanvas1' width="240" height="180"></canvas>
     <canvas id='takePhotoCanvas2' width="240" height="180"></canvas>
     <canvas id='takePhotoCanvas3' width="240" height="180"></canvas>
-  </div>
-
-  <div style="width: 240px">
-    <p><button id="takePhotoButton" onclick="takePhoto()">take photo</button></p>
-    <input type="range" id="exposureTime-slider" min="0" , max="0">
-    <output id="exposureTime-slider-value"></output>
-    <p><button id="createHDRButton" onclick="createHDR()">Create HDR</button></p>
+    <br>
+    <label for="exposure-slider">🔆 Exposure <output id="exposureTime-slider-value"></output>
+      <input type="range" id="exposureTime-slider" min="0" max="0" style="display: block;">
+    </label>
+      <button id="takePhotoButton">📷 Take photo</button>
   </div>
   <div>
     <canvas id='outputCanvasHDR' width="240" height="180"></canvas>
     <canvas id='outputCanvasHDRnoColorspaceConversion' width="240" height="180"></canvas>
     <canvas id='outputCanvasLDR' width="240" height="180"></canvas>
+    <p><button id="createHDRButton" onclick="createHDR()">✨ Create HDR</button></p>
   </div>
-  <div>
-    <label id='label_outputCanvasHDR' width="240"> outputCanvasHDR </label>
-    <label id='label_outputCanvasHDRnoColorspaceConversion' width="240"> outputCanvasHDRnoColorspaceConversion </label>
-    <label id='label_outputCanvasLDR' width="240"> outputCanvasLDR </label>
-  </div>
-  </div>
-
   <script src="../libs/adapter-latest.js"></script>
   <script src="../libs/stats.min.js"></script>
   <script src="../libs/dat.gui.min.js"></script>
   <script src="../libs/utils.js"></script>
   <script>
+    window.onload = () => {
+      document.querySelector('#start').addEventListener('click', () => { startCamera() });
+      document.querySelector('#takePhotoButton').addEventListener('click', () => { takePhoto() });
+
+      addTextToCanvas('Photo 1', 'takePhotoCanvas1');
+      addTextToCanvas('Photo 2 (tip: adjust exposure!)', 'takePhotoCanvas2');
+      addTextToCanvas('Photo 3 (tip: adjust exposure again!)', 'takePhotoCanvas3');
+
+      addTextToCanvas('High Dynamic Range', 'outputCanvasHDR');
+      addTextToCanvas('HDR no colorspace conversion', 'outputCanvasHDRnoColorspaceConversion');
+      addTextToCanvas('Low Dynamic Range', 'outputCanvasLDR');
+    };
+    </script>
+  <script>
     var featuresReady = checkFeatures(document.getElementById("info"), {
       webrtc: true
+      // FIXME: Wasm
+      // wasm: true
     });
   </script>
   <script src="js/index.js"></script>
+  <!--
+  <script>
+    // FIXME: Wasm
+    var Module = {
+      wasmBinaryFile: '../../build/wasm/opencv_js.wasm',
+      _main: function () {
+        opencvIsReady();
+      }
+    };
+  </script>
+  <script async src="../../build/wasm/opencv.js"></script>
+  -->
   <script async src="../../build/asm.js/opencv.js" onload="opencvIsReady()"></script>
 </body>
 
