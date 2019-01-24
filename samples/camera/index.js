@@ -1,4 +1,4 @@
-const constraints = {
+const constraints_general = {
   "video": {
     width: {
       exact: 480
@@ -6,6 +6,18 @@ const constraints = {
     height: {
       ideal: 360
     }
+  }
+};
+
+// Mobile rear camera is usually the better camera.
+const constraints_mobile = {
+  video: {
+      facingMode: { exact: "environment" },
+      width : { exact:240
+      },
+      height: {
+        ideal: 180
+      }
   }
 };
 
@@ -18,11 +30,22 @@ let focusDistanceSliderValue = document.getElementById("focusDistance-slider-val
 let imageCapturer;
 
 function startCamera() {
-  navigator.mediaDevices.getUserMedia(constraints)
-    .then(gotMedia)
-    .catch(e => {
-      console.error('getUserMedia() failed: ', e);
-    });
+  document.querySelector('#start').style.display = 'none';
+  //Right now only chrome on Android and Chrome on Linux/CrOS will work.
+
+  if (navigator.userAgent.match(/Android/i)) {
+    navigator.mediaDevices.getUserMedia(constraints_mobile)
+      .then(gotMedia)
+      .catch(e => {
+          console.error('getUserMedia() failed: ', e);
+      });
+  } else {
+      navigator.mediaDevices.getUserMedia(constraints_general)
+      .then(gotMedia)
+      .catch(e => {
+          console.error('getUserMedia() failed: ', e);
+      });
+    }
 }
 
 function gotMedia(mediastream) {
