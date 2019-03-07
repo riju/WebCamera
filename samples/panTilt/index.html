@@ -1,0 +1,89 @@
+<html>
+
+<body>
+  <video autoplay></video>
+  <img>
+  <div>
+    <input type="range" id="panRange" name="pan" hidden>
+    <label for="pan">Pan</label>
+  </div>
+  <div>
+    <input type="range" id="tiltRange" name="tilt" hidden>
+    <label for="tilt">Tilt</label>
+  </div>
+  <script>
+    var imageCapture;
+    const supports = navigator.mediaDevices.getSupportedConstraints();
+    console.log("supports = ", JSON.parse(JSON.stringify(supports)));
+    navigator.mediaDevices.getUserMedia({
+      video: true
+    }).then(async mediaStream => {
+      document.querySelector('video').srcObject = mediaStream;
+      await sleep(1000);
+      const track = mediaStream.getVideoTracks()[0];
+      const capabilities = track.getCapabilities();
+      console.log("capabilities == ", JSON.parse(JSON.stringify(capabilities)));
+      const settings = track.getSettings();
+      console.log("settings == ", JSON.parse(JSON.stringify(settings)));
+      const inputPanRange = document.getElementById('panRange');
+      const inputTiltRange = document.getElementById('tiltRange');
+      // Check whether pan is supported or not.
+      if (!('pan' in capabilities)) {
+        return Promise.reject('pan is not supported by ' + track.label);
+      }
+      // Check whether pan is supported or not.
+      if (!('tilt' in capabilities)) {
+        return Promise.reject('tilt is not supported by ' + track.label);
+      }
+      // Map pan to a slider element.
+      inputPanRange.min = capabilities.pan.min + 0.00001;
+      inputPanRange.max = capabilities.pan.max;
+      console.log("inputPanRange.min = ", inputPanRange.min);
+      console.log("inputPanRange.max = ", inputPanRange.max);
+      inputPanRange.step = capabilities.pan.step;
+      console.log("inputPanRange.max = ", inputPanRange.step);
+      inputPanRange.value = settings.pan;
+
+      // Map tilt to a slider element.
+      inputTiltRange.min = capabilities.tilt.min + 0.00001;
+      inputTiltRange.max = capabilities.tilt.max;
+      console.log("inputTiltRange.min = ", inputTiltRange.min);
+      console.log("inputTiltRange.max = ", inputTiltRange.max);
+      inputTiltRange.step = capabilities.tilt.step;
+      console.log("inputTiltRange.max = ", inputTiltRange.step);
+      inputTiltRange.value = settings.pan;
+      inputPanRange.oninput = function(event) {
+        console.log(" inputPanRange.value = ", inputPanRange.value);
+        track.applyConstraints({
+          advanced: [{
+            pan: event.target.value
+          }]
+        });
+      }
+      inputPanRange.hidden = false;
+      inputTiltRange.oninput = function(event) {
+        console.log(" inputTiltRange.value = ", inputTiltRange.value);
+        track.applyConstraints({
+          advanced: [{
+            tilt: event.target.value
+          }]
+        });
+      }
+      inputTiltRange.hidden = false;
+    }).catch(error => console.log('Argh!', error.name || error));
+    /* Utils */
+    function sleep(ms = 0) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    function takePhoto() {
+      imageCapture.takePhoto().then(blob => {
+        console.log('Photo taken: ' + blob.type + ', ' + blob.size + 'B');
+        const image = document.querySelector('img');
+        image.src = URL.createObjectURL(blob);
+      }).catch(err => console.error('takePhoto() failed: ', err));
+    }
+  </script>
+</body>
+
+</html>
