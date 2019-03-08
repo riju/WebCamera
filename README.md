@@ -16,3 +16,5 @@ Try out the demos (Chrome 72+):
 
 
 ![](cameraWebapp.gif)
+
+![](panTilt.gif)
