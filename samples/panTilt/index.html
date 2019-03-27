@@ -1,3 +1,4 @@
+
 <html>
 
 <body>
@@ -11,12 +12,17 @@
     <input type="range" id="tiltRange" name="tilt" hidden>
     <label for="tilt">Tilt</label>
   </div>
+  <div>
+    <input type="range" id="zoomRange" name="zoom " hidden>
+    <label for="zoom">Zoom</label>
+  </div>
+  <p>See <a href="README.md">the README</a> for a list of supported cameras.</p>
   <script>
     var imageCapture;
     const supports = navigator.mediaDevices.getSupportedConstraints();
     console.log("supports = ", JSON.parse(JSON.stringify(supports)));
     navigator.mediaDevices.getUserMedia({
-      video: true
+video: {deviceId: 'fbd4b4fbf019a48924514ea8c6db1cb02b2969c03621e4d93a5e0224334821f1'}
     }).then(async mediaStream => {
       document.querySelector('video').srcObject = mediaStream;
       await sleep(1000);
@@ -27,6 +33,7 @@
       console.log("settings == ", JSON.parse(JSON.stringify(settings)));
       const inputPanRange = document.getElementById('panRange');
       const inputTiltRange = document.getElementById('tiltRange');
+      const inputZoomRange = document.getElementById('zoomRange');
       // Check whether pan is supported or not.
       if (!('pan' in capabilities)) {
         return Promise.reject('pan is not supported by ' + track.label);
@@ -70,6 +77,24 @@
         });
       }
       inputTiltRange.hidden = false;
+
+      // Map zoom to a slider element.
+      inputZoomRange.min = capabilities.zoom.min + 0.00001;
+      inputZoomRange.max = capabilities.zoom.max;
+      console.log("inputZoomRange.min = ", inputZoomRange.min);
+      console.log("inputZoomRange.max = ", inputZoomRange.max);
+      inputZoomRange.step = capabilities.zoom.step;
+      console.log("inputZoomRange.max = ", inputZoomRange.step);
+      inputZoomRange.value = settings.zoom;
+      inputZoomRange.oninput = function(event) {
+        console.log(" inputZoomRange.value = ", inputZoomRange.value);
+        track.applyConstraints({
+          advanced: [{
+            zoom: event.target.value
+          }]
+        });
+      }
+      inputZoomRange.hidden = false;
     }).catch(error => console.log('Argh!', error.name || error));
     /* Utils */
     function sleep(ms = 0) {
