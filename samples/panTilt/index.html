@@ -16,6 +16,10 @@
     <input type="range" id="zoomRange" name="zoom " hidden>
     <label for="zoom">Zoom</label>
   </div>
+  <div class="select">
+    <label for="videoSource">Video source: </label>
+    <select id="videoSource" disabled></select>
+  </div>
   <p>See <a href="README.md">the README</a> for a list of supported cameras.</p>
   <script>
     var imageCapture;
@@ -23,7 +27,18 @@
     console.log("supports = ", JSON.parse(JSON.stringify(supports)));
     navigator.mediaDevices.getUserMedia({
       video: true
-    }).then(async mediaStream => {
+    }).then((mediaStream) => {
+      gotStream(mediaStream);
+      return navigator.mediaDevices.enumerateDevices()
+        .then(gotDevices);
+    })
+    .catch(error => console.log('Argh!', error.name || error));
+
+    async function gotStream(mediaStream) {
+      const video = document.querySelector('video');
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+      }
       document.querySelector('video').srcObject = mediaStream;
       await sleep(1000);
       const track = mediaStream.getVideoTracks()[0];
@@ -95,7 +110,27 @@
         });
       }
       inputZoomRange.hidden = false;
-    }).catch(error => console.log('Argh!', error.name || error));
+    }
+
+    function gotDevices(devices) {
+      const select = document.getElementById('videoSource');
+      devices.forEach(device => {
+        if (device.kind !== 'videoinput') {
+          return;
+        }
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label;
+        select.appendChild(option);
+      });
+      select.disabled = false;
+      select.onchange = () => {
+        const deviceId = select.value;
+        navigator.mediaDevices.getUserMedia({video: {deviceId}})
+          .then(gotStream)
+          .catch(error => console.log('Argh!', error.name || error));
+      }
+    }
     /* Utils */
     function sleep(ms = 0) {
       return new Promise(r => setTimeout(r, ms));
