@@ -1,0 +1,74 @@
+.item canvas {
+  display: inline-block;
+  color: white;
+  padding: 7px;
+  cursor: pointer;
+  width: 128px;
+  height: 96px;
+}
+.item canvas:hover {
+  background-color: rgb(122, 122, 122);
+  position: relative;
+  top: 0px;
+}
+.menu-wrapper {
+  position: relative;
+  max-width: 640px;
+  height: 146px;
+  margin: 1em auto;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  border: 1px solid gray;
+}
+.menu	{
+  background: #f3f3f3;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.item {
+  display: inline-block;
+  width: 128px;
+  height: 146px;
+  box-sizing: border-box;
+  outline: 1px dotted gray;
+  vertical-align: top;
+}
+.item label{
+  width: 108px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative;
+  bottom: 7px;
+  left: 8px;
+  white-space: pre-line;
+  text-align: center;
+}
+.paddle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.left-paddle {
+  left: 0;
+}
+.right-paddle {
+  right: 0;
+}
+.left-paddle span{
+  position: relative;
+  bottom: 7px;
+  font-size: 100px;
+  line-height: 100px;
+  color: gray;
+}
+.right-paddle span{
+  position: relative;
+  bottom: 7px;
+  font-size: 100px;
+  line-height: 100px;
+  color: gray;
+}
