@@ -1,0 +1,20 @@
+.canvas-big {
+  z-index: 1;
+}
+input {
+  display: block;
+}
+
+.filters-settings div {
+  position: absolute;
+  top: 538px; /* HARDCODED, REMOVE LATER*/
+  color: rgb(255, 255, 255);
+  font-size: 14px;
+  background-color: rgba(48, 47, 47, 0.589);
+  width: 640px;
+  padding: 10px;
+  z-index: 2147483647;
+}
+.single-label {
+  vertical-align: text-bottom;
+}

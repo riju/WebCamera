@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Image Processing for Video Capture</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/menu.css">
+  <link rel="stylesheet" href="css/filters-settings.css">
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+  <h2 class="centered header">Image Processing for Video Capture</h2>
+  <p class="err centered" id="errorMessage"></p>
+  <div class="centered" id="container">
+    <table>
+      <tr>
+        <td>
+          <div style="padding: 10px;">
+            <span>Current Filter: </span><span id="filterName" style="font-weight: bold;">No Filter</span>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="canvas-wrapper">
+            <canvas id="canvasOutput" class="canvas-big" width="640" height="480"></canvas>
+            <div class="filters-settings">
+              <div id="threshold-settings" class="hidden"><label for="threshold-value">Threshold value: <output
+                    id="threshold-value-output"></output>
+                  <input type="range" id="threshold-value" value="100" min="0" max="200" step="1"></label>
+              </div>
+              <div id="adaptive-threshold-settings" class="hidden"> <label for="adaptive-block-size">Block size:
+                  <output id="adaptive-block-size-output"></output>
+                  <input type="range" id="adaptive-block-size" value="3" min="3" max="99" step="1"></label>
+              </div>
+              <div id="gaussian-settings" class="hidden"> <label for="gaussian-kernel-size">Kernel size: <output
+                    id="gaussian-kernel-size-output"></output>
+                  <input type="range" id="gaussian-kernel-size" value="7" min="7" max="99" step="1"></label>
+              </div>
+              <div id="median-settings" class="hidden"> <label for="median-kernel-size">Kernel size: <output
+                    id="median-kernel-size-output"></output>
+                  <input type="range" id="median-kernel-size" value="5" min="3" max="99" step="1"></label>
+              </div>
+              <div id="sobel-settings" class="hidden"> <label for="sobel-kernel-size">Kernel size: <output
+                    id="sobel-kernel-size-output"></output>
+                  <input type="range" id="sobel-kernel-size" value="3" min="3" max="13" step="1"></label>
+              </div>
+              <div id="laplacian-settings" class="hidden"> <label for="laplacian-kernel-size">Kernel size:
+                  <output id="laplacian-kernel-size-output"></output>
+                  <input type="range" id="laplacian-kernel-size" value="3" min="1" max="15" step="1"></label>
+              </div>
+              <div id="bilateral-settings" class="hidden"> <label for="bilateral-diameter">Diameter: <output
+                    id="bilateral-diameter-output"></output>
+                  <input type="range" id="bilateral-diameter" value="5" min="1" max="15" step="1"></label>
+                <label for="bilateral-sigma">Sigma: <output id="bilateral-sigma-output"></output>
+                  <input type="range" id="bilateral-sigma" value="75" min="1" max="255" step="1"></label>
+              </div>
+              <div id="morphology-settings" class="hidden"> <label for="morphology-operation">Operation:<br>
+                  <select id="morphology-operation">
+                    <option value="MORPH_ERODE">MORPH_ERODE</option>
+                    <option value="MORPH_DILATE">MORPH_DILATE</option>
+                    <option value="MORPH_OPEN">MORPH_OPEN</option>
+                    <option value="MORPH_CLOSE">MORPH_CLOSE</option>
+                    <option value="MORPH_GRADIENT">MORPH_GRADIENT</option>
+                    <option value="MORPH_TOPHAT">MORPH_TOPHAT</option>
+                    <option value="MORPH_BLACKHAT">MORPH_BLACKHAT</option>
+                  </select></label>
+                <label for="morphology-shape">Shape:<br>
+                  <select id="morphology-shape">
+                    <option value="MORPH_RECT">MORPH_RECT</option>
+                    <option value="MORPH_CROSS">MORPH_CROSS</option>
+                    <option value="MORPH_ELLIPSE">MORPH_ELLIPSE</option>
+                  </select></label>
+                <label for="morphology-size">Kernel size: <output id="morphology-size-output"></output>
+                  <input type="range" id="morphology-size" value="5" min="1" max="15" step="1"></label>
+                <label for="morphology-border">Shape:<br>
+                  <select id="morphology-border">
+                    <option value="BORDER_CONSTANT">CONSTANT</option>
+                    <option value="BORDER_REPLICATE">REPLICATE</option>
+                    <option value="BORDER_REFLECT">REFLECT</option>
+                    <option value="BORDER_REFLECT_101">REFLECT_101</option>
+                  </select></label>
+              </div>
+              <div id="canny-settings" class="hidden"> <label for="canny-threshold1">Threshold1: <output
+                    id="canny-threshold1-output"></output>
+                  <input type="range" id="canny-threshold1" value="150" min="1" max="500" step="1"></label>
+                <label for="canny-threshold2">Threshold2: <output id="canny-threshold2-output"></output>
+                  <input type="range" id="canny-threshold2" value="300" min="1" max="500" step="1"></label>
+                <label for="canny-aperture">Aperture size: <output id="canny-aperture-output"></output>
+                  <input type="range" id="canny-aperture" value="3" min="3" max="7" step="2"></label>
+                <label class="single-label">I2 gradient: </label>
+                <label><input type="checkbox" id="canny-gradient"></label>
+              </div>
+              <div id="backprojection-settings" class="hidden"> <label for="backprojection-low">Range low: <output
+                    id="backprojection-low-output"></output>
+                  <input type="range" id="backprojection-low" value="0" min="0" max="255" step="1"></label>
+                <label for="backprojection-high">Range high: <output id="backprojection-high-output"></output>
+                  <input type="range" id="backprojection-high" value="150" min="0" max="255" step="1"></label>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="menu-wrapper">
+            <div id="filterMenu" class="menu">
+              <div class="item"><canvas id="passThrough" onclick="controls.passThrough()"></canvas><label>No
+                  Filter</label></div>
+              <div class="item"><canvas id="gray" onclick="controls.gray()"></canvas><label>Gray</label></div>
+              <div class="item"><canvas id="hsv" onclick="controls.hsv()"></canvas><label>HSV</label></div>
+              <div class="item"><canvas id="threshold" onclick="controls.threshold()"></canvas><label>Threshold</label>
+              </div>
+              <div class="item"><canvas id="adaptiveThreshold"
+                  onclick="controls.adaptiveThreshold()"></canvas><label>Adaptive Threshold</label></div>
+              <div class="item"><canvas id="gaussianBlur" onclick="controls.gaussianBlur()"></canvas><label>Gaussian
+                  Blurring</label></div>
+              <div class="item"><canvas id="medianBlur" onclick="controls.medianBlur()"></canvas><label>Median
+                  Blurring</label></div>
+              <div class="item"><canvas id="bilateralFilter"
+                  onclick="controls.bilateralFilter()"></canvas><label>Bilateral Filtering</label></div>
+              <div class="item"><canvas id="morphology"
+                  onclick="controls.morphology()"></canvas><label>Morphology</label></div>
+              <div class="item"><canvas id="sobel" onclick="controls.sobel()"></canvas><label>Sobel Derivatives</label>
+              </div>
+              <div class="item"><canvas id="scharr" onclick="controls.scharr()"></canvas><label>Scharr
+                  Derivatives</label></div>
+              <div class="item"><canvas id="laplacian" onclick="controls.laplacian()"></canvas><label>Laplacian
+                  Derivatives</label></div>
+              <div class="item"><canvas id="canny" onclick="controls.canny()"></canvas><label>Canny Edge
+                  Detection</label></div>
+              <div class="item"><canvas id="calcHist" onclick="controls.calcHist()"></canvas><label>Calculation</label>
+              </div>
+              <div class="item"><canvas id="equalizeHist"
+                  onclick="controls.equalizeHist()"></canvas><label>Equalization</label></div>
+              <div class="item"><canvas id="backprojection"
+                  onclick="controls.backprojection()"></canvas><label>Backprojection</label></div>
+            </div>
+            <div class="paddles">
+              <button class="left-paddle paddle hidden">
+                <span>&#8249;</span>
+              </button>
+              <button class="right-paddle paddle">
+                <span>&#8250;</span>
+              </button>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        </td>
+      </tr>
+    </table>
+    <div>
+      <video id="videoInput" class="hidden">Your browser does not support the video tag.</video>
+    </div>
+  </div>
+
+  <p id="output"></p>
+  <script src="../libs/adapter-latest.js" type="text/javascript"></script>
+
+  <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+
+  <script src="js/utils.js" type="text/javascript"></script>
+  <script src="js/menu.js" type="text/javascript"></script>
+  <script src="js/index.js" type="text/javascript"></script>
+</body>
+
+</html>

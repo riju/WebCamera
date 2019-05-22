@@ -1,0 +1,20 @@
+.canvas-big {
+  box-shadow: 0px 0px 40px 0px rgba(0,0,0,0.75);
+}
+.header {
+  position: relative;
+  top: 20px;
+  padding: 10px;
+}
+.err {
+  color: red;
+  font-weight: bold;
+}
+.hidden {
+  display: none;
+}
+.centered {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
