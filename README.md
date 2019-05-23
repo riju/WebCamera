@@ -18,3 +18,6 @@ Try out the demos (Chrome 72+):
 ![](cameraWebapp.gif)
 
 ![](panTilt.gif)
+
+
+<img src="filtersDemo.gif" width="541" height="555" />

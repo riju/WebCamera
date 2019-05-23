@@ -1,10 +1,7 @@
-.canvas-big {
-  box-shadow: 0px 0px 40px 0px rgba(0,0,0,0.75);
-}
 .header {
-  position: relative;
-  top: 20px;
-  padding: 10px;
+  padding-top : 30px;
+  color: #5c85b8;
+  text-align: center;
 }
 .err {
   color: red;
