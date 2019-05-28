@@ -1,20 +1,90 @@
+.canvas-wrapper {
+  padding-bottom: 20px;
+  width: 100%;
+  text-align: center;
+  height: 480px; /* resized in index.js */
+}
 .canvas-big {
-  z-index: 1;
+  box-shadow: 0px 0px 20px 0px #5c85b8;
+  width: 640px; /* resized in index.js */
+  height: 480px; /* resized in index.js */
+  border-radius: 10px;
+  display: inline;
 }
-input {
-  display: block;
+.canvas-big:focus {
+  cursor: pointer;
 }
-
-.filters-settings div {
+.current-filter-name {
   position: absolute;
-  top: 538px; /* HARDCODED, REMOVE LATER*/
-  color: rgb(255, 255, 255);
-  font-size: 14px;
-  background-color: rgba(48, 47, 47, 0.589);
-  width: 640px;
   padding: 10px;
-  z-index: 2147483647;
+  font-size: 18px;
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+.settings-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  bottom: 96px;
+}
+.settings {
+  color: white;
+  font-size: 16px;
+  background-color: rgba(0, 0, 0, 0.3);
+  width: 610px; /* 640-30 because of padding; resized in index.js */
+  padding: 15px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  border-radius: 10px;
+  text-align: center;
+  overflow: auto;
+  white-space: nowrap;
 }
 .single-label {
   vertical-align: text-bottom;
+}
+label {
+  display: inline-block;
+  text-align: center;
+}
+select {
+  display: block;
+  margin: 10px 0;
+}
+input[type=checkbox] {
+  display: block;
+  margin: 7px 0;
+  position: relative;
+  top: 8px;
+  left: 30px;
+}
+input[type=range] {
+  display: block;
+  -webkit-appearance: none;
+  margin: 20px 0;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: white;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 20px;
+  width: 9px;
+  border-radius: 3px;
+  background: #5c85b8;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -8px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: white;
 }
