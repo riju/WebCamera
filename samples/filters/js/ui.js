@@ -1,3 +1,6 @@
+let stats = null;
+let filterName = document.getElementById('filterName');
+let controls;
 let settingsOnScreen = true;
 
 let filters = {
@@ -79,7 +82,7 @@ function closeFilterOptions(filter) {
   }
 }
 
-function showOrHideSettings(filter) {
+function showOrHideSettings() {
   if (settingsOnScreen) {
     closeFilterOptions(controls.filter);
   } else {
@@ -87,23 +90,8 @@ function showOrHideSettings(filter) {
   }
 }
 
-for (let filter in filters) {
-  document.getElementById(filter).addEventListener("click", function () {
-    setFilter(filter);
-  });
-}
-
-let filterName = document.getElementById('filterName');
-let controls;
-let stats = null;
-
 function initUI() {
-  stats = new Stats();
-  stats.showPanel(0);
-  document.body.appendChild(stats.domElement);
-  stats.domElement.style.position = 'absolute';
-  stats.domElement.style.right = '0px';
-  stats.domElement.style.top = '0px';
+  initStats();
 
   morphologyOpValues = {
     'MORPH_ERODE': cv.MORPH_ERODE,
@@ -213,67 +201,23 @@ function initUI() {
     morphologyBorderType:
       document.getElementById("morphology-border"),
   };
+
+  // add onclick event listeners for menu canvases
+  for (let filter in filters) {
+    document.getElementById(filter).addEventListener("click", function () {
+      setFilter(filter);
+    });
+  }
+
+  document.getElementById("canvasOutput").addEventListener("click", function () {
+    showOrHideSettings();
+  });
 }
 
-let vgaWidth = 640;
-let gvgaWidth = 320;
-
-function resizeElements() {
-  // carousel
-  let buttonWidth =
-    document.querySelector("[data-action='slideRight']").offsetWidth;
-  document.getElementsByClassName("carousel")[0].style.width =
-    `${width - 2 * buttonWidth}px`;
-  // main canvas
-  let canvas = document.getElementById("canvasOutput");
-  canvas.style.height = `${height}px`;
-  canvas.style.width = `${width}px`;
-  document.getElementsByClassName("canvas-wrapper")[0].style.height =
-    `${height}px`;
-  // small canvases and cards
-  let smallCanvases = document.getElementsByClassName("small-canvas");
-  let scProperties = document.querySelector(".small-canvas");
-  let scPadding = parseInt(getComputedStyle(scProperties).padding);
-  let cards = document.getElementsByClassName("card");
-  for (let i = 0; i < smallCanvases.length; i++) {
-    smallCanvases[i].style.height = `${parseInt(height / 5)}px`;
-    smallCanvases[i].style.width = `${parseInt(width / 5)}px`;
-    cards[i].style.width = `${parseInt(width / 5 + 2 * scPadding)}px`;
-    if (width < vgaWidth) {
-      cards[i].style.fontSize = `16px`;
-    }
-  }
-  // filter settings on main canvas
+function resizeFilterSettings() {
   let settings = document.querySelectorAll(".settings");
   let settingsPadding = parseInt(getComputedStyle(settings[0]).padding);
   for (let i = 0; i < settings.length; i++) {
     settings[i].style.width = `${width - 2 * settingsPadding}px`;
   }
-  // buttons
-  let buttons = document.getElementsByClassName("menu-button");
-  buttons[0].style.height = `${scProperties.scrollHeight}px`;
-  buttons[1].style.height = `${scProperties.scrollHeight}px`;
 }
-
-window.onresize = function () {
-  let buttonWidth =
-    document.querySelector("[data-action='slideRight']").offsetWidth;
-  let windowConstraintVGA = vgaWidth + 2 * buttonWidth;
-  let windowConstraintGVGA = gvgaWidth + 2 * buttonWidth;
-  if (window.innerWidth < windowConstraintVGA && width == vgaWidth) { // vga
-    document.getElementsByClassName("carousel")[0].style.width =
-      `${window.innerWidth - 3 * buttonWidth}px`;
-  } else if (window.innerWidth > windowConstraintVGA &&
-             width == vgaWidth) { // vga
-    document.getElementsByClassName("carousel")[0].style.width =
-      `${width - 2 * buttonWidth}px`;
-  } else if (window.innerWidth < windowConstraintGVGA &&
-             width == gvgaWidth) {// gvga
-    document.getElementsByClassName("carousel")[0].style.width =
-      `${window.innerWidth - 3 * buttonWidth}px`;
-  } else if (window.innerWidth > windowConstraintGVGA &&
-             width == gvgaWidth) {// gvga
-    document.getElementsByClassName("carousel")[0].style.width =
-      `${width - 2 * buttonWidth}px`;
-  }
-};

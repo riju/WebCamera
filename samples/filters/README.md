@@ -1,6 +1,6 @@
 # Goal
 
-Present kind of Instagram filters in web browser using OpenCV library.
+Present kinds of Instagram filters in web browser using OpenCV.
 
 ## Filters
 
@@ -125,5 +125,5 @@ cv.calcBackProject(targetVec, channels, hist, dstC1, ranges, 1);
 
 ## References
 
-1. [OpenCV.js Tutorial for Image Processing](https://docs.opencv.org/3.4/d8/d54/tutorial_js_imgproc_camera.html)
-
+1. [List of filters (OpenCV)](https://docs.opencv.org/3.4/d2/df0/tutorial_js_table_of_contents_imgproc.html)
+2. [OpenCV.js Tutorial for Image Processing](https://docs.opencv.org/3.4/d8/d54/tutorial_js_imgproc_camera.html)
