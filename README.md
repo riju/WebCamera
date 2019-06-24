@@ -19,7 +19,6 @@ Try out the demos (Chrome 72+):
 
 ![](panTilt.gif)
 
-
 <img src="filtersDemo.gif" width="654" height="786" />
 
 Face and eyes detection |  Funny hats and glasses
