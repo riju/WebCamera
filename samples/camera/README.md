@@ -1,6 +1,11 @@
 # Goal
 
-Demonstrate how to use manual exposureMode and focusDistance.
+Demonstrate how to use manual controls like -
+* exposureMode to control exposureTime
+* focusMode to control focusDistance
+* ISO
+* WhiteBalance
+* Color temperature, contrast, saturation.
 
 # Motivation
 
@@ -21,19 +26,20 @@ well as setting focus distance value.
 This can be used to create Depth of Field or "bokeh" effect, and 
 will also be useful for Focus Stacking.
 
+Implementation information for other properties can be found in [here](https://github.com/w3c/mediacapture-image/blob/master/implementation-status.md).
+
 
 ## Useful Links
 
 Chromium Implementation:
 Intent to Implement and Ship:
-https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ls3wQSoHOUY
-https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/oNxzXaFY9c8
+[exposureTime](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/ls3wQSoHOUY) and [focusDistance](https://groups.google.com/a/chromium.org/forum/#!topic/blink-dev/oNxzXaFY9c8)
+
 
 Crbug:
-https://bugs.chromium.org/p/chromium/issues/detail?id=823316
-https://bugs.chromium.org/p/chromium/issues/detail?id=732807
+[exposureTime](https://bugs.chromium.org/p/chromium/issues/detail?id=823316) and [focusDistance](https://bugs.chromium.org/p/chromium/issues/detail?id=732807)
+
 
 W3C Spec:
-https://github.com/w3c/mediacapture-image/issues/199
-https://github.com/w3c/mediacapture-image/pull/200
-https://github.com/w3c/mediacapture-image/pull/175
+[exposureTime](https://github.com/w3c/mediacapture-image/issues/199) and
+[focusDistance](https://github.com/w3c/mediacapture-image/pull/175)

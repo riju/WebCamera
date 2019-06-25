@@ -23,10 +23,31 @@ const constraints_mobile = {
 
 let videoTag = document.getElementById('video-tag');
 let imageTag = document.getElementById('image-tag');
+
 let exposureTimeSlider = document.getElementById("exposureTime-slider");
 let exposureTimeSliderValue = document.getElementById("exposureTime-slider-value");
+
 let focusDistanceSlider = document.getElementById("focusDistance-slider");
 let focusDistanceSliderValue = document.getElementById("focusDistance-slider-value");
+
+let contrastSlider = document.getElementById("contrast-slider");
+let contrastSliderValue = document.getElementById("contrast-slider-value");
+
+let colorTemperatureSlider = document.getElementById("colorTemperature-slider");
+let colorTemperatureSliderValue = document.getElementById("colorTemperature-slider-value");
+
+let saturationSlider = document.getElementById("saturation-slider");
+let saturationSliderValue = document.getElementById("saturation-slider-value");
+
+let sharpnessSlider = document.getElementById("sharpness-slider");
+let sharpnessSliderValue = document.getElementById("sharpness-slider-value");
+
+let brightnessSlider = document.getElementById("brightness-slider");
+let brightnessSliderValue = document.getElementById("brightness-slider-value");
+
+let zoomSlider = document.getElementById("zoom-slider");
+let zoomSliderValue = document.getElementById("zoom-slider-value");
+
 let imageCapturer;
 
 function startCamera() {
@@ -69,6 +90,36 @@ function gotMedia(mediastream) {
       console.error('focusDistance not supported.');
       return;
     }
+    // Check whether contrast is supported or not.
+    if (!capabilities.contrast) {
+      console.error('contrast not supported.');
+      return;
+    }
+    // Check whether colorTemperature is supported or not.
+     if (!capabilities.colorTemperature) {
+      console.error('colorTemperature not supported.');
+      return;
+    }
+    // Check whether saturation is supported or not.
+    if (!capabilities.saturation) {
+      console.error('saturation not supported.');
+      return;
+    }
+    // Check whether sharpness is supported or not.
+    if (!capabilities.sharpness) {
+      console.error('sharpness not supported.');
+      return;
+    }
+    // Check whether brightness is supported or not.
+    if (!capabilities.brightness) {
+      console.error('brightness not supported.');
+      return;
+    }
+    // Check whether zoom is supported or not.
+    if (!capabilities.zoom) {
+      console.error('zoom not supported.');
+      return;
+    }
     
     exposureTimeSlider.min = capabilities.exposureTime.min;
     exposureTimeSlider.max = capabilities.exposureTime.max;
@@ -78,12 +129,53 @@ function gotMedia(mediastream) {
     focusDistanceSlider.max = capabilities.focusDistance.max;
     focusDistanceSlider.step = capabilities.focusDistance.step;
 
+    contrastSlider.min = capabilities.contrast.min;
+    contrastSlider.max = capabilities.contrast.max;
+    contrastSlider.step = capabilities.contrast.step;
+
+    colorTemperatureSlider.min = capabilities.colorTemperature.min;
+    colorTemperatureSlider.max = capabilities.colorTemperature.max;
+    colorTemperatureSlider.step = capabilities.colorTemperature.step;
+
+    saturationSlider.min = capabilities.saturation.min;
+    saturationSlider.max = capabilities.saturation.max;
+    saturationSlider.step = capabilities.saturation.step;
+
+    sharpnessSlider.min = capabilities.sharpness.min;
+    sharpnessSlider.max = capabilities.sharpness.max;
+    sharpnessSlider.step = capabilities.sharpness.step;
+
+    brightnessSlider.min = capabilities.brightness.min;
+    brightnessSlider.max = capabilities.brightness.max;
+    brightnessSlider.step = capabilities.brightness.step;
+
+    zoomSlider.min = capabilities.zoom.min;
+    zoomSlider.max = capabilities.zoom.max;
+    zoomSlider.step = capabilities.zoom.step;
+
     exposureTimeSlider.value = exposureTimeSliderValue.value = videoTrack.getSettings().exposureTime;
     exposureTimeSliderValue.value = exposureTimeSlider.value;
 
     focusDistanceSlider.value = focusDistanceSliderValue.value = videoTrack.getSettings().focusDistance;
     focusDistanceSliderValue.value = focusDistanceSlider.value;
 
+    contrastSlider.value = contrastSliderValue.value = videoTrack.getSettings().contrast;
+    contrastSliderValue.value = contrastSlider.value;
+
+    colorTemperatureSlider.value = colorTemperatureSliderValue.value = videoTrack.getSettings().colorTemperature;
+    colorTemperatureSliderValue.value = colorTemperatureSlider.value;
+
+    saturationSlider.value = saturationSliderValue.value = videoTrack.getSettings().saturation;
+    saturationSliderValue.value = saturationSlider.value;
+
+    sharpnessSlider.value = sharpnessSliderValue.value = videoTrack.getSettings().sharpness;
+    sharpnessSliderValue.value = sharpnessSlider.value;
+
+    brightnessSlider.value = brightnessSliderValue.value = videoTrack.getSettings().brightness;
+    brightnessSliderValue.value = brightnessSlider.value;
+
+    zoomSlider.value = zoomSliderValue.value = videoTrack.getSettings().zoom;
+    zoomSliderValue.value = zoomSlider.value;
 
     exposureTimeSlider.oninput = function () {
       exposureTimeSliderValue.value = exposureTimeSlider.value;
@@ -101,6 +193,61 @@ function gotMedia(mediastream) {
         advanced: [{
           focusMode: "manual",
           focusDistance: focusDistanceSlider.value
+        }]
+      });
+    }
+
+    contrastSlider.oninput = function () {
+      contrastSliderValue.value = contrastSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          contrast: contrastSlider.value
+        }]
+      });
+    }
+
+    colorTemperatureSlider.oninput = function () {
+      colorTemperatureSliderValue.value = colorTemperatureSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          whiteBalanceMode: "manual",
+          colorTemperature: colorTemperatureSlider.value
+        }]
+      });
+    }
+
+    saturationSlider.oninput = function () {
+      saturationSliderValue.value = saturationSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          saturation: saturationSlider.value
+        }]
+      });
+    }
+
+    sharpnessSlider.oninput = function () {
+      sharpnessSliderValue.value = sharpnessSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          sharpness: sharpnessSlider.value
+        }]
+      });
+    }
+
+    brightnessSlider.oninput = function () {
+      brightnessSliderValue.value = brightnessSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          brightness: brightnessSlider.value
+        }]
+      });
+    }
+
+    zoomSlider.oninput = function () {
+      zoomSliderValue.value = zoomSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          zoom: zoomSlider.value
         }]
       });
     }
