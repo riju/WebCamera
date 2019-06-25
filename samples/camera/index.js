@@ -42,6 +42,9 @@ let saturationSliderValue = document.getElementById("saturation-slider-value");
 let sharpnessSlider = document.getElementById("sharpness-slider");
 let sharpnessSliderValue = document.getElementById("sharpness-slider-value");
 
+let brightnessSlider = document.getElementById("brightness-slider");
+let brightnessSliderValue = document.getElementById("brightness-slider-value");
+
 let imageCapturer;
 
 function startCamera() {
@@ -104,6 +107,11 @@ function gotMedia(mediastream) {
       console.error('sharpness not supported.');
       return;
     }
+    // Check whether brightness is supported or not.
+    if (!capabilities.brightness) {
+      console.error('brightness not supported.');
+      return;
+    }
     
     exposureTimeSlider.min = capabilities.exposureTime.min;
     exposureTimeSlider.max = capabilities.exposureTime.max;
@@ -129,6 +137,10 @@ function gotMedia(mediastream) {
     sharpnessSlider.max = capabilities.sharpness.max;
     sharpnessSlider.step = capabilities.sharpness.step;
 
+    brightnessSlider.min = capabilities.brightness.min;
+    brightnessSlider.max = capabilities.brightness.max;
+    brightnessSlider.step = capabilities.brightness.step;
+
     exposureTimeSlider.value = exposureTimeSliderValue.value = videoTrack.getSettings().exposureTime;
     exposureTimeSliderValue.value = exposureTimeSlider.value;
 
@@ -146,6 +158,9 @@ function gotMedia(mediastream) {
 
     sharpnessSlider.value = sharpnessSliderValue.value = videoTrack.getSettings().sharpness;
     sharpnessSliderValue.value = sharpnessSlider.value;
+
+    brightnessSlider.value = brightnessSliderValue.value = videoTrack.getSettings().brightness;
+    brightnessSliderValue.value = brightnessSlider.value;
 
 
     exposureTimeSlider.oninput = function () {
@@ -201,6 +216,15 @@ function gotMedia(mediastream) {
       videoTrack.applyConstraints({
         advanced: [{
           sharpness: sharpnessSlider.value
+        }]
+      });
+    }
+
+    brightnessSlider.oninput = function () {
+      brightnessSliderValue.value = brightnessSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          brightness: brightnessSlider.value
         }]
       });
     }
