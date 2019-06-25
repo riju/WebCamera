@@ -23,14 +23,22 @@ const constraints_mobile = {
 
 let videoTag = document.getElementById('video-tag');
 let imageTag = document.getElementById('image-tag');
+
 let exposureTimeSlider = document.getElementById("exposureTime-slider");
 let exposureTimeSliderValue = document.getElementById("exposureTime-slider-value");
+
 let focusDistanceSlider = document.getElementById("focusDistance-slider");
 let focusDistanceSliderValue = document.getElementById("focusDistance-slider-value");
+
 let contrastSlider = document.getElementById("contrast-slider");
 let contrastSliderValue = document.getElementById("contrast-slider-value");
+
 let colorTemperatureSlider = document.getElementById("colorTemperature-slider");
 let colorTemperatureSliderValue = document.getElementById("colorTemperature-slider-value");
+
+let saturationSlider = document.getElementById("saturation-slider");
+let saturationSliderValue = document.getElementById("saturation-slider-value");
+
 let imageCapturer;
 
 function startCamera() {
@@ -83,6 +91,11 @@ function gotMedia(mediastream) {
       console.error('colorTemperature not supported.');
       return;
     }
+    // Check whether saturation is supported or not.
+    if (!capabilities.saturation) {
+      console.error('saturation not supported.');
+      return;
+    }
     
     exposureTimeSlider.min = capabilities.exposureTime.min;
     exposureTimeSlider.max = capabilities.exposureTime.max;
@@ -111,6 +124,10 @@ function gotMedia(mediastream) {
 
     colorTemperatureSlider.value = colorTemperatureSliderValue.value = videoTrack.getSettings().colorTemperature;
     colorTemperatureSliderValue.value = colorTemperatureSlider.value;
+
+    saturationSlider.min = capabilities.saturation.min;
+    saturationSlider.max = capabilities.saturation.max;
+    saturationSlider.step = capabilities.saturation.step;
 
 
     exposureTimeSlider.oninput = function () {
@@ -148,6 +165,15 @@ function gotMedia(mediastream) {
         advanced: [{
           whiteBalanceMode: "manual",
           colorTemperature: colorTemperatureSlider.value
+        }]
+      });
+    }
+
+    saturationSlider.oninput = function () {
+      saturationSliderValue.value = saturationSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          saturation: saturationSlider.value
         }]
       });
     }
