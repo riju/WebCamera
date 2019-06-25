@@ -45,6 +45,9 @@ let sharpnessSliderValue = document.getElementById("sharpness-slider-value");
 let brightnessSlider = document.getElementById("brightness-slider");
 let brightnessSliderValue = document.getElementById("brightness-slider-value");
 
+let zoomSlider = document.getElementById("zoom-slider");
+let zoomSliderValue = document.getElementById("zoom-slider-value");
+
 let imageCapturer;
 
 function startCamera() {
@@ -112,6 +115,11 @@ function gotMedia(mediastream) {
       console.error('brightness not supported.');
       return;
     }
+    // Check whether zoom is supported or not.
+    if (!capabilities.zoom) {
+      console.error('zoom not supported.');
+      return;
+    }
     
     exposureTimeSlider.min = capabilities.exposureTime.min;
     exposureTimeSlider.max = capabilities.exposureTime.max;
@@ -141,6 +149,10 @@ function gotMedia(mediastream) {
     brightnessSlider.max = capabilities.brightness.max;
     brightnessSlider.step = capabilities.brightness.step;
 
+    zoomSlider.min = capabilities.zoom.min;
+    zoomSlider.max = capabilities.zoom.max;
+    zoomSlider.step = capabilities.zoom.step;
+
     exposureTimeSlider.value = exposureTimeSliderValue.value = videoTrack.getSettings().exposureTime;
     exposureTimeSliderValue.value = exposureTimeSlider.value;
 
@@ -162,6 +174,8 @@ function gotMedia(mediastream) {
     brightnessSlider.value = brightnessSliderValue.value = videoTrack.getSettings().brightness;
     brightnessSliderValue.value = brightnessSlider.value;
 
+    zoomSlider.value = zoomSliderValue.value = videoTrack.getSettings().zoom;
+    zoomSliderValue.value = zoomSlider.value;
 
     exposureTimeSlider.oninput = function () {
       exposureTimeSliderValue.value = exposureTimeSlider.value;
@@ -225,6 +239,15 @@ function gotMedia(mediastream) {
       videoTrack.applyConstraints({
         advanced: [{
           brightness: brightnessSlider.value
+        }]
+      });
+    }
+
+    zoomSlider.oninput = function () {
+      zoomSliderValue.value = zoomSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          zoom: zoomSlider.value
         }]
       });
     }
