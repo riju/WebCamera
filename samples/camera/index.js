@@ -29,6 +29,8 @@ let focusDistanceSlider = document.getElementById("focusDistance-slider");
 let focusDistanceSliderValue = document.getElementById("focusDistance-slider-value");
 let contrastSlider = document.getElementById("contrast-slider");
 let contrastSliderValue = document.getElementById("contrast-slider-value");
+let colorTemperatureSlider = document.getElementById("colorTemperature-slider");
+let colorTemperatureSliderValue = document.getElementById("colorTemperature-slider-value");
 let imageCapturer;
 
 function startCamera() {
@@ -76,6 +78,11 @@ function gotMedia(mediastream) {
       console.error('contrast not supported.');
       return;
     }
+    // Check whether colorTemperature is supported or not.
+     if (!capabilities.colorTemperature) {
+      console.error('colorTemperature not supported.');
+      return;
+    }
     
     exposureTimeSlider.min = capabilities.exposureTime.min;
     exposureTimeSlider.max = capabilities.exposureTime.max;
@@ -89,6 +96,10 @@ function gotMedia(mediastream) {
     contrastSlider.max = capabilities.contrast.max;
     contrastSlider.step = capabilities.contrast.step;
 
+    colorTemperatureSlider.min = capabilities.colorTemperature.min;
+    colorTemperatureSlider.max = capabilities.colorTemperature.max;
+    colorTemperatureSlider.step = capabilities.colorTemperature.step;
+
     exposureTimeSlider.value = exposureTimeSliderValue.value = videoTrack.getSettings().exposureTime;
     exposureTimeSliderValue.value = exposureTimeSlider.value;
 
@@ -97,6 +108,9 @@ function gotMedia(mediastream) {
 
     contrastSlider.value = contrastSliderValue.value = videoTrack.getSettings().contrast;
     contrastSliderValue.value = contrastSlider.value;
+
+    colorTemperatureSlider.value = colorTemperatureSliderValue.value = videoTrack.getSettings().colorTemperature;
+    colorTemperatureSliderValue.value = colorTemperatureSlider.value;
 
 
     exposureTimeSlider.oninput = function () {
@@ -124,6 +138,16 @@ function gotMedia(mediastream) {
       videoTrack.applyConstraints({
         advanced: [{
           contrast: contrastSlider.value
+        }]
+      });
+    }
+
+    colorTemperatureSlider.oninput = function () {
+      colorTemperatureSliderValue.value = colorTemperatureSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          whiteBalanceMode: "manual",
+          colorTemperature: colorTemperatureSlider.value
         }]
       });
     }
