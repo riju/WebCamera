@@ -27,6 +27,8 @@ let exposureTimeSlider = document.getElementById("exposureTime-slider");
 let exposureTimeSliderValue = document.getElementById("exposureTime-slider-value");
 let focusDistanceSlider = document.getElementById("focusDistance-slider");
 let focusDistanceSliderValue = document.getElementById("focusDistance-slider-value");
+let contrastSlider = document.getElementById("contrast-slider");
+let contrastSliderValue = document.getElementById("contrast-slider-value");
 let imageCapturer;
 
 function startCamera() {
@@ -69,6 +71,11 @@ function gotMedia(mediastream) {
       console.error('focusDistance not supported.');
       return;
     }
+    // Check whether contrast is supported or not.
+    if (!capabilities.contrast) {
+      console.error('contrast not supported.');
+      return;
+    }
     
     exposureTimeSlider.min = capabilities.exposureTime.min;
     exposureTimeSlider.max = capabilities.exposureTime.max;
@@ -78,11 +85,18 @@ function gotMedia(mediastream) {
     focusDistanceSlider.max = capabilities.focusDistance.max;
     focusDistanceSlider.step = capabilities.focusDistance.step;
 
+    contrastSlider.min = capabilities.contrast.min;
+    contrastSlider.max = capabilities.contrast.max;
+    contrastSlider.step = capabilities.contrast.step;
+
     exposureTimeSlider.value = exposureTimeSliderValue.value = videoTrack.getSettings().exposureTime;
     exposureTimeSliderValue.value = exposureTimeSlider.value;
 
     focusDistanceSlider.value = focusDistanceSliderValue.value = videoTrack.getSettings().focusDistance;
     focusDistanceSliderValue.value = focusDistanceSlider.value;
+
+    contrastSlider.value = contrastSliderValue.value = videoTrack.getSettings().contrast;
+    contrastSliderValue.value = contrastSlider.value;
 
 
     exposureTimeSlider.oninput = function () {
@@ -101,6 +115,15 @@ function gotMedia(mediastream) {
         advanced: [{
           focusMode: "manual",
           focusDistance: focusDistanceSlider.value
+        }]
+      });
+    }
+
+    contrastSlider.oninput = function () {
+      contrastSliderValue.value = contrastSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          contrast: contrastSlider.value
         }]
       });
     }
