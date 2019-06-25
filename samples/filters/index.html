@@ -4,19 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Image Processing for Video Capture</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/menu.css">
-  <link rel="stylesheet" href="css/filters-settings.css">
+  <title>Image Processing for Video Capture 🤳</title>
+  <link href="css/style.css" rel="stylesheet">
+  <link href="css/menu.css" rel="stylesheet">
+  <link href="css/main-canvas.css" rel="stylesheet">
 </head>
 
 <body>
-  <h1 class="centered header">Image Processing for Video Capture 🤳</h1>
   <p class="err centered" id="errorMessage"></p>
 
   <div class="canvas-wrapper">
     <span id="filterName" class="current-filter-name">No Filter</span>
-    <canvas id="canvasOutput" class="canvas-big centered" onclick="showOrHideSettings(controls.filter)"></canvas>
+    <canvas id="canvasOutput" class="canvas-big centered"></canvas>
     <div class="settings-wrapper">
       <div id="threshold-settings" class="settings hidden"><label for="threshold-value">Threshold value:
           <output id="threshold-value-output"></output>
@@ -100,7 +99,7 @@
   <div class="centered">
     <div class="carousel-wrapper">
       <button data-action="slideLeft" class="menu-button">&#8249;</button>
-      <ul class="carousel" data-target="carousel" id="filterMenu">
+      <ul class="carousel" data-target="carousel">
         <li class="card" data-target="card">
           <div><canvas id="passThrough" class="small-canvas"></canvas></div>No Filter
         </li>
@@ -108,13 +107,13 @@
           <div><canvas id="gray" class="small-canvas"></canvas></div>Gray
         </li>
         <li class="card" data-target="card">
-          <div><canvas id="hsv" class="small-canvas" onclick="setFilter('hsv')"></canvas></div>HSV
+          <div><canvas id="hsv" class="small-canvas"></canvas></div>HSV
         </li>
         <li class="card" data-target="card">
           <div><canvas id="threshold" class="small-canvas"></canvas></div>Thresholding
         </li>
         <li class="card" data-target="card">
-          <div><canvas id="adaptiveThreshold" class="small-canvas"></canvas>Adaptive Thresholding
+          <div><canvas id="adaptiveThreshold" class="small-canvas"></canvas></div>Adaptive Thresholding
         </li>
         <li class="card" data-target="card">
           <div><canvas id="gaussianBlur" class="small-canvas"></canvas></div>Gaussian Blurring
@@ -153,15 +152,20 @@
       <button data-action="slideRight" class="menu-button">&#8250;</button>
     </div>
   </div>
+  <div class="centered stats-settings">
+    <label id="hideStatsLabel" class="hidden" for="hideStats">Hide statistics</label>
+    <input id="hideStats" class="hidden" type="checkbox" checked>
+  </div>
   <div>
     <video id="videoInput" class="hidden">Your browser does not support the video tag.</video>
   </div>
-  <script src="../libs/stats.min.js" type="text/javascript"></script>
-  <script src="../libs/adapter-latest.js" type="text/javascript"></script>
-  <script src="js/filters.js" type="text/javascript"></script>
+  <script src="../../libs/stats.min.js" type="text/javascript"></script>
+  <script src="../../libs/adapter-latest.js" type="text/javascript"></script>
+  <script src="../../utils/utils.js" type="text/javascript"></script>
+  <script src="../../utils/statsInit.js" type="text/javascript"></script>
+  <script src="../../utils/menu.js" type="text/javascript"></script>
   <script src="js/ui.js" type="text/javascript"></script>
-  <script src="js/utils.js" type="text/javascript"></script>
-  <script src="js/menu.js" type="text/javascript"></script>
+  <script src="js/filters.js" type="text/javascript"></script>
   <script src="js/index.js" type="text/javascript"></script>
 </body>
 

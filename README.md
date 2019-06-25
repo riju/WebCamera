@@ -19,5 +19,8 @@ Try out the demos (Chrome 72+):
 
 ![](panTilt.gif)
 
+<img src="filtersDemo.gif" width="654" height="786" />
 
-<img src="filtersDemo.gif" width="541" height="555" />
+Face and eyes detection |  Funny hats and glasses
+------------------------|-------------------------
+<img src="faceDetection.gif" width="345" height="299" /> |  <img src="funnyHats.gif" width="345" height="462" />

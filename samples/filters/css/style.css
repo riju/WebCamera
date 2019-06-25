@@ -1,11 +1,7 @@
-.header {
-  padding-top : 30px;
-  color: #5c85b8;
-  text-align: center;
-}
 .err {
   color: red;
   font-weight: bold;
+  padding: 10px;
 }
 .hidden {
   display: none;
@@ -14,4 +10,7 @@
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+}
+.stats-settings {
+  padding-top: 10px;
 }

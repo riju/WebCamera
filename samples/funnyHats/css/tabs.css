@@ -1,0 +1,35 @@
+.tabset > input[type="radio"] {
+  position: absolute;
+  left: -200vw;
+}
+.tabset > #hatsTab:checked ~ .tab-panels > #hatsSection,
+.tabset > #glassesTab:checked ~ .tab-panels > #glassesSection {
+  display: block;
+}
+.tabset {
+  width: 640px;
+  display: flex;
+}
+.tabset > label {
+  position: relative;
+  display: inline-block;
+  padding: 15px 40px 10px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  cursor: pointer;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+.tabset > label:hover {
+  background-color: #c8dcff;
+}
+.tabset > input:checked + label {
+  border-color: #8f99b8;
+  border-bottom: 1px solid #fff;
+  margin-bottom: -1px;
+}
+.tab-panel {
+  border-top: 1px solid #8f99b8;
+  border-radius: 10px;
+  display: none;
+}
