@@ -39,6 +39,9 @@ let colorTemperatureSliderValue = document.getElementById("colorTemperature-slid
 let saturationSlider = document.getElementById("saturation-slider");
 let saturationSliderValue = document.getElementById("saturation-slider-value");
 
+let sharpnessSlider = document.getElementById("sharpness-slider");
+let sharpnessSliderValue = document.getElementById("sharpness-slider-value");
+
 let imageCapturer;
 
 function startCamera() {
@@ -96,6 +99,11 @@ function gotMedia(mediastream) {
       console.error('saturation not supported.');
       return;
     }
+    // Check whether sharpness is supported or not.
+    if (!capabilities.sharpness) {
+      console.error('sharpness not supported.');
+      return;
+    }
     
     exposureTimeSlider.min = capabilities.exposureTime.min;
     exposureTimeSlider.max = capabilities.exposureTime.max;
@@ -113,6 +121,14 @@ function gotMedia(mediastream) {
     colorTemperatureSlider.max = capabilities.colorTemperature.max;
     colorTemperatureSlider.step = capabilities.colorTemperature.step;
 
+    saturationSlider.min = capabilities.saturation.min;
+    saturationSlider.max = capabilities.saturation.max;
+    saturationSlider.step = capabilities.saturation.step;
+
+    sharpnessSlider.min = capabilities.sharpness.min;
+    sharpnessSlider.max = capabilities.sharpness.max;
+    sharpnessSlider.step = capabilities.sharpness.step;
+
     exposureTimeSlider.value = exposureTimeSliderValue.value = videoTrack.getSettings().exposureTime;
     exposureTimeSliderValue.value = exposureTimeSlider.value;
 
@@ -125,9 +141,11 @@ function gotMedia(mediastream) {
     colorTemperatureSlider.value = colorTemperatureSliderValue.value = videoTrack.getSettings().colorTemperature;
     colorTemperatureSliderValue.value = colorTemperatureSlider.value;
 
-    saturationSlider.min = capabilities.saturation.min;
-    saturationSlider.max = capabilities.saturation.max;
-    saturationSlider.step = capabilities.saturation.step;
+    saturationSlider.value = saturationSliderValue.value = videoTrack.getSettings().saturation;
+    saturationSliderValue.value = saturationSlider.value;
+
+    sharpnessSlider.value = sharpnessSliderValue.value = videoTrack.getSettings().sharpness;
+    sharpnessSliderValue.value = sharpnessSlider.value;
 
 
     exposureTimeSlider.oninput = function () {
@@ -174,6 +192,15 @@ function gotMedia(mediastream) {
       videoTrack.applyConstraints({
         advanced: [{
           saturation: saturationSlider.value
+        }]
+      });
+    }
+
+    sharpnessSlider.oninput = function () {
+      sharpnessSliderValue.value = sharpnessSlider.value;
+      videoTrack.applyConstraints({
+        advanced: [{
+          sharpness: sharpnessSlider.value
         }]
       });
     }
