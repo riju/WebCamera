@@ -1,50 +1,60 @@
 .carousel-wrapper {
-  position: relative;
+  position: absolute;
   overflow: hidden;
   display: flex;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 .carousel {
   margin: 0;
   padding: 0;
   display: flex;
   transition: all 1s ease;
-  width: 560px; /* 640-80 because of two buttons; resized in index.js*/
+  font-size: 16px;
 }
 .card {
-  background: white;
   display: inline-block;
+  padding: 5px;
+}
+.card label {
+  position: absolute;
   text-align: center;
-  color: #4e6096;
-  font-size: 18px;
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
   hyphens: auto;
   -webkit-hyphens: auto;
   -ms-hyphens: auto;
   -moz-hyphens: auto;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  overflow: hidden;
 }
-.small-canvas {
-  width: 128px; /* resized in index.js */
-  height: 96px; /* resized in index.js */
-  border-radius: 20px;
-  padding: 8px;
+.card canvas {
+  border-width: medium;
+  border-color: yellow;
+  border-style: none;
 }
-.card div {
-  border-radius: 20px;
+.card canvas:hover {
+  cursor: pointer;
 }
-.card div:hover {
-  background-color: #c8dcff;
+.card img {
+  border-width: medium;
+  border-color: yellow;
+  border-style: none;
+}
+.card img:hover {
+  cursor: pointer;
+}
+.card label:hover {
   cursor: pointer;
 }
 .menu-button {
-  z-index: 2;
-  height: 112px; /*96+16 because of canvas padding (8+8); resized in index.js*/
+  z-index: 10;
+  position: relative;
   width: 40px;
-  font-size: 60px;
+  font-size: 40px;
   color: rgb(255, 255, 255);
   cursor: pointer;
   background: linear-gradient(to bottom, #9bb4e2 5%, #5c85b8 100%);
-  border-radius: 10px;
   border: 1px solid #8f99b8;
 }
 .menu-button:hover {

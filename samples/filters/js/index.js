@@ -1,13 +1,12 @@
 let utils = new Utils('errorMessage');
-let width = 0;
-let height = 0;
-let smallWidth = 0;
-let smallHeight = 0;
-// whether streaming video from the camera.
+let video = document.getElementById('videoInputMain');
+let videoSmall = document.getElementById('videoInputSmall');
+let canvasOutput = document.getElementById('canvasOutput');
+
+// Whether streaming video from the camera.
 let streaming = false;
-let resolution = window.innerWidth < 700 ? 'qvga' : 'vga';
-let video = document.getElementById('videoInput');
-let vc = null;
+let videoCaptureMain = null;
+let videoCaptureSmall = null;
 let src = null;
 let dstC1 = null;
 let dstC3 = null;
@@ -17,23 +16,49 @@ let dstC1Small = null;
 let dstC3Small = null;
 let dstC4Small = null;
 
+function initOpencvMatrices() {
+  src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+  dstC1 = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+  dstC3 = new cv.Mat(video.height, video.width, cv.CV_8UC3);
+  dstC4 = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+  srcSmall = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC4);
+  dstC1Small = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC1);
+  dstC3Small = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC3);
+  dstC4Small = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC4);
+}
+
+function deleteOpencvMatrices() {
+  src.delete();
+  dstC1.delete();
+  dstC3.delete();
+  dstC4.delete();
+  srcSmall.delete();
+  dstC1Small.delete();
+  dstC3Small.delete();
+  dstC4Small.delete();
+}
+
 function startVideoProcessing() {
-  vc = new cv.VideoCapture(video);
-  src = new cv.Mat(height, width, cv.CV_8UC4);
-  dstC1 = new cv.Mat(height, width, cv.CV_8UC1);
-  dstC3 = new cv.Mat(height, width, cv.CV_8UC3);
-  dstC4 = new cv.Mat(height, width, cv.CV_8UC4);
-  srcSmall = new cv.Mat(smallHeight, smallWidth, cv.CV_8UC4);
-  dstC1Small = new cv.Mat(smallHeight, smallWidth, cv.CV_8UC1);
-  dstC3Small = new cv.Mat(smallHeight, smallWidth, cv.CV_8UC3);
-  dstC4Small = new cv.Mat(smallHeight, smallWidth, cv.CV_8UC4);
+  videoSmall.width = videoSmall.videoWidth;
+  videoSmall.height = videoSmall.videoHeight;
+  resizeMenu(videoSmall.height, videoSmall.height);
+  resizeMenuLabels();
+  resizeFilterSettings();
+
+  videoCaptureMain = new cv.VideoCapture(video);
+  videoCaptureSmall = new cv.VideoCapture(videoSmall);
+  initOpencvMatrices();
   requestAnimationFrame(processVideo);
 }
 
 function processVideo() {
-  if (!streaming) return;
+  if (!streaming) {
+    cleanupAndStop()
+    return;
+  }
   stats.begin();
-  vc.read(src);
+  videoCaptureMain.read(src);
+  videoCaptureSmall.read(srcSmall);
   let result;
   switch (controls.filter) {
     case 'passThrough': result = passThrough(src); break;
@@ -42,14 +67,14 @@ function processVideo() {
     case 'canny': result = canny(src, dstC1); break;
     case 'threshold': result = threshold(src, dstC4); break;
     case 'adaptiveThreshold':
-      result = adaptiveThreshold(src, dstC1, height, width); break;
+      result = adaptiveThreshold(src, dstC1); break;
     case 'gaussianBlur': result = gaussianBlur(src, dstC4); break;
     case 'bilateralFilter':
-      result = bilateralFilter(src, dstC3, height, width); break;
+      result = bilateralFilter(src, dstC3); break;
     case 'medianBlur': result = medianBlur(src, dstC4); break;
-    case 'sobel': result = sobel(src, dstC1, height, width); break;
-    case 'scharr': result = scharr(src, dstC1, height, width); break;
-    case 'laplacian': result = laplacian(src, dstC1, height, width); break;
+    case 'sobel': result = sobel(src, dstC1); break;
+    case 'scharr': result = scharr(src, dstC1); break;
+    case 'laplacian': result = laplacian(src, dstC1); break;
     case 'calcHist': result = calcHist(src, dstC1, dstC4); break;
     case 'equalizeHist': result = equalizeHist(src, dstC1); break;
     case 'backprojection': result = backprojection(src, dstC1, dstC3); break;
@@ -58,30 +83,26 @@ function processVideo() {
   }
   cv.imshow('canvasOutput', result);
 
-  srcSmall.delete();
-  srcSmall = src.clone();
-  let smallSize = new cv.Size(smallWidth, smallHeight);
-  cv.resize(srcSmall, srcSmall, smallSize, 0, 0, cv.INTER_CUBIC);
-  cv.imshow('passThrough', passThrough(srcSmall));
-  cv.imshow('gray', gray(srcSmall, dstC1Small));
-  cv.imshow('hsv', hsv(srcSmall, dstC3Small));
-  cv.imshow('canny', canny(srcSmall, dstC1Small));
-  cv.imshow('threshold', threshold(srcSmall, dstC4Small));
-  cv.imshow('adaptiveThreshold',
-    adaptiveThreshold(srcSmall, dstC1Small, smallHeight, smallWidth));
-  cv.imshow('gaussianBlur', gaussianBlur(srcSmall, dstC4Small));
-  cv.imshow('bilateralFilter',
-    bilateralFilter(srcSmall, dstC3Small, smallHeight, smallWidth));
-  cv.imshow('medianBlur', medianBlur(srcSmall, dstC4Small));
-  cv.imshow('sobel', sobel(srcSmall, dstC1Small, smallHeight, smallWidth));
-  cv.imshow('scharr', scharr(srcSmall, dstC1Small, smallHeight, smallWidth));
-  cv.imshow('laplacian',
-    laplacian(srcSmall, dstC1Small, smallHeight, smallWidth));
-  cv.imshow('calcHist', calcHist(srcSmall, dstC1Small, dstC4Small));
-  cv.imshow('equalizeHist', equalizeHist(srcSmall, dstC1Small));
-  cv.imshow('backprojection',
+  cv.imshow('passThroughCanvas', passThrough(srcSmall));
+  cv.imshow('grayCanvas', gray(srcSmall, dstC1Small));
+  cv.imshow('hsvCanvas', hsv(srcSmall, dstC3Small));
+  cv.imshow('cannyCanvas', canny(srcSmall, dstC1Small));
+  cv.imshow('thresholdCanvas', threshold(srcSmall, dstC4Small));
+  cv.imshow('adaptiveThresholdCanvas',
+    adaptiveThreshold(srcSmall, dstC1Small));
+  cv.imshow('gaussianBlurCanvas', gaussianBlur(srcSmall, dstC4Small));
+  cv.imshow('bilateralFilterCanvas',
+    bilateralFilter(srcSmall, dstC3Small));
+  cv.imshow('medianBlurCanvas', medianBlur(srcSmall, dstC4Small));
+  cv.imshow('sobelCanvas', sobel(srcSmall, dstC1Small));
+  cv.imshow('scharrCanvas', scharr(srcSmall, dstC1Small));
+  cv.imshow('laplacianCanvas',
+    laplacian(srcSmall, dstC1Small));
+  cv.imshow('calcHistCanvas', calcHist(srcSmall, dstC1Small, dstC4Small));
+  cv.imshow('equalizeHistCanvas', equalizeHist(srcSmall, dstC1Small));
+  cv.imshow('backprojectionCanvas',
     backprojection(srcSmall, dstC1Small, dstC3Small));
-  cv.imshow('morphology', morphology(srcSmall, dstC3Small, dstC4Small));
+  cv.imshow('morphologyCanvas', morphology(srcSmall, dstC3Small, dstC4Small));
 
   stats.end();
   requestAnimationFrame(processVideo);
@@ -90,52 +111,36 @@ function processVideo() {
 function startCamera() {
   if (!streaming) {
     utils.clearError();
-    utils.startCamera(resolution, onVideoStarted, 'videoInput');
+    utils.startCamera(videoConstraint, 'videoInputMain', () => {
+      // TODO(sasha): figure out why some cameras don't work
+      // if we create two streams.
+      utils.startCamera(smallVideoConstraint,
+        'videoInputSmall', onVideoStarted);
+    });
   } else {
-    utils.stopCamera();
+    stopCamera(video);
+    stopCamera(videoSmall);
     onVideoStopped();
   }
 }
 
-function setWidthAndHeight() {
-  width = video.videoWidth;
-  height = video.videoHeight;
-  smallWidth = parseInt(video.videoWidth / 5);
-  smallHeight = parseInt(video.videoHeight / 5);
-  video.setAttribute('width', width);
-  video.setAttribute('height', height);
-  canvasOutput.style.width = `${width}px`;
-  canvasOutput.style.height = `${height}px`;
-  document.getElementsByClassName("canvas-wrapper")[0].style.height =
-    `${height}px`;
+function cleanupAndStop() {
+  deleteOpencvMatrices();
+  stopCamera(video);
+  stopCamera(videoSmall);
+  onVideoStopped();
 }
 
-function onVideoStarted() {
-  streaming = true;
-  setWidthAndHeight();
-  resizeMenu();
-  resizeFilterSettings();
-  startVideoProcessing();
-}
-
-function stopVideoProcessing() {
-  if (src != null && !src.isDeleted()) src.delete();
-  if (dstC1 != null && !dstC1.isDeleted()) dstC1.delete();
-  if (dstC3 != null && !dstC3.isDeleted()) dstC3.delete();
-  if (dstC4 != null && !dstC4.isDeleted()) dstC4.delete();
-  if (srcSmall != null && !srcSmall.isDeleted()) srcSmall.delete();
-  if (dstC1Small != null && !dstC1Small.isDeleted()) dstC1Small.delete();
-  if (dstC3Small != null && !dstC3Small.isDeleted()) dstC3Small.delete();
-  if (dstC4Small != null && !dstC4Small.isDeleted()) dstC4Small.delete();
-}
-
-function onVideoStopped() {
-  if (!streaming) return;
-  stopVideoProcessing();
-  document.getElementById('canvasOutput').getContext('2d')
-    .clearRect(0, 0, width, height);
-  streaming = false;
-}
+function stopCamera(video) {
+  if (video) {
+    video.pause();
+    video.srcObject = null;
+    video.removeEventListener('canplay', onVideoCanPlay);
+  }
+  if (video.srcObject) {
+    video.srcObject.getVideoTracks()[0].stop();
+  }
+};
 
 utils.loadOpenCv(() => {
   initUI();
