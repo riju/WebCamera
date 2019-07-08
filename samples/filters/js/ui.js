@@ -1,10 +1,4 @@
-let stats = null;
 let controls;
-let settingsVisible = true;
-let menuVisible = true;
-
-let videoConstraint;
-let smallVideoConstraint;
 
 const filters = {
   'passThrough': 'No Filter',
@@ -28,10 +22,19 @@ const filters = {
 function initUI() {
   initStats();
   getVideoConstraint();
+  calculateSmallVideoConstraint();
 
   controls = {
     filter: 'passThrough',
     lastFilter: 'passThrough',
+
+    settingsVisible: true,
+    menuVisible: true,
+
+    frontCamera: null,
+    backCamera: null,
+    facingMode: '',
+
     morphologyOperationValues: {
       'MORPH_ERODE': cv.MORPH_ERODE,
       'MORPH_DILATE': cv.MORPH_DILATE,
@@ -91,31 +94,53 @@ function initUI() {
   canvasOutput.addEventListener('click', function () {
     showOrHideCanvasElements();
   });
+
+  // TakePhoto event by clicking takePhotoButton.
+  let takePhotoButton = document.getElementById('takePhotoButton');
+  takePhotoButton.addEventListener('click', function () {
+    // Here we are not using takePhoto() per se.
+    // new ImageCapture(videoTrack) gives image without applied filter.
+    let dstCanvas = document.getElementById('gallery');
+    drawCanvas(dstCanvas, canvasOutput);
+  });
+
+  // Set initial facingMode value for small video.
+  if (controls.backCamera != null) {
+    smallVideoConstraint.facingMode = controls.facingMode;
+  }
+  // TODO(sasha): move to utils.js.
+  let facingModeButton = document.getElementById('facingModeButton');
+  // Switch to face or environment mode by clicking facingModeButton.
+  facingModeButton.addEventListener('click', function () {
+    if (controls.facingMode == 'user') {
+      controls.facingMode = 'environment';
+      videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
+      smallVideoConstraint.deviceId = { exact: controls.backCamera.deviceId };
+      facingModeButton.innerText = 'camera_front';
+    } else if (controls.facingMode == 'environment') {
+      controls.facingMode = 'user';
+      videoConstraint.deviceId = { exact: controls.frontCamera.deviceId };
+      smallVideoConstraint.deviceId = { exact: controls.frontCamera.deviceId };
+      facingModeButton.innerText = 'camera_rear';
+    }
+    stopCamera(video);
+    stopCamera(videoSmall);
+    utils.startCamera(videoConstraint, 'videoInputMain', () => {
+      // TODO(sasha): figure out why some cameras don't work
+      // if we create two streams.
+      utils.startCamera(smallVideoConstraint,
+        'videoInputSmall', startVideoProcessing);
+    });
+  });
 }
 
-function getVideoConstraint() {
+function calculateSmallVideoConstraint() {
   if (isMobileDevice()) {
-    // TODO(sasha): figure out why getUserMedia(...) in utils.js
-    // swap width and height for mobile devices.
-    videoConstraint = {
-      facingMode: { exact: "user" },
-      //width: { ideal: window.screen.width },
-      //height: { ideal: window.screen.height }
-      width: { ideal: window.screen.height },
-      height: { ideal: window.screen.width }
-    };
     smallVideoConstraint = {
-      facingMode: { exact: "user" },
       width: { ideal: parseInt(window.screen.width / 5) },
       height: { ideal: parseInt(window.screen.width / 5) }
     };
-  } else {
-    if (window.innerWidth < 960) {
-      videoConstraint = resolutions['qvga'];
-    } else {
-      videoConstraint = resolutions['vga'];
-    }
-    // Create 5 times lower square resolution
+  } else { // Create 5 times lower square resolution.
     smallVideoConstraint = {
       width: { ideal: parseInt(videoConstraint.height.exact / 5) },
       height: { ideal: parseInt(videoConstraint.height.exact / 5) }
@@ -132,23 +157,24 @@ function setFilter(filter) {
   lastFilterElem.style.borderStyle = 'none';
   currentFilterElem.style.borderStyle = 'solid';
 
-  closeFilterOptions(controls.lastFilter);
-  openFilterOptions(controls.filter);
+  hideFilterSettings(controls.lastFilter);
+  showFilterSettings(controls.filter);
 }
 
-function openFilterOptions(filter) {
-  settingsVisible = true;
+function showFilterSettings(filter) {
+  controls.settingsVisible = true;
   let settings = document.getElementById(`${filter}Settings`);
   if (typeof (settings) != 'undefined' && settings != null) {
     settings.classList.remove('hidden');
-    // Set appropriate height for settings wrapper.
+    // Set appropriate position for settings wrapper.
     let settingsWrapper = document.querySelector('.settings-wrapper');
-    settingsWrapper.style.bottom = `${settings.offsetHeight + carousels[0].offsetHeight}px`;
+    settingsWrapper.style.bottom =
+      `${settingsWrapper.offsetHeight + carousels[0].offsetHeight}px`;
   }
 }
 
-function closeFilterOptions(filter) {
-  settingsVisible = false;
+function hideFilterSettings(filter) {
+  controls.settingsVisible = false;
   let settings = document.getElementById(`${filter}Settings`);
   if (typeof (settings) != 'undefined' && settings != null) {
     settings.classList.add('hidden');
@@ -156,37 +182,27 @@ function closeFilterOptions(filter) {
 }
 
 function showMenu() {
-  menuVisible = true;
+  controls.menuVisible = true;
   carouselWrappers[0].classList.remove('hidden');
   window.onresize();
 }
 
 function hideMenu() {
-  menuVisible = false;
+  controls.menuVisible = false;
   carouselWrappers[0].classList.add('hidden');
 }
 
 function showOrHideCanvasElements() {
-  if (menuVisible) {
-    closeFilterOptions(controls.filter);
+  if (controls.menuVisible) {
+    hideFilterSettings(controls.filter);
     hideMenu();
   } else {
-    openFilterOptions(controls.filter);
+    showFilterSettings(controls.filter);
     showMenu();
   }
 }
 
-function resizeFilterSettings() {
-  let allSettings = document.querySelectorAll('.settings');
-  let settingsPadding = parseInt(getComputedStyle(allSettings[0]).padding);
-  allSettings.forEach(function (settings) {
-    settings.classList.remove('hidden');
-    settings.style.width = `${video.width - 2 * settingsPadding}px`;
-    settings.classList.add('hidden');
-  });
-}
-
-function resizeMenuLabels() {
+function initMenuLabels() {
   let fontSize;
   if (video.width >= 500) fontSize = `16px`;
   else if (video.width >= 400) fontSize = `14px`;
@@ -202,4 +218,16 @@ function resizeMenuLabels() {
     label.style.height = smallCanvases[i].style.height;
   });
 
+}
+
+window.onresize = function () {
+  resizeMenu();
+  let settingsWrapper = document.querySelector('.settings-wrapper');
+  settingsWrapper.style.bottom =
+    `${settingsWrapper.offsetHeight + carousels[0].offsetHeight}px`;
+
+};
+
+function initFiltersSettings() {
+  document.querySelector('.settings-bar').style.width = `${video.width}px`;
 }

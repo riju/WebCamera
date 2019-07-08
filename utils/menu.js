@@ -58,41 +58,8 @@ rightButtons.forEach(function (button, i) {
   });
 });
 
-// Resize width of carousel on window resizing.
-window.onresize = function () {
-  const VGA_WIDTH = 640;
-  const QVGA_WIDTH = 320;
-  let originalCarouselWidth = video.width - 2 * buttonWidth;
-  let resizedCarouselWidth = window.innerWidth - 2 * buttonWidth;
-  carousels.forEach(function (carousel) {
-    if (window.innerWidth < VGA_WIDTH
-      && video.width == VGA_WIDTH) { // vga and need to resize
-      carousel.style.width = `${resizedCarouselWidth}px`;
-    } else if (window.innerWidth > VGA_WIDTH
-      && video.width == VGA_WIDTH) { // vga and no need to resize
-      carousel.style.width = `${originalCarouselWidth}px`;
-    } else if (window.innerWidth < QVGA_WIDTH
-      && video.width == QVGA_WIDTH) {// gvga and need to resize
-      carousel.style.width = `${resizedCarouselWidth}px`;
-    } else if (window.innerWidth > QVGA_WIDTH
-      && video.width == QVGA_WIDTH) {// gvga and no need to resize
-      carousel.style.width = `${originalCarouselWidth}px`;
-    }
-  });
-  // Set appropriate height for settings wrapper.
-  let settings;
-  try {
-    settings = document.getElementById(`${controls.filter}Settings`);
-    if (typeof (settings) != 'undefined' && settings != null) {
-      let settingsWrapper = document.querySelector('.settings-wrapper');
-      settingsWrapper.style.bottom =
-        `${settings.offsetHeight + carousels[0].offsetHeight}px`;
-    }
-  } catch (err) { }
-};
-
-// Resize elements in menu for current canvas size.
-function resizeMenu(smallWidth, smallHeight) {
+// Resize menu elements for current canvas size.
+function initMenu(smallWidth, smallHeight) {
   // Small canvases and cards
   let cards = document.querySelectorAll('.card');
   let cardPadding = getComputedStyle(cards[0]).padding;
@@ -133,4 +100,27 @@ function resizeMenu(smallWidth, smallHeight) {
     wrapper.style.top = `${video.height - cards[0].offsetHeight}px`;
   });
   window.onresize();
+}
+
+// Resize width of carousel
+function resizeMenu() {
+  const VGA_WIDTH = 640;
+  const QVGA_WIDTH = 320;
+  let originalCarouselWidth = video.width - 2 * buttonWidth;
+  let resizedCarouselWidth = window.innerWidth - 2 * buttonWidth;
+  carousels.forEach(function (carousel) {
+    if (window.innerWidth < VGA_WIDTH
+      && video.width == VGA_WIDTH) { // vga and need to resize
+      carousel.style.width = `${resizedCarouselWidth}px`;
+    } else if (window.innerWidth > VGA_WIDTH
+      && video.width == VGA_WIDTH) { // vga and no need to resize
+      carousel.style.width = `${originalCarouselWidth}px`;
+    } else if (window.innerWidth < QVGA_WIDTH
+      && video.width == QVGA_WIDTH) {// gvga and need to resize
+      carousel.style.width = `${resizedCarouselWidth}px`;
+    } else if (window.innerWidth > QVGA_WIDTH
+      && video.width == QVGA_WIDTH) {// gvga and no need to resize
+      carousel.style.width = `${originalCarouselWidth}px`;
+    }
+  });
 }

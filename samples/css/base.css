@@ -6,14 +6,39 @@
   justify-content: center;
   flex-wrap: wrap;
 }
+.err {
+  position: relative;
+  top: 50px;
+  color: red;
+  font-weight: bold;
+  width: 300px;
+  margin: auto;
+}
 body {
   margin: 0px;
 }
 .stats-settings {
-  padding: 5px;
-}
-.err {
-  color: red;
-  font-weight: bold;
   padding: 10px;
+  width: 100%;
+}
+.stats-settings #hideStats:hover {
+  cursor: pointer;
+}
+
+#mainContent {
+  margin: 0 auto;
+}
+.canvas-wrapper {
+  width: 100%;
+}
+.canvas-big {
+  display: inline;
+}
+.canvas-big:hover {
+  cursor: pointer;
+}
+
+.jitterLimit {
+  width: 100%;
+  padding: 5px;
 }

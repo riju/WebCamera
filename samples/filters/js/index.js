@@ -1,12 +1,17 @@
 let utils = new Utils('errorMessage');
+let stats = null;
+let videoConstraint;
+let smallVideoConstraint;
+let streaming = false;
+let imageCapturer = null;
+let videoTrack = null;
+
 let video = document.getElementById('videoInputMain');
 let videoSmall = document.getElementById('videoInputSmall');
 let canvasOutput = document.getElementById('canvasOutput');
 
-// Whether streaming video from the camera.
-let streaming = false;
-let videoCaptureMain = null;
-let videoCaptureSmall = null;
+let videoCapturer = null;
+let videoCapturerSmall = null;
 let src = null;
 let dstC1 = null;
 let dstC3 = null;
@@ -16,39 +21,75 @@ let dstC1Small = null;
 let dstC3Small = null;
 let dstC4Small = null;
 
-function initOpencvMatrices() {
+
+function initOpencvObjects() {
+  videoCapturer = new cv.VideoCapture(video);
+  videoCapturerSmall = new cv.VideoCapture(videoSmall);
+
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   dstC1 = new cv.Mat(video.height, video.width, cv.CV_8UC1);
   dstC3 = new cv.Mat(video.height, video.width, cv.CV_8UC3);
   dstC4 = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+
   srcSmall = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC4);
   dstC1Small = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC1);
   dstC3Small = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC3);
   dstC4Small = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC4);
 }
 
-function deleteOpencvMatrices() {
+function deleteOpencvObjects() {
   src.delete();
   dstC1.delete();
   dstC3.delete();
   dstC4.delete();
+
   srcSmall.delete();
   dstC1Small.delete();
   dstC3Small.delete();
   dstC4Small.delete();
 }
 
-function startVideoProcessing() {
+function completeStyling() {
+  let cameraBar = document.querySelector('.camera-bar-wrapper');
+  cameraBar.style.width = `${video.videoWidth}px`;
+
   videoSmall.width = videoSmall.videoWidth;
   videoSmall.height = videoSmall.videoHeight;
-  resizeMenu(videoSmall.height, videoSmall.height);
-  resizeMenuLabels();
-  resizeFilterSettings();
+  initMenu(videoSmall.height, videoSmall.height);
 
-  videoCaptureMain = new cv.VideoCapture(video);
-  videoCaptureSmall = new cv.VideoCapture(videoSmall);
-  initOpencvMatrices();
-  requestAnimationFrame(processVideo);
+  initMenuLabels();
+  initFiltersSettings();
+
+  document.getElementById('takePhotoButton').disabled = false;
+}
+
+function applyFacingModeToSmallVideo() {
+  let smallVideoTrack = videoSmall.srcObject.getVideoTracks()[0];
+  let constraints = smallVideoTrack.getConstraints();
+  constraints.facingMode = { exact: controls.facingMode };
+  smallVideoTrack.applyConstraints(constraints).catch(e => console.log(e));
+}
+
+function applyCurrentFilter() {
+  switch (controls.filter) {
+    case 'passThrough': return passThrough(src);
+    case 'gray': return gray(src, dstC1);
+    case 'hsv': return hsv(src, dstC3);
+    case 'canny': return canny(src, dstC1);
+    case 'threshold': return threshold(src, dstC4);
+    case 'adaptiveThreshold': return adaptiveThreshold(src, dstC1);
+    case 'gaussianBlur': return gaussianBlur(src, dstC4);
+    case 'bilateralFilter': return bilateralFilter(src, dstC3);
+    case 'medianBlur': return medianBlur(src, dstC4);
+    case 'sobel': return sobel(src, dstC1);
+    case 'scharr': return scharr(src, dstC1);
+    case 'laplacian': return laplacian(src, dstC1);
+    case 'calcHist': return calcHist(src, dstC1, dstC4);
+    case 'equalizeHist': return equalizeHist(src, dstC1);
+    case 'backprojection': return backprojection(src, dstC1, dstC3);
+    case 'morphology': return morphology(src, dstC3, dstC4);
+    default: return passThrough(src);
+  }
 }
 
 function processVideo() {
@@ -57,32 +98,10 @@ function processVideo() {
     return;
   }
   stats.begin();
-  videoCaptureMain.read(src);
-  videoCaptureSmall.read(srcSmall);
-  let result;
-  switch (controls.filter) {
-    case 'passThrough': result = passThrough(src); break;
-    case 'gray': result = gray(src, dstC1); break;
-    case 'hsv': result = hsv(src, dstC3); break;
-    case 'canny': result = canny(src, dstC1); break;
-    case 'threshold': result = threshold(src, dstC4); break;
-    case 'adaptiveThreshold':
-      result = adaptiveThreshold(src, dstC1); break;
-    case 'gaussianBlur': result = gaussianBlur(src, dstC4); break;
-    case 'bilateralFilter':
-      result = bilateralFilter(src, dstC3); break;
-    case 'medianBlur': result = medianBlur(src, dstC4); break;
-    case 'sobel': result = sobel(src, dstC1); break;
-    case 'scharr': result = scharr(src, dstC1); break;
-    case 'laplacian': result = laplacian(src, dstC1); break;
-    case 'calcHist': result = calcHist(src, dstC1, dstC4); break;
-    case 'equalizeHist': result = equalizeHist(src, dstC1); break;
-    case 'backprojection': result = backprojection(src, dstC1, dstC3); break;
-    case 'morphology': result = morphology(src, dstC3, dstC4); break;
-    default: result = passThrough(src);
-  }
-  cv.imshow('canvasOutput', result);
+  videoCapturer.read(src);
+  cv.imshow('canvasOutput', applyCurrentFilter());
 
+  videoCapturerSmall.read(srcSmall);
   cv.imshow('passThroughCanvas', passThrough(srcSmall));
   cv.imshow('grayCanvas', gray(srcSmall, dstC1Small));
   cv.imshow('hsvCanvas', hsv(srcSmall, dstC3Small));
@@ -109,6 +128,12 @@ function processVideo() {
 }
 
 function startCamera() {
+  // Set initial facingMode for small video.
+  if (controls.backCamera != null) {
+    controls.facingMode = 'environment';
+    smallVideoConstraint.deviceId = { exact: controls.backCamera.deviceId };
+  }
+
   if (!streaming) {
     utils.clearError();
     utils.startCamera(videoConstraint, 'videoInputMain', () => {
@@ -125,24 +150,24 @@ function startCamera() {
 }
 
 function cleanupAndStop() {
-  deleteOpencvMatrices();
+  deleteOpencvObjects();
   stopCamera(video);
   stopCamera(videoSmall);
   onVideoStopped();
 }
 
-function stopCamera(video) {
-  if (video) {
-    video.pause();
-    video.srcObject = null;
-    video.removeEventListener('canplay', onVideoCanPlay);
+function stopCamera(videoElem) {
+  if (videoElem) {
+    videoElem.pause();
+    videoElem.srcObject = null;
+    videoElem.removeEventListener('canplay', utils.onVideoCanPlay);
   }
-  if (video.srcObject) {
-    video.srcObject.getVideoTracks()[0].stop();
+  if (videoElem.srcObject) {
+    videoElem.srcObject.getVideoTracks()[0].stop();
   }
 };
 
 utils.loadOpenCv(() => {
   initUI();
-  startCamera();
+  initCameraSettingsAndStart();
 });

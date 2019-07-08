@@ -2,7 +2,6 @@
   position: absolute;
   overflow: hidden;
   display: flex;
-  background-color: rgba(0, 0, 0, 0.2);
 }
 .carousel {
   margin: 0;

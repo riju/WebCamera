@@ -111,9 +111,6 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
 
   this.startCamera = function (videoConstraint, videoId, callback) {
     let video = document.getElementById(videoId);
-    if (!video) video = document.createElement('video');
-    if (!videoConstraint) videoConstraint = true;
-
     navigator.mediaDevices.getUserMedia({ video: videoConstraint, audio: false })
       .then(function (stream) {
         video.srcObject = stream;
@@ -180,24 +177,116 @@ function isMobileDevice() {
   return false;
 };
 
+function getVideoConstraint() {
+  let navBarHeight = 0;
+  try {
+    navBarHeight =
+      parseInt(getComputedStyle(document.querySelector('.camera-bar-wrapper')).height);
+  } catch (e) { }
+
+  if (isMobileDevice()) {
+    // TODO(sasha): figure out why getUserMedia(...) in utils.js
+    // swap width and height for mobile devices.
+    videoConstraint = {
+      //width: { ideal: window.screen.width },
+      //height: { ideal: window.screen.height - navBarHeight }
+      width: { ideal: window.screen.height - navBarHeight },
+      height: { ideal: window.screen.width }
+    };
+  } else {
+    if (window.innerWidth < 960) {
+      videoConstraint = resolutions['qvga'];
+    } else {
+      videoConstraint = resolutions['vga'];
+    }
+  }
+}
+
 function setMainCanvasProperties(video) {
   video.width = video.videoWidth;
   video.height = video.videoHeight;
-  canvasOutput.style.width = `${video.width}px`;
-  canvasOutput.style.height = `${video.height}px`;
-  document.getElementsByClassName('canvas-wrapper')[0].style.height =
+  //canvasOutput.style.width = `${video.width}px`;
+  //canvasOutput.style.height = `${video.height}px`;
+  document.getElementById('mainContent').style.width = `${video.width}px`;
+  document.querySelector('.canvas-wrapper').style.height =
     `${video.height}px`;
 }
 
 function onVideoStarted() {
   streaming = true;
+  videoTrack = video.srcObject.getVideoTracks()[0];
+  imageCapturer = new ImageCapture(videoTrack);
   setMainCanvasProperties(video);
   document.getElementById('mainContent').classList.remove('hidden');
-  startVideoProcessing();
+  completeStyling();
+  initOpencvObjects();
+  requestAnimationFrame(processVideo);
 }
 
 function onVideoStopped() {
   streaming = false;
   let canvasContext = canvasOutput.getContext('2d');
   canvasContext.clearRect(0, 0, video.width, video.height);
+}
+
+function startVideoProcessing() {
+  videoTrack = video.srcObject.getVideoTracks()[0];
+  imageCapturer = new ImageCapture(videoTrack);
+  requestAnimationFrame(processVideo);
+}
+
+function initCameraSettingsAndStart() {
+  // Detect back and front cameras.
+  navigator.mediaDevices.enumerateDevices()
+    .then(function (devices) {
+      devices.forEach(device => {
+        if (device.kind == 'videoinput') {
+
+          if (device.facingMode == "environment"
+            || device.label.indexOf("facing back") >= 0)
+            controls.backCamera = device;
+
+          else if (device.facingMode == "user"
+            || device.label.indexOf("facing front") >= 0)
+            controls.frontCamera = device;
+        }
+      });
+      // Disable facingModeButton if there is no environment or user mode.
+      let facingModeButton = document.getElementById('facingModeButton');
+      if (controls.frontCamera == null || controls.backCamera == null) {
+        facingModeButton.style.color = 'gray';
+        facingModeButton.style.border = '2px solid gray';
+      } else {
+        facingModeButton.disabled = false;
+      }
+
+      // Set initial facingMode value if camera is available.
+      if (controls.backCamera != null) {
+        controls.facingMode = 'environment';
+        videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
+      }
+
+      startCamera();
+    });
+}
+
+function drawCanvas(canvas, img) {
+  canvas.width = getComputedStyle(canvas).width.split('px')[0];
+  canvas.height = getComputedStyle(canvas).height.split('px')[0];
+  let ratio = Math.max(canvas.width / img.width, canvas.height / img.height);
+  let x = (canvas.width - img.width * ratio) / 2;
+  let y = (canvas.height - img.height * ratio) / 2;
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height,
+    x, y, img.width * ratio, img.height * ratio);
+}
+
+function takePhoto() {
+  imageCapturer.takePhoto()
+    .then(blob => createImageBitmap(blob))
+    .then(imageBitmap => {
+      const canvas = document.getElementById('gallery');
+      drawCanvas(canvas, imageBitmap);
+    })
+    .catch((err) => console.error("takePhoto() failed: ", err));
 }

@@ -1,0 +1,53 @@
+.camera-bar-wrapper {
+  height: 100px;
+  background: black;
+  display: flex;
+}
+#camera-bar {
+  width: 100%;
+  display: flex;
+  margin: 0px;
+  padding: 0px 30px;
+}
+#camera-bar li {
+  display: inline-block;
+  width: 33.33%;
+}
+#camera-bar li div {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+}
+.camera-bar-icon {
+  border: 2px solid white;
+  border-radius: 50px;
+  color: white;
+  background: black;
+}
+.gallery-wrapper {
+  padding: 23px 0px;
+}
+.take-photo-wrapper {
+  padding: 14px 0px;
+}
+.face-mode-wrapper {
+  padding: 23px 0px;
+}
+#gallery {
+  height: 50px;
+  width: 50px;
+}
+#takePhotoButton {
+  font-size: 48px;
+  padding: 10px;
+  width: 72px;
+}
+#takePhotoButton:active {
+  color: silver;
+  border: 2px solid silver;
+}
+#facingModeButton {
+  font-size: 30px;
+  padding: 10px;
+  width: 55px;
+}
