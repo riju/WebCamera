@@ -1,62 +1,67 @@
 let utils = new Utils('errorMessage');
-
-let resolution = window.innerWidth < 700 ? 'qvga' : 'vga';
-const FPS = 30;
-
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
-let canvasContext = canvasOutput.getContext('2d');
-
-let width = 0;
-let height = 0;
 
 let streaming = false;
-let cap = null;
+let videoCapture = null;
 let src = null;
 let gray = null;
 
+// Standart size of hat or glasses image.
+const imageWidth = 320;
+const imageHeight = 240;
+
 function startVideoProcessing() {
-  src = new cv.Mat(height, width, cv.CV_8UC4);
+  // Draw border for the first hat and glasses.
+  document.getElementById(`hat${currentHat}`).style.borderStyle = 'solid';
+  document.getElementById(`glasses${currentGlasses}`).style.borderStyle
+    = 'solid';
+
+  let smallWidth = (video.width / 5);
+  let smallHeight = smallWidth * (imageHeight / imageWidth);
+  resizeMenu(smallWidth, smallHeight);
+
+  resizeTabSet();
+  // Remove "disabled" attr from the second input tab.
+  document.getElementById("glassesTab").removeAttribute("disabled");
+
+  videoCapture = new cv.VideoCapture(video);
+  src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   gray = new cv.Mat();
-  cap = new cv.VideoCapture(video);
-  initOpencvVars();
-  setTimeout(processVideo, 0);
+  initOpencvObjects();
+  requestAnimationFrame(processVideo);
 }
 
 function processVideo() {
   try {
     if (!streaming) {
-      // clean and stop
-      src.delete(); gray.delete();
-      deleteOpencvObjects();
-      deleteHats(); deleteGlasses();
+      cleanupAndStop();
       return;
     }
     stats.begin();
-    let begin = Date.now();
-    cap.read(src);
+    videoCapture.read(src);
 
-    // detect faces
+    // Detect faces.
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
     let scaleFactor = 1.1;
     let minNeighbors = 3;
     faceCascade.detectMultiScale(gray, faces, scaleFactor, minNeighbors);
     deleteObjectsForOldFaces();
 
-    // process hat and glasses for each face
+    // Process hat and glasses for each face.
     for (let i = 0; i < faces.size(); ++i) {
       let face = faces.get(i);
       let hat = getHatCoords(face);
 
       if (!hatFrames[i]) {
-        // create new hat frame and glasses frame
+        // Create new hat frame and glasses frame.
         hatFrames.splice(i, 0, hat.coords);
         resizeHat(hat.width, hat.height, i);
         processGlasses(i, face, "new");
 
-      } else if (exceedJitterLimit(i, hat.coords) || objectChanged) {
-        // replace old hat frame and glasses frame
-        objectChanged = false;
+      } else if (exceedJitterLimit(i, hat.coords) || hatOrGlassesChanged) {
+        // Replace old hat frame and glasses frame.
+        hatOrGlassesChanged = false;
         replaceOldHatFrame(i, hat.coords);
         resizeHat(hat.width, hat.height, i);
         if (!glassesFrames[i])
@@ -65,65 +70,45 @@ function processVideo() {
           processGlasses(i, face, "replace");
       }
 
-      // draw hat
+      // Draw hat.
       if (hatFrames[i].show)
-        hatFrames[i].src.copyTo(src.rowRange(hatFrames[i].y1, hatFrames[i].y2)
-          .colRange(hatFrames[i].x1, hatFrames[i].x2), hatFrames[i].mask);
-      // draw glasses
+        hatFrames[i].src.copyTo(src
+          .rowRange(hatFrames[i].yUpper, hatFrames[i].yBottom)
+          .colRange(hatFrames[i].xUpper, hatFrames[i].xBottom),
+          hatFrames[i].mask);
+      // Draw glasses.
       if (glassesFrames[i].show)
         glassesFrames[i].src.copyTo(
-          src.rowRange(glassesFrames[i].y1, glassesFrames[i].y2)
-            .colRange(glassesFrames[i].x1, glassesFrames[i].x2),
+          src.rowRange(glassesFrames[i].yUpper, glassesFrames[i].yBottom)
+            .colRange(glassesFrames[i].xUpper, glassesFrames[i].xBottom),
           glassesFrames[i].mask);
     }
     cv.imshow('canvasOutput', src);
 
-    if (objectChanged) objectChanged = false;
+    if (hatOrGlassesChanged) hatOrGlassesChanged = false;
 
-    // schedule the next processing
-    let delay = 1000 / FPS - (Date.now() - begin);
     stats.end();
-    setTimeout(processVideo, delay);
+    requestAnimationFrame(processVideo);
   } catch (err) {
     utils.printError(err);
   }
 };
 
-function setWidthAndHeight() {
-  width = video.videoWidth;
-  height = video.videoHeight;
-  video.setAttribute('width', width);
-  video.setAttribute('height', height);
-  canvasOutput.style.width = `${width}px`;
-  canvasOutput.style.height = `${height}px`;
-  document.getElementsByClassName("canvas-wrapper")[0].style.height =
-    `${height}px`;
-}
-
 function startCamera() {
   if (!streaming) {
     utils.clearError();
-    utils.startCamera(resolution, onVideoStarted, 'videoInput');
+    utils.startCamera(videoConstraint, 'videoInput', onVideoStarted);
   } else {
     utils.stopCamera();
     onVideoStopped();
   }
 }
 
-function onVideoStarted() {
-  streaming = true;
-  setWidthAndHeight();
-  const heightDependenceCoef = 320 / 240; // depends on hat image resolution
-  resizeMenu("customFormat", heightDependenceCoef);
-  resizeTabSet();
-  // remove "disabled" attr from the second input tab
-  document.getElementById("glassesTab").removeAttribute("disabled");
-  startVideoProcessing();
-}
-
-function onVideoStopped() {
-  streaming = false;
-  canvasContext.clearRect(0, 0, canvasOutput.width, canvasOutput.height);
+function cleanupAndStop() {
+  src.delete(); gray.delete();
+  deleteOpencvObjects();
+  deleteHats(); deleteGlasses();
+  utils.stopCamera(); onVideoStopped();
 }
 
 utils.loadOpenCv(() => {

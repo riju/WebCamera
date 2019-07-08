@@ -2,34 +2,28 @@
   position: absolute;
   left: -200vw;
 }
-.tabset > #hatsTab:checked ~ .tab-panels > #hatsSection,
-.tabset > #glassesTab:checked ~ .tab-panels > #glassesSection {
-  display: block;
-}
 .tabset {
-  width: 640px;
+  position: absolute;
   display: flex;
+  width: 640px;
+  padding-bottom: 5px;
 }
 .tabset > label {
   position: relative;
   display: inline-block;
-  padding: 15px 40px 10px;
+  font-size: 14px;
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  padding: 5px 10px 0px;
   border: 1px solid transparent;
   border-bottom: 0;
   cursor: pointer;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-}
-.tabset > label:hover {
-  background-color: #c8dcff;
+  border-radius: 10px;
 }
 .tabset > input:checked + label {
-  border-color: #8f99b8;
-  border-bottom: 1px solid #fff;
-  margin-bottom: -1px;
+  background-color: #9bb4e2;
 }
-.tab-panel {
-  border-top: 1px solid #8f99b8;
-  border-radius: 10px;
-  display: none;
+#menuSelector {
+  font-size: 24px;
+  padding: 0px 10px 0px;
 }

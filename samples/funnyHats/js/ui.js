@@ -1,122 +1,256 @@
 let stats = null;
+let videoConstraint;
 
-let hatsData = [];
-let hatSrc = null;
-let hatMask = null;
 let currentHat = 0;
-let hatsNum = document.getElementsByClassName('hat-image').length;
-
-let glassesData = [];
-let glassesSrc = null;
-let glassesMask = null;
 let currentGlasses = 0;
-let glassesNum = document.getElementsByClassName('glasses-image').length;
 
-let objectChanged = false;
+let hatOrGlassesChanged = false;
+let tabsetVisible = false; // To hide/show menu types (hats or glasses).
+let tabPanelVisible = true; // To hide/show whole tab panel
+let menuVisible = true;
+
+// Hat frame is redrawn when coordinates of the object
+// have moved more than 3 pixels.
+let jitterLimit = 3;
+
+// #menuSelector switches between these types of menu.
+const menuTypes = { hats: '🎩', glasses: '🕶️' };
+
+const resourcesPath = 'resources/';
+const virtualObjects = ['hats', 'glasses'];
+const hatsData = [
+  { file: '0', name: "Pirate hat", scale: 1.2, yOffsetDown: 0.25 },
+  { file: '1', name: "Crown", scale: 0.9, yOffsetDown: 0.1 },
+  { file: '2', name: "Party hat", scale: 1.2, yOffsetDown: 0.0 },
+  { file: '3', name: "Police hat", scale: 1.0, yOffsetDown: 0.2 },
+  { file: '4', name: "Green hat", scale: 1.3, yOffsetDown: 0.3 },
+  { file: '5', name: "Clown hat", scale: 1.2, yOffsetDown: 0.0 },
+  { file: '6', name: "Women's red hat", scale: 1.6, yOffsetDown: 0.5 },
+  { file: '7', name: "Cowboy hat", scale: 1.2, yOffsetDown: 0.3 },
+  { file: '8', name: "Propeller beanie", scale: 1.4, yOffsetDown: 0.3 },
+  { file: '9', name: "Women's pink hat", scale: 1.6, yOffsetDown: 0.5 },
+  { file: '10', name: "Top hat", scale: 1.2, yOffsetDown: 0.1 },
+  { file: '11', name: "Winter hat", scale: 0.95, yOffsetDown: 0.25 },
+  { file: '12', name: "Women's white hat", scale: 1.3, yOffsetDown: 0.4 },
+  { file: '13', name: "Red cap", scale: 1.05, yOffsetDown: 0.3 },
+  { file: '14', name: "Blue hat", scale: 1.2, yOffsetDown: 0.3 },
+  { file: '15', name: "Santa hat", scale: 1.4, yOffsetDown: 0.25 },
+  { file: '16', name: "Square academic cap", scale: 1.2, yOffsetDown: 0.25 },
+  { file: '17', name: "Viking helmet", scale: 1.7, yOffsetDown: 0.2 },
+  { file: '18', name: "Mexican hat", scale: 1.35, yOffsetDown: 0.2 },
+  { file: '19', name: "Cat ears", scale: 1.2, yOffsetDown: 0.3 },
+  { file: '20', name: "Brown hat", scale: 1.5, yOffsetDown: 0.4 },
+];
+const glassesData = [
+  { file: '0', name: "Deal with it", scale: 1.4, yOffsetUp: 0.5 },
+  { file: '1', name: "Harry Potter", scale: 1.2, yOffsetUp: 0.5 },
+  { file: '2', name: "Red sunglasses", scale: 1.5, yOffsetUp: 0.6 },
+  { file: '3', name: "Glasses with a nose", scale: 1.2, yOffsetUp: 0.3 },
+  { file: '4', name: "Round black glasses", scale: 1.1, yOffsetUp: 0.4 },
+  { file: '5', name: "3d glasses", scale: 1.4, yOffsetUp: 0.6 },
+  { file: '6', name: "Yellow sunglasses", scale: 1.4, yOffsetUp: 0.5 },
+  { file: '7', name: "Heart glasses", scale: 1.5, yOffsetUp: 0.8 },
+  { file: '8', name: "Round white glasses", scale: 1.2, yOffsetUp: 0.4 },
+  { file: '9', name: "Blue sunglasses", scale: 1.4, yOffsetUp: 0.5 },
+  { file: '10', name: "Pink sunglasses", scale: 1.4, yOffsetUp: 0.5 },
+  { file: '11', name: "Red women's glasses", scale: 1.6, yOffsetUp: 0.8 },
+];
 
 function initUI() {
   initStats();
+  getVideoConstraint();
   loadHats();
   loadGlasses();
-  // choose initial hat and glasses
-  hatSrc = hatsData[currentHat].src.clone();
-  hatMask = hatsData[currentHat].mask.clone();
-  glassesSrc = glassesData[currentGlasses].src.clone();
-  glassesMask = glassesData[currentGlasses].mask.clone();
-  // now we have canvases and can create menu
+
+  // Now we have images and can create menu.
   let menuScript = document.createElement('script');
   menuScript.type = 'text/javascript';
   menuScript.src = '../../utils/menu.js';
   document.body.appendChild(menuScript);
+
+  // Define events for tabset and menu.
+  let menuSelector = document.getElementById('menuSelector');
+  menuSelector.addEventListener('click', function () {
+    if (tabsetVisible) closeTabset();
+    else openTabset();
+  });
+  let hatsTab = document.getElementById('hatsTab');
+  hatsTab.addEventListener('click', function () {
+    closeTabset();
+    document.getElementById('menuSelector').innerText = menuTypes.hats;
+    carouselWrappers[1].classList.add('hidden');
+    carouselWrappers[0].classList.remove('hidden');
+  });
+  let glassesTab = document.getElementById('glassesTab');
+  glassesTab.addEventListener('click', function () {
+    closeTabset();
+    document.getElementById('menuSelector').innerText = menuTypes.glasses;
+    carouselWrappers[0].classList.add('hidden');
+    carouselWrappers[1].classList.remove('hidden');
+  });
+
+  // Hide or show images elements by clicking on main canvas.
+  canvasOutput.addEventListener('click', function () {
+    showOrHideImageElements();
+  });
+
+  // Event listener for jitter limit
+  let jitterLimitInput = document.getElementById('jitterLimit');
+  let jitterLimitOutput = document.getElementById('jitterLimitOutput');
+  jitterLimitInput.addEventListener('input', function () {
+    jitterLimit = jitterLimitOutput.value = parseInt(jitterLimitInput.value);
+  });
+  jitterLimitInput.addEventListener('change', function () {
+    jitterLimit = jitterLimitOutput.value = parseInt(jitterLimitInput.value);
+  });
 }
 
-function loadHats() {
-  let rgbaVector = new cv.MatVector();
-  for (let i = 0; i < hatsNum; i++) {
-    let img = document.getElementById(`hat${i}`);
-    hatSrc = cv.imread(img);
-    let scale = Number(img.dataset.scaleFactor);
-    let yOffset = Number(img.dataset.yOffset);
-    let name = img.dataset.name;
-    let hatNode = createNode(name, 'hatsCarousel');
-    // add event listener to menu canvas
-    hatNode.addEventListener('click', function () {
-      hatSrc.delete(); hatMask.delete();
-      currentHat = i;
-      hatSrc = hatsData[currentHat].src.clone();
-      hatMask = hatsData[currentHat].mask.clone();
-      objectChanged = true;
-    });
-    // create mask from alpha channel
-    cv.split(hatSrc, rgbaVector);
-    // push hat to array of hats
-    hatsData.push({
-      name: name, src: hatSrc.clone(),
-      mask: rgbaVector.get(3).clone(), scale: scale, yOffset: yOffset
-    });
-    cv.imshow(hatNode, hatSrc);
+function getVideoConstraint() {
+  if (isMobileDevice()) {
+    // TODO(sasha): figure out why getUserMedia(...) in utils.js
+    // swap width and height for mobile devices.
+    videoConstraint = {
+      facingMode: { exact: "user" },
+      //width: { ideal: window.screen.width },
+      //height: { ideal: window.screen.height }
+      width: { ideal: window.screen.height },
+      height: { ideal: window.screen.width }
+    };
+  } else {
+    if (window.innerWidth < 960) {
+      videoConstraint = resolutions['qvga'];
+    } else {
+      videoConstraint = resolutions['vga'];
+    }
   }
-  rgbaVector.delete();
+}
+
+function closeTabset() {
+  tabsetVisible = false;
+  document.getElementById('hatsTab').classList.add("hidden");
+  document.getElementById('hatsTabLabel').classList.add("hidden");
+  document.getElementById('glassesTab').classList.add("hidden");
+  document.getElementById('glassesTabLabel').classList.add("hidden");
+}
+
+function openTabset() {
+  tabsetVisible = true;
+  document.getElementById('hatsTab').classList.remove("hidden");
+  document.getElementById('hatsTabLabel').classList.remove("hidden");
+  document.getElementById('glassesTab').classList.remove("hidden");
+  document.getElementById('glassesTabLabel').classList.remove("hidden");
+}
+
+function showMenu() {
+  menuVisible = true;
+  if (document.getElementById('menuSelector').innerText == menuTypes.hats)
+    carouselWrappers[0].classList.remove('hidden');
+  else carouselWrappers[1].classList.remove('hidden');
+  window.onresize();
+}
+
+function hideMenu() {
+  menuVisible = false;
+  if (document.getElementById('menuSelector').innerText == menuTypes.hats)
+    carouselWrappers[0].classList.add('hidden');
+  else carouselWrappers[1].classList.add('hidden');
+}
+
+function showOrHideImageElements() {
+  if (tabPanelVisible) {
+    tabPanelVisible = false;
+    document.getElementsByClassName('tabset')[0].classList.add("hidden");
+    hideMenu();
+  } else {
+    tabPanelVisible = true;
+    document.getElementsByClassName('tabset')[0].classList.remove("hidden");
+    showMenu();
+  }
+}
+
+// TODO(sasha): 1. Check image licences;
+// 2. Optimize images(size,resolution,etc) and loading
+function loadHats() {
+  let hatSrc = null;
+  hatsData.forEach(function (object, i) {
+    let hatImage = createImgNode(`hat${object.file}`, 'hatsCarousel');
+
+    hatImage.addEventListener('click', function () {
+      // Remove old image border.
+      document.getElementById(`hat${currentHat}`).style.borderStyle = 'none';
+      hatImage.style.borderStyle = 'solid'; // Draw new image border.
+
+      currentHat = i;
+      hatOrGlassesChanged = true;
+    });
+
+    hatImage.onload = function () {
+      let rgbaVector = new cv.MatVector();
+      hatSrc = cv.imread(hatImage);
+      cv.split(hatSrc, rgbaVector); // Create mask from alpha channel.
+      object.src = hatSrc;
+      object.mask = rgbaVector.get(3);
+      rgbaVector.delete();
+    };
+    hatImage.src =
+      resourcesPath + virtualObjects[0] + '/' + object.file + '.png';
+  });
 }
 
 function loadGlasses() {
-  let rgbaVector = new cv.MatVector();
-  for (let i = 0; i < glassesNum; i++) {
-    let img = document.getElementById(`glasses${i}`);
-    glassesSrc = cv.imread(img);
-    let scale = Number(img.dataset.scaleFactor);
-    let yOffset = Number(img.dataset.yOffset);
-    let name = img.dataset.name;
-    let glassesNode = createNode(name, 'glassesCarousel');
-    // add event listener to menu canvas
-    glassesNode.addEventListener('click', function () {
-      glassesSrc.delete(); glassesMask.delete();
+  let glassesSrc = null;
+  glassesData.forEach(function (object, i) {
+    let glassesImage =
+      createImgNode(`glasses${object.file}`, 'glassesCarousel');
+
+    glassesImage.addEventListener('click', function () {
+      document.getElementById(`glasses${currentGlasses}`).style.borderStyle
+        = 'none'; // Remove old image border.
+      glassesImage.style.borderStyle = 'solid'; // Draw new image border.
+
       currentGlasses = i;
-      glassesSrc = glassesData[currentGlasses].src.clone();
-      glassesMask = glassesData[currentGlasses].mask.clone();
-      objectChanged = true;
+      hatOrGlassesChanged = true;
     });
-    // create mask from alpha channel
-    cv.split(glassesSrc, rgbaVector);
-    // push glasses to array of glasses
-    glassesData.push({
-      name: name, src: glassesSrc.clone(),
-      mask: rgbaVector.get(3).clone(), scale: scale, yOffset: yOffset
-    });
-    cv.imshow(glassesNode, glassesSrc);
-  }
-  rgbaVector.delete();
+
+    glassesImage.onload = function () {
+      let rgbaVector = new cv.MatVector();
+      glassesSrc = cv.imread(glassesImage);
+      cv.split(glassesSrc, rgbaVector); // Create mask from alpha channel.
+      object.src = glassesSrc;
+      object.mask = rgbaVector.get(3);
+      rgbaVector.delete();
+    };
+    glassesImage.src =
+      resourcesPath + virtualObjects[1] + '/' + object.file + '.png';
+  });
 }
 
-function createNode(name, carouselName) {
+function createImgNode(id, carouselName) {
   let liNode = document.createElement('li');
   liNode.classList.add('card');
-  liNode.setAttribute('data-target', 'card');
-  let divNode = document.createElement('div');
-  let canvasNode = document.createElement('canvas');
-  canvasNode.classList.add('small-canvas');
-  divNode.appendChild(canvasNode);
-  liNode.appendChild(divNode);
-  let liText = document.createTextNode(name);
-  liNode.appendChild(liText);
+  let imgNode = document.createElement('img');
+  imgNode.id = id;
+  imgNode.classList.add('small-canvas');
+  liNode.appendChild(imgNode);
   document.getElementById(carouselName).appendChild(liNode);
-  return canvasNode;
+  return imgNode;
 }
 
 function deleteHats() {
-  for (let i = 0; i < hatsData.length; i++) {
-    hatsData[i].src.delete();
-    hatsData[i].mask.delete();
-  }
+  hatsData.forEach(function (object) {
+    object.src.delete(); object.mask.delete();
+  });
 }
 
 function deleteGlasses() {
-  for (let i = 0; i < glassesData.length; i++) {
-    glassesData[i].src.delete();
-    glassesData[i].mask.delete();
-  }
+  glassesData.forEach(function (object) {
+    object.src.delete(); object.mask.delete();
+  });
 }
 
 function resizeTabSet() {
-  document.getElementsByClassName("tabset")[0].style.width = `${width}px`;
+  let tabset = document.getElementsByClassName('tabset')[0];
+  tabset.style.top =
+    `${video.height - tabset.offsetHeight - carousels[0].offsetHeight}px`;
+  tabset.style.width = `${video.width}px`;
 }

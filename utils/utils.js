@@ -1,3 +1,9 @@
+const resolutions = {
+  'qqvga': { width: { exact: 160 }, height: { exact: 120 } },
+  'qvga': { width: { exact: 320 }, height: { exact: 240 } },
+  'vga': { width: { exact: 640 }, height: { exact: 480 } }
+};
+
 function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
   let self = this;
   this.errorOutput = document.getElementById(errorOutputId);
@@ -39,7 +45,8 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
           cv.FS_createDataFile('/', path, data, true, false, false);
           callback();
         } else {
-          self.printError('Failed to load ' + url + ' status: ' + request.status);
+          self.printError(
+            'Failed to load ' + url + ' status: ' + request.status);
         }
       }
     };
@@ -57,16 +64,6 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
       ctx.drawImage(img, 0, 0, img.width, img.height);
     };
     img.src = url;
-  };
-
-  this.executeCode = function (textAreaId) {
-    try {
-      this.clearError();
-      let code = document.getElementById(textAreaId).value;
-      eval(code);
-    } catch (err) {
-      this.printError(err);
-    }
   };
 
   this.clearError = function () {
@@ -95,15 +92,6 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
     this.errorOutput.innerHTML = err;
   };
 
-  this.loadCode = function (scriptId, textAreaId) {
-    let scriptNode = document.getElementById(scriptId);
-    let textArea = document.getElementById(textAreaId);
-    if (scriptNode.type !== 'text/code-snippet') {
-      throw Error('Unknown code snippet type');
-    }
-    textArea.value = scriptNode.text.replace(/^\n/, '');
-  };
-
   this.addFileInputHandler = function (fileInputId, canvasId) {
     let inputElement = document.getElementById(fileInputId);
     inputElement.addEventListener('change', (e) => {
@@ -121,20 +109,10 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
     }
   };
 
-  this.startCamera = function (resolution, callback, videoId) {
-    const constraints = {
-      'qvga': { width: { exact: 320 }, height: { exact: 240 } },
-      'vga': { width: { exact: 640 }, height: { exact: 480 } }
-    };
+  this.startCamera = function (videoConstraint, videoId, callback) {
     let video = document.getElementById(videoId);
-    if (!video) {
-      video = document.createElement('video');
-    }
-
-    let videoConstraint = constraints[resolution];
-    if (!videoConstraint) {
-      videoConstraint = true;
-    }
+    if (!video) video = document.createElement('video');
+    if (!videoConstraint) videoConstraint = true;
 
     navigator.mediaDevices.getUserMedia({ video: videoConstraint, audio: false })
       .then(function (stream) {
@@ -192,4 +170,34 @@ function checkFeatures(info, features) {
   }
 
   return true;
+}
+
+function isMobileDevice() {
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i
+    .test(navigator.userAgent)) {
+    return true;
+  }
+  return false;
+};
+
+function setMainCanvasProperties(video) {
+  video.width = video.videoWidth;
+  video.height = video.videoHeight;
+  canvasOutput.style.width = `${video.width}px`;
+  canvasOutput.style.height = `${video.height}px`;
+  document.getElementsByClassName('canvas-wrapper')[0].style.height =
+    `${video.height}px`;
+}
+
+function onVideoStarted() {
+  streaming = true;
+  setMainCanvasProperties(video);
+  document.getElementById('mainContent').classList.remove('hidden');
+  startVideoProcessing();
+}
+
+function onVideoStopped() {
+  streaming = false;
+  let canvasContext = canvasOutput.getContext('2d');
+  canvasContext.clearRect(0, 0, video.width, video.height);
 }

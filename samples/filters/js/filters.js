@@ -14,38 +14,34 @@ function hsv(src, dstC3) {
 }
 
 function canny(src, dstC1) {
-  let cannyThreshold1 = parseInt(controls.cannyThreshold1.value);
-  controls.cannyThreshold1Output.value = cannyThreshold1;
-  let cannyThreshold2 = parseInt(controls.cannyThreshold2.value);
-  controls.cannyThreshold2Output.value = cannyThreshold2;
-  let cannyApertureSize = parseInt(controls.cannyApertureSize.value);
-  if (cannyApertureSize % 2 === 0) {
-    cannyApertureSize = cannyApertureSize + 1;
-  }
-  controls.cannyApertureSizeOutput.value = cannyApertureSize;
+  let cannyThreshold1 = controls.cannyThreshold1Output.value =
+    parseInt(controls.cannyThreshold1.value);
+  let cannyThreshold2 = controls.cannyThreshold2Output.value =
+    parseInt(controls.cannyThreshold2.value);
+  let cannyAperture = parseInt(controls.cannyAperture.value);
+  if (cannyAperture % 2 === 0) cannyAperture = cannyAperture + 1;
+  controls.cannyApertureOutput.value = cannyAperture;
 
   cv.cvtColor(src, dstC1, cv.COLOR_RGBA2GRAY);
   cv.Canny(dstC1, dstC1, cannyThreshold1, cannyThreshold2,
-    cannyApertureSize, controls.cannyL2Gradient.checked);
+    cannyAperture, controls.cannyGradient.checked);
   return dstC1;
 }
 
 function threshold(src, dstC4) {
-  let thresholdValue = parseFloat(controls.thresholdValue.value);
-  controls.thresholdValueOutput.value = thresholdValue;
+  let thresholdValue = controls.thresholdValueOutput.value =
+    parseFloat(controls.thresholdValue.value);
 
   cv.threshold(src, dstC4, thresholdValue, 200, cv.THRESH_BINARY);
   return dstC4;
 }
 
-function adaptiveThreshold(src, dstC1, height, width) {
+function adaptiveThreshold(src, dstC1) {
   let blockSizeValue = parseInt(controls.adaptiveBlockSize.value);
-  if (blockSizeValue % 2 === 0) {
-    blockSizeValue = blockSizeValue + 1;
-  }
+  if (blockSizeValue % 2 === 0) blockSizeValue = blockSizeValue + 1;
   controls.adaptiveBlockSizeOutput.value = blockSizeValue;
 
-  let mat = new cv.Mat(height, width, cv.CV_8U);
+  let mat = new cv.Mat(dstC1.rows, dstC1.cols, cv.CV_8U);
   cv.cvtColor(src, mat, cv.COLOR_RGBA2GRAY);
   cv.adaptiveThreshold(mat, dstC1, 200, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
     cv.THRESH_BINARY, Number(blockSizeValue), 2);
@@ -54,76 +50,70 @@ function adaptiveThreshold(src, dstC1, height, width) {
 }
 
 function gaussianBlur(src, dstC4) {
-  let gaussianBlurSize = parseInt(controls.gaussianBlurSize.value);
-  if (gaussianBlurSize % 2 === 0) {
-    gaussianBlurSize = gaussianBlurSize + 1;
-  }
-  controls.gaussianBlurSizeOutput.value = gaussianBlurSize;
+  let gaussianKernelSize = parseInt(controls.gaussianKernelSize.value);
+  if (gaussianKernelSize % 2 === 0) gaussianKernelSize = gaussianKernelSize + 1;
+  controls.gaussianKernelSizeOutput.value = gaussianKernelSize;
 
   cv.GaussianBlur(src, dstC4,
-    { width: gaussianBlurSize, height: gaussianBlurSize },
+    { width: gaussianKernelSize, height: gaussianKernelSize },
     0, 0, cv.BORDER_DEFAULT);
   return dstC4;
 }
 
-function bilateralFilter(src, dstC3, height, width) {
-  let bilateralFilterDiameter =
-    parseInt(controls.bilateralFilterDiameter.value);
-  controls.bilateralFilterDiameterOutput.value = bilateralFilterDiameter;
-  let bilateralFilterSigma = parseInt(controls.bilateralFilterSigma.value);
-  controls.bilateralFilterSigmaOutput.value = bilateralFilterSigma;
+function bilateralFilter(src, dstC3) {
+  let bilateralDiameter = controls.bilateralDiameterOutput.value =
+    parseInt(controls.bilateralDiameter.value);
+  let bilateralSigma = controls.bilateralSigmaOutput.value =
+    parseInt(controls.bilateralSigma.value);
 
-  let mat = new cv.Mat(height, width, cv.CV_8UC3);
+  let mat = new cv.Mat(dstC3.rows, dstC3.cols, cv.CV_8UC3);
   cv.cvtColor(src, mat, cv.COLOR_RGBA2RGB);
-  cv.bilateralFilter(mat, dstC3, bilateralFilterDiameter, bilateralFilterSigma,
-    bilateralFilterSigma, cv.BORDER_DEFAULT);
+  cv.bilateralFilter(mat, dstC3, bilateralDiameter, bilateralSigma,
+    bilateralSigma, cv.BORDER_DEFAULT);
   mat.delete();
   return dstC3;
 }
 
 function medianBlur(src, dstC4) {
-  let medianBlurSize = parseInt(controls.medianBlurSize.value);
-  if (medianBlurSize % 2 === 0) {
-    medianBlurSize = medianBlurSize + 1;
-  }
-  controls.medianBlurSizeOutput.value = medianBlurSize;
+  let medianKernelSize = parseInt(controls.medianKernelSize.value);
+  if (medianKernelSize % 2 === 0) medianKernelSize = medianKernelSize + 1;
+  controls.medianKernelSizeOutput.value = medianKernelSize;
 
-  cv.medianBlur(src, dstC4, medianBlurSize);
+  cv.medianBlur(src, dstC4, medianKernelSize);
   return dstC4;
 }
 
-function sobel(src, dstC1, height, width) {
-  let sobelSize = parseInt(controls.sobelSize.value);
-  if (sobelSize % 2 === 0) {
-    sobelSize = sobelSize + 1;
-  }
-  controls.sobelSizeOutput.value = sobelSize;
+function sobel(src, dstC1) {
+  let sobelKernelSize = parseInt(controls.sobelKernelSize.value);
+  if (sobelKernelSize % 2 === 0) sobelKernelSize = sobelKernelSize + 1;
+  controls.sobelKernelSizeOutput.value = sobelKernelSize;
 
-  let mat = new cv.Mat(height, width, cv.CV_8UC1);
+  let mat = new cv.Mat(dstC1.rows, dstC1.cols, cv.CV_8UC1);
   cv.cvtColor(src, mat, cv.COLOR_RGB2GRAY, 0);
-  cv.Sobel(mat, dstC1, cv.CV_8U, 1, 0, sobelSize, 1, 0, cv.BORDER_DEFAULT);
+  cv.Sobel(
+    mat, dstC1, cv.CV_8U, 1, 0, sobelKernelSize, 1, 0, cv.BORDER_DEFAULT);
   mat.delete();
   return dstC1;
 }
 
-function scharr(src, dstC1, height, width) {
-  let mat = new cv.Mat(height, width, cv.CV_8UC1);
+function scharr(src, dstC1) {
+  let mat = new cv.Mat(dstC1.rows, dstC1.cols, cv.CV_8UC1);
   cv.cvtColor(src, mat, cv.COLOR_RGB2GRAY, 0);
   cv.Scharr(mat, dstC1, cv.CV_8U, 1, 0, 1, 0, cv.BORDER_DEFAULT);
   mat.delete();
   return dstC1;
 }
 
-function laplacian(src, dstC1, height, width) {
-  let laplacianSize = parseInt(controls.laplacianSize.value);
-  if (laplacianSize % 2 === 0) {
-    laplacianSize = laplacianSize + 1;
-  }
-  controls.laplacianSizeOutput.value = laplacianSize;
+function laplacian(src, dstC1) {
+  let laplacianKernelSize = parseInt(controls.laplacianKernelSize.value);
+  if (laplacianKernelSize % 2 === 0)
+    laplacianKernelSize = laplacianKernelSize + 1;
+  controls.laplacianKernelSizeOutput.value = laplacianKernelSize;
 
-  let mat = new cv.Mat(height, width, cv.CV_8UC1);
+  let mat = new cv.Mat(dstC1.cols, dstC1.cols, cv.CV_8UC1);
   cv.cvtColor(src, mat, cv.COLOR_RGB2GRAY);
-  cv.Laplacian(mat, dstC1, cv.CV_8U, laplacianSize, 1, 0, cv.BORDER_DEFAULT);
+  cv.Laplacian(
+    mat, dstC1, cv.CV_8U, laplacianKernelSize, 1, 0, cv.BORDER_DEFAULT);
   mat.delete();
   return dstC1;
 }
@@ -143,7 +133,7 @@ function calcHist(src, dstC1, dstC4) {
   let result = cv.minMaxLoc(hist, mask);
   let max = result.maxVal;
   cv.cvtColor(dstC1, dstC4, cv.COLOR_GRAY2RGBA);
-  // draw histogram on src
+  // Draw histogram on src.
   for (let i = 0; i < histSize[0]; i++) {
     let binVal = hist.data32F[i] * src.rows / max;
     cv.rectangle(dstC4, { x: i * scale, y: src.rows - 1 },
@@ -164,11 +154,10 @@ function equalizeHist(src, dstC1) {
 let base;
 
 function backprojection(src, dstC1, dstC3) {
-  let backprojectionRangeLow = parseInt(controls.backprojectionRangeLow.value);
-  controls.backprojectionRangeLowOutput.value = backprojectionRangeLow;
-  let backprojectionRangeHigh =
-    parseInt(controls.backprojectionRangeHigh.value);
-  controls.backprojectionRangeHighOutput.value = backprojectionRangeHigh;
+  let backprojectionLow = controls.backprojectionLowOutput.value =
+    parseInt(controls.backprojectionLow.value);
+  let backprojectionHigh = controls.backprojectionHighOutput.value =
+    parseInt(controls.backprojectionHigh.value);
 
   if (controls.lastFilter !== 'backprojection') {
     if (base instanceof cv.Mat) {
@@ -186,8 +175,8 @@ function backprojection(src, dstC1, dstC3) {
   let channels = [0];
   let histSize = [50];
   let ranges;
-  if (backprojectionRangeLow < backprojectionRangeHigh) {
-    ranges = [backprojectionRangeLow, backprojectionRangeHigh];
+  if (backprojectionLow < backprojectionHigh) {
+    ranges = [backprojectionLow, backprojectionHigh];
   } else {
     return src;
   }
@@ -202,34 +191,29 @@ function backprojection(src, dstC1, dstC3) {
 }
 
 function morphology(src, dstC3, dstC4) {
-  let opIndex =
-    controls.morphologyOp.options[controls.morphologyOp.selectedIndex].value;
-  let op = Number(morphologyOpValues[opIndex]);
-  let borderTypeIndex = controls.morphologyBorderType.options[
-    controls.morphologyBorderType.selectedIndex
-  ].value;
-  let borderType = morphologyBorderValues[borderTypeIndex];
+  let operationIndex = controls.morphologyOperation.
+    options[controls.morphologyOperation.selectedIndex].value;
+  let operation = Number(controls.morphologyOperationValues[operationIndex]);
+  let borderTypeIndex = controls.morphologyBorder.options[
+    controls.morphologyBorder.selectedIndex].value;
+  let borderType = controls.morphologyBorderValues[borderTypeIndex];
   let kernelIndex = controls.morphologyShape.options[
-    controls.morphologyShape.selectedIndex
-  ].value;
+    controls.morphologyShape.selectedIndex].value;
   let kernelSize = parseInt(controls.morphologySize.value);
-  if (kernelSize % 2 === 0) {
-    kernelSize = kernelSize + 1;
-  }
+  if (kernelSize % 2 === 0) kernelSize = kernelSize + 1;
   controls.morphologySizeOutput.value = kernelSize;
-  let kernel =
-    cv.getStructuringElement(Number(morphologyShapeValues[kernelIndex]),
-      { width: kernelSize, height: kernelSize });
+  let kernel = cv.getStructuringElement(
+    Number(controls.morphologyShapeValues[kernelIndex]),
+    { width: kernelSize, height: kernelSize });
 
-  let color = new cv.Scalar();
   let image = src;
-  if (op === cv.MORPH_GRADIENT || op === cv.MORPH_TOPHAT ||
-    op === cv.MORPH_BLACKHAT) {
+  if (operation === cv.MORPH_GRADIENT || operation === cv.MORPH_TOPHAT ||
+    operation === cv.MORPH_BLACKHAT) {
     cv.cvtColor(src, dstC3, cv.COLOR_RGBA2RGB);
     image = dstC3;
   }
-  cv.morphologyEx(image, dstC4, op, kernel, { x: -1, y: -1 }, 1,
-    Number(borderType), color);
+  cv.morphologyEx(image, dstC4, operation, kernel, { x: -1, y: -1 }, 1,
+    Number(borderType), new cv.Scalar());
   kernel.delete();
   return dstC4;
 }

@@ -1,0 +1,19 @@
+.hidden {
+  display: none !important;
+}
+.centered {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+body {
+  margin: 0px;
+}
+.stats-settings {
+  padding: 5px;
+}
+.err {
+  color: red;
+  font-weight: bold;
+  padding: 10px;
+}

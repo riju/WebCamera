@@ -1,111 +1,136 @@
-const carousels = document.querySelectorAll("[data-target='carousel']");
-const leftButtons = document.querySelectorAll("[data-action='slideLeft']");
-const rightButtons = document.querySelectorAll("[data-action='slideRight']");
+let carouselWrappers = document.querySelectorAll('.carousel-wrapper');
+let carousels = document.querySelectorAll('.carousel');
+let leftButtons = document.querySelectorAll("[data-action='slideLeft']");
+let rightButtons = document.querySelectorAll("[data-action='slideRight']");
+let buttonWidth = leftButtons[0].offsetWidth;
 
-let offset = [];
-carousels.forEach(function (carousel) {
-  // offset for each caousel will always be negative or zero
-  offset.push(0);
-});
+// We don't need buttons if it is mobile phone.
+if (isMobileDevice()) buttonWidth = 0;
 
-// for showing 1/4 part of previous menu window after scrolling
+// For showing 1/4 part of previous menu window after scrolling.
 const menuParts = 4;
+
+// Array of properties for each carousel:
+// {offset, cardsCounter, cardWidth}
+let properties = [];
+
+// Set up properties for each carousel.
+carousels.forEach(function (carousel) {
+  // Offset for each carousel will always be negative or zero.
+  let offset = 0;
+  let cards = carousel.querySelectorAll('.card');
+  let cardsCounter = cards.length;
+  let cardWidth = cards[0].offsetWidth;
+  properties.push(
+    {
+      offset: offset, cardsCounter: cardsCounter, cardWidth: cardWidth,
+    });
+});
 
 leftButtons.forEach(function (button, i) {
   button.addEventListener("click", function () {
-    const carouselWidth = carousels[i].offsetWidth;
-    if (offset[i] < 0) {
-      let remainedWidth = 0 - offset[i];
-      if (remainedWidth <= carouselWidth) {
-        offset[i] += remainedWidth;
+    let carouselWidth = carousels[i].offsetWidth;
+    if (properties[i].offset < 0) {
+      let remainingWidth = 0 - properties[i].offset;
+      if (remainingWidth <= carouselWidth) {
+        properties[i].offset += remainingWidth;
       } else {
-        offset[i] += carouselWidth - carouselWidth / menuParts;
+        properties[i].offset += carouselWidth - carouselWidth / menuParts;
       }
-      carousels[i].style.transform = `translateX(${offset[i]}px)`;
+      carousels[i].style.transform = `translateX(${properties[i].offset}px)`;
     }
   });
 });
 
 rightButtons.forEach(function (button, i) {
-  button.addEventListener("click", function () {
-    const cardCount = carousels[i].querySelectorAll("[data-target='card']").length;
-    const card = carousels[i].querySelector("[data-target='card']");
-    const maxX = cardCount * card.offsetWidth;
-    const carouselWidth = carousels[i].offsetWidth;
-    if (offset[i] > -maxX) {
-      let remainedWidth = maxX + offset[i] - carouselWidth;
-      if (remainedWidth <= carouselWidth) {
-        offset[i] -= remainedWidth;
+  button.addEventListener('click', function () {
+    let maxX = properties[i].cardsCounter * properties[i].cardWidth;
+    let carouselWidth = carousels[i].offsetWidth;
+    if (properties[i].offset > -maxX) {
+      let remainingWidth = maxX + properties[i].offset - carouselWidth;
+      if (remainingWidth <= carouselWidth) {
+        properties[i].offset -= remainingWidth;
       } else {
-        offset[i] -= carouselWidth - carouselWidth / menuParts;
+        properties[i].offset -= carouselWidth - carouselWidth / menuParts;
       }
-      carousels[i].style.transform = `translateX(${offset[i]}px)`;
+      carousels[i].style.transform = `translateX(${properties[i].offset}px)`;
     }
   });
 });
 
-// resize carousel on window resizing
+// Resize width of carousel on window resizing.
 window.onresize = function () {
   const VGA_WIDTH = 640;
-  const GVGA_WIDTH = 320;
-  let buttonWidth = leftButtons[0].offsetWidth;
-  let windowConstraintVGA = VGA_WIDTH + 2 * buttonWidth;
-  let windowConstraintGVGA = GVGA_WIDTH + 2 * buttonWidth;
+  const QVGA_WIDTH = 320;
+  let originalCarouselWidth = video.width - 2 * buttonWidth;
+  let resizedCarouselWidth = window.innerWidth - 2 * buttonWidth;
   carousels.forEach(function (carousel) {
-    if (window.innerWidth < windowConstraintVGA && width == VGA_WIDTH) { // vga
-      carousel.style.width =
-        `${window.innerWidth - 3 * buttonWidth}px`;
-    } else if (window.innerWidth > windowConstraintVGA &&
-      width == VGA_WIDTH) { // vga
-      carousel.style.width =
-        `${width - 2 * buttonWidth}px`;
-    } else if (window.innerWidth < windowConstraintGVGA &&
-      width == GVGA_WIDTH) {// gvga
-      carousel.style.width =
-        `${window.innerWidth - 3 * buttonWidth}px`;
-    } else if (window.innerWidth > windowConstraintGVGA &&
-      width == GVGA_WIDTH) {// gvga
-      carousel.style.width =
-        `${width - 2 * buttonWidth}px`;
+    if (window.innerWidth < VGA_WIDTH
+      && video.width == VGA_WIDTH) { // vga and need to resize
+      carousel.style.width = `${resizedCarouselWidth}px`;
+    } else if (window.innerWidth > VGA_WIDTH
+      && video.width == VGA_WIDTH) { // vga and no need to resize
+      carousel.style.width = `${originalCarouselWidth}px`;
+    } else if (window.innerWidth < QVGA_WIDTH
+      && video.width == QVGA_WIDTH) {// gvga and need to resize
+      carousel.style.width = `${resizedCarouselWidth}px`;
+    } else if (window.innerWidth > QVGA_WIDTH
+      && video.width == QVGA_WIDTH) {// gvga and no need to resize
+      carousel.style.width = `${originalCarouselWidth}px`;
     }
   });
+  // Set appropriate height for settings wrapper.
+  let settings;
+  try {
+    settings = document.getElementById(`${controls.filter}Settings`);
+    if (typeof (settings) != 'undefined' && settings != null) {
+      let settingsWrapper = document.querySelector('.settings-wrapper');
+      settingsWrapper.style.bottom =
+        `${settings.offsetHeight + carousels[0].offsetHeight}px`;
+    }
+  } catch (err) { }
 };
 
-// resize menu for current canvas size
-function resizeMenu(smallCanvasFormat = "deviceFormat",
-                    heightDependenceCoef = 0, scale = 0.2) {
-
-  const VGA_WIDTH = 640;
-  // carousel
-  let buttonWidth = leftButtons[0].offsetWidth;
-  carousels.forEach(function (carousel) {
-    carousel.style.width = `${width - 2 * buttonWidth}px`;
-  });
-  // small canvases and cards
-  let smallCanvases = document.getElementsByClassName("small-canvas");
-  let scProperties = document.querySelector(".small-canvas");
-  let scPadding = parseInt(getComputedStyle(scProperties).padding);
-  let cards = document.getElementsByClassName("card");
-  let smallH = scale * height;
-  let smallW = 0;
-  if (smallCanvasFormat == "customFormat") {
-    smallW = smallH * heightDependenceCoef;
-  } else if (smallCanvasFormat == "deviceFormat") {
-    smallW = scale * width;
-  }
+// Resize elements in menu for current canvas size.
+function resizeMenu(smallWidth, smallHeight) {
+  // Small canvases and cards
+  let cards = document.querySelectorAll('.card');
+  let cardPadding = getComputedStyle(cards[0]).padding;
+  let smallCanvases = document.querySelectorAll('.small-canvas');
   for (let i = 0; i < smallCanvases.length; i++) {
-    smallCanvases[i].style.height = `${parseInt(smallH)}px`;
-    smallCanvases[i].style.width = `${parseInt(smallW)}px`;
-    cards[i].style.width = `${parseInt(smallW + 2 * scPadding)}px`;
-    if (width < VGA_WIDTH) {
-      cards[i].style.fontSize = `16px`;
-    }
+    smallCanvases[i].style.height = `${smallHeight}px`;
+    smallCanvases[i].style.width = cards[i].style.width = `${smallWidth}px`;
   }
-  // buttons
-  rightButtons.forEach(function (button) {
-    button.style.height = `${scProperties.scrollHeight}px`;
+  // Carousel
+  if (isMobileDevice()) {
+    carousels.forEach(function (carousel, i) {
+      carousel.style.width = `${video.width}px`;
+      carouselWrappers[i].style.overflowX = 'scroll';
+      carouselWrappers[i].style.WebkitOverflowScrolling = 'touch';
+      properties[i].cardWidth = smallWidth + 2 * parseInt(cardPadding);
+    });
+    leftButtons.forEach(function (leftButton, i) {
+      leftButton.classList.add('hidden');
+      rightButtons[i].classList.add('hidden');
+    });
+  } else {
+    buttonWidth = leftButtons[0].offsetWidth;
+    carousels.forEach(function (carousel, i) {
+      carousel.style.width = `${video.width - 2 * buttonWidth}px`;
+      properties[i].cardWidth = smallWidth + 2 * parseInt(cardPadding);
+    });
+    // Buttons height and top position (according to card padding)
+    leftButtons.forEach(function (leftButton, i) {
+      leftButton.style.top = cardPadding;
+      rightButtons[i].style.top = cardPadding;
+      leftButton.style.height = `${smallCanvases[0].scrollHeight}px`;
+      rightButtons[i].style.height = `${smallCanvases[0].scrollHeight}px`;
+    });
+  }
+
+  // Menu over the canvas
+  carouselWrappers.forEach(function (wrapper) {
+    wrapper.style.top = `${video.height - cards[0].offsetHeight}px`;
   });
-  leftButtons.forEach(function (button) {
-    button.style.height = `${scProperties.scrollHeight}px`;
-  });
+  window.onresize();
 }
