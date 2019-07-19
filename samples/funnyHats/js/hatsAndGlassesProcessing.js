@@ -17,29 +17,6 @@ const faceDetectionUrl =
 const eyeDetectionPath = 'haarcascade_eye.xml';
 const eyeDetectionUrl = '../../data/classifiers/haarcascade_eye.xml';
 
-function initOpencvObjects() {
-  // TODO(sasha): Use Web Workers to load files.
-  faces = new cv.RectVector();
-  faceCascade = new cv.CascadeClassifier();
-  faceCascade.load(faceDetectionPath);
-
-  eyes = new cv.RectVector();
-  eyeCascade = new cv.CascadeClassifier();
-  eyeCascade.load(eyeDetectionPath);
-
-  hatDst = new cv.Mat();
-  hatMaskDst = new cv.Mat();
-  glassesDst = new cv.Mat();
-  glassesMaskDst = new cv.Mat();
-}
-
-function deleteOpencvObjects() {
-  hatDst.delete(); hatMaskDst.delete();
-  glassesDst.delete(); glassesMaskDst.delete();
-  faces.delete(); faceCascade.delete();
-  eyes.delete(); eyeCascade.delete();
-}
-
 function deleteObjectsForOldFaces() {
   if (hatFrames.length > faces.size() && faces.size() > 0) {
     for (let i = faces.size(); i < hatFrames.length; ++i) {
@@ -216,12 +193,20 @@ function resizeGlasses(glasses, i) {
 }
 
 function processGlasses(i, face, option) {
+  function createEmptyFrame() {
+    if (option == "new") glassesFrames.splice(i, 0, { show: false });
+    else { // (option == "replace") Replace if not new.
+      glassesFrames[i].src.delete();
+      glassesFrames[i].mask.delete();
+      glassesFrames.splice(i, 1, { show: false });
+    }
+    glassesFrames[i].src = new cv.Mat();
+    glassesFrames[i].mask = new cv.Mat();
+  }
+
   detectEyes(face);
-  let show = true;
-
-  if (eyes.size() < 2)
-    show = false;
-
+  // Don't draw glasses because only one eye was detected.
+  if (eyes.size() < 2) createEmptyFrame();
   else {
     let leftEye = 0;
     let rightEye = 1;
@@ -234,7 +219,7 @@ function processGlasses(i, face, option) {
     // Check that glasses coords are inside the canvas.
     if (glasses.coords.yUpper > 0 && glasses.coords.yBottom < video.height &&
       glasses.coords.xBottom < video.width && glasses.coords.xUpper >= 0) {
-
+      // Glasses fit into the canvas.
       if (option == "new")
         glassesFrames.splice(i, 0, glasses.coords);
       else { // Replace if not new.
@@ -244,17 +229,6 @@ function processGlasses(i, face, option) {
       }
       resizeGlasses(glasses, i);
 
-    } else show = false;
-  }
-  if (!show) {
-    if (option == "new") glassesFrames.splice(i, 0, { show: show });
-
-    else { // (option == "replace") Replace if not new.
-      glassesFrames[i].src.delete();
-      glassesFrames[i].mask.delete();
-      glassesFrames.splice(i, 1, { show: show });
-    }
-    glassesFrames[i].src = new cv.Mat();
-    glassesFrames[i].mask = new cv.Mat();
+    } else createEmptyFrame(); // Glasses don't fit into the canvas.
   }
 }

@@ -1,9 +1,15 @@
 let utils = new Utils('errorMessage');
+let stats = null;
+let controls = {};
+let videoConstraint;
+let streaming = false;
+let imageCapturer = null;
+let videoTrack = null;
+
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
 
-let streaming = false;
-let videoCapture = null;
+let videoCapturer = null;
 let src = null;
 let gray = null;
 
@@ -11,7 +17,39 @@ let gray = null;
 const imageWidth = 320;
 const imageHeight = 240;
 
-function startVideoProcessing() {
+
+function initOpencvObjects() {
+  videoCapturer = new cv.VideoCapture(video);
+  src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+  gray = new cv.Mat();
+
+  faces = new cv.RectVector();
+  faceCascade = new cv.CascadeClassifier();
+  // TODO(sasha): Use Web Workers to load files.
+  faceCascade.load(faceDetectionPath);
+
+  eyes = new cv.RectVector();
+  eyeCascade = new cv.CascadeClassifier();
+  eyeCascade.load(eyeDetectionPath);
+
+  hatDst = new cv.Mat();
+  hatMaskDst = new cv.Mat();
+  glassesDst = new cv.Mat();
+  glassesMaskDst = new cv.Mat();
+}
+
+function deleteOpencvObjects() {
+  src.delete(); gray.delete();
+  faces.delete(); faceCascade.delete();
+  eyes.delete(); eyeCascade.delete();
+  hatDst.delete(); hatMaskDst.delete();
+  glassesDst.delete(); glassesMaskDst.delete();
+}
+
+function completeStyling() {
+  let cameraBar = document.querySelector('.camera-bar-wrapper');
+  cameraBar.style.width = `${video.videoWidth}px`;
+
   // Draw border for the first hat and glasses.
   document.getElementById(`hat${currentHat}`).style.borderStyle = 'solid';
   document.getElementById(`glasses${currentGlasses}`).style.borderStyle
@@ -19,17 +57,13 @@ function startVideoProcessing() {
 
   let smallWidth = (video.width / 5);
   let smallHeight = smallWidth * (imageHeight / imageWidth);
-  resizeMenu(smallWidth, smallHeight);
+  initMenu(smallWidth, smallHeight);
 
-  resizeTabSet();
+  initTabSet();
   // Remove "disabled" attr from the second input tab.
   document.getElementById("glassesTab").removeAttribute("disabled");
 
-  videoCapture = new cv.VideoCapture(video);
-  src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-  gray = new cv.Mat();
-  initOpencvObjects();
-  requestAnimationFrame(processVideo);
+  document.getElementById('takePhotoButton').disabled = false;
 }
 
 function processVideo() {
@@ -39,7 +73,7 @@ function processVideo() {
       return;
     }
     stats.begin();
-    videoCapture.read(src);
+    videoCapturer.read(src);
 
     // Detect faces.
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
@@ -105,7 +139,6 @@ function startCamera() {
 }
 
 function cleanupAndStop() {
-  src.delete(); gray.delete();
   deleteOpencvObjects();
   deleteHats(); deleteGlasses();
   utils.stopCamera(); onVideoStopped();
@@ -115,7 +148,7 @@ utils.loadOpenCv(() => {
   utils.createFileFromUrl(faceDetectionPath, faceDetectionUrl, () => {
     utils.createFileFromUrl(eyeDetectionPath, eyeDetectionUrl, () => {
       initUI();
-      startCamera();
+      initCameraSettingsAndStart();
     });
   });
 });

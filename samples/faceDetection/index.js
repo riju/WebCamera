@@ -1,12 +1,18 @@
 let utils = new Utils('errorMessage');
 let stats = null;
+let controls = {};
 let videoConstraint;
+let streaming = false;
+let imageCapturer = null;
+let videoTrack = null;
+
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
 
-let streaming = false;
-let videoCapture = null;
+let videoCapturer = null;
+let image = null;
 let src = null;
+let gray = null;
 let faces = null;
 let eyes = null;
 let faceCascade = null;
@@ -20,43 +26,32 @@ const eyeDetectionUrl = '../../data/classifiers/haarcascade_eye.xml';
 const faceColor = [0, 255, 255, 255];
 const eyesColor = [0, 0, 255, 255];
 
-function getVideoConstraint() {
-  if (isMobileDevice()) {
-    // TODO(sasha): figure out why getUserMedia(...) in utils.js
-    // swap width and height for mobile devices.
-    videoConstraint = {
-      facingMode: { exact: "user" },
-      //width: { ideal: window.screen.width },
-      //height: { ideal: window.screen.height }
-      width: { ideal: window.screen.height },
-      height: { ideal: window.screen.width }
-    };
-  } else {
-    if (window.innerWidth < 960) {
-      videoConstraint = resolutions['qvga'];
-    } else {
-      videoConstraint = resolutions['vga'];
-    }
-  }
-}
 
 function initOpencvObjects() {
-  videoCapture = new cv.VideoCapture(video);
+  videoCapturer = new cv.VideoCapture(video);
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   gray = new cv.Mat();
+
   faces = new cv.RectVector();
-  eyes = new cv.RectVector();
   faceCascade = new cv.CascadeClassifier();
   // TODO(sasha): Use Web Workers to load files.
   faceCascade.load(faceDetectionPath);
+
+  eyes = new cv.RectVector();
   eyeCascade = new cv.CascadeClassifier();
   eyeCascade.load(eyeDetectionPath);
 }
 
-function startVideoProcessing() {
-  initStats();
-  initOpencvObjects();
-  requestAnimationFrame(processVideo);
+function deleteOpencvObjects() {
+  src.delete(); gray.delete();
+  faces.delete(); faceCascade.delete();
+  eyes.delete(); eyeCascade.delete();
+}
+
+function completeStyling() {
+  let cameraBar = document.querySelector('.camera-bar-wrapper');
+  cameraBar.style.width = `${video.videoWidth}px`;
+  document.getElementById('takePhotoButton').disabled = false;
 }
 
 function processVideo() {
@@ -66,7 +61,7 @@ function processVideo() {
       return;
     }
     stats.begin();
-    videoCapture.read(src);
+    videoCapturer.read(src);
 
     // Detect faces.
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
@@ -97,6 +92,7 @@ function processVideo() {
       }
       faceGray.delete(); faceSrc.delete();
     }
+    image = src;
     cv.imshow('canvasOutput', src);
 
     stats.end();
@@ -117,17 +113,52 @@ function startCamera() {
 }
 
 function cleanupAndStop() {
-  src.delete(); gray.delete();
-  faces.delete(); faceCascade.delete();
-  eyes.delete(); eyeCascade.delete();
+  deleteOpencvObjects();
   utils.stopCamera(); onVideoStopped();
+}
+
+function initUI() {
+  getVideoConstraint();
+  initStats();
+
+  // TakePhoto event by clicking takePhotoButton.
+  let takePhotoButton = document.getElementById('takePhotoButton');
+  takePhotoButton.addEventListener('click', function () {
+    // Here we are not using takePhoto() per se.
+    // new ImageCapture(videoTrack) gives image without applied filter.
+    let dstCanvas = document.getElementById('gallery');
+    drawCanvas(dstCanvas, canvasOutput);
+  });
+
+  controls = {
+    frontCamera: null,
+    backCamera: null,
+    facingMode: '',
+  };
+
+  // TODO(sasha): move to utils.js.
+  let facingModeButton = document.getElementById('facingModeButton');
+  // Switch to face or environment mode by clicking facingModeButton.
+  facingModeButton.addEventListener('click', function () {
+    if (controls.facingMode == 'user') {
+      controls.facingMode = 'environment';
+      videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
+      facingModeButton.innerText = 'camera_front';
+    } else if (controls.facingMode == 'environment') {
+      controls.facingMode = 'user';
+      videoConstraint.deviceId = { exact: controls.frontCamera.deviceId };
+      facingModeButton.innerText = 'camera_rear';
+    }
+    utils.stopCamera();
+    utils.startCamera(videoConstraint, 'videoInput', startVideoProcessing);
+  });
 }
 
 utils.loadOpenCv(() => {
   utils.createFileFromUrl(faceDetectionPath, faceDetectionUrl, () => {
     utils.createFileFromUrl(eyeDetectionPath, eyeDetectionUrl, () => {
-      getVideoConstraint();
-      startCamera();
+      initUI();
+      initCameraSettingsAndStart();
     });
   });
 });

@@ -1,6 +1,3 @@
-let stats = null;
-let videoConstraint;
-
 let currentHat = 0;
 let currentGlasses = 0;
 
@@ -19,27 +16,27 @@ const menuTypes = { hats: '🎩', glasses: '🕶️' };
 const resourcesPath = 'resources/';
 const virtualObjects = ['hats', 'glasses'];
 const hatsData = [
-  { file: '0', name: "Pirate hat", scale: 1.2, yOffsetDown: 0.25 },
-  { file: '1', name: "Crown", scale: 0.9, yOffsetDown: 0.1 },
-  { file: '2', name: "Party hat", scale: 1.2, yOffsetDown: 0.0 },
-  { file: '3', name: "Police hat", scale: 1.0, yOffsetDown: 0.2 },
-  { file: '4', name: "Green hat", scale: 1.3, yOffsetDown: 0.3 },
+  { file: '0', name: "Pirate hat", scale: 1.3, yOffsetDown: 0.25 },
+  { file: '1', name: "Crown", scale: 1.0, yOffsetDown: 0.1 },
+  { file: '2', name: "Party hat", scale: 1.3, yOffsetDown: 0.0 },
+  { file: '3', name: "Police hat", scale: 1.1, yOffsetDown: 0.2 },
+  { file: '4', name: "Green hat", scale: 1.4, yOffsetDown: 0.3 },
   { file: '5', name: "Clown hat", scale: 1.2, yOffsetDown: 0.0 },
   { file: '6', name: "Women's red hat", scale: 1.6, yOffsetDown: 0.5 },
   { file: '7', name: "Cowboy hat", scale: 1.2, yOffsetDown: 0.3 },
-  { file: '8', name: "Propeller beanie", scale: 1.4, yOffsetDown: 0.3 },
+  { file: '8', name: "Propeller beanie", scale: 1.5, yOffsetDown: 0.3 },
   { file: '9', name: "Women's pink hat", scale: 1.6, yOffsetDown: 0.5 },
-  { file: '10', name: "Top hat", scale: 1.2, yOffsetDown: 0.1 },
-  { file: '11', name: "Winter hat", scale: 0.95, yOffsetDown: 0.25 },
+  { file: '10', name: "Top hat", scale: 1.3, yOffsetDown: 0.0 },
+  { file: '11', name: "Winter hat", scale: 0.95, yOffsetDown: 0.2 },
   { file: '12', name: "Women's white hat", scale: 1.3, yOffsetDown: 0.4 },
-  { file: '13', name: "Red cap", scale: 1.05, yOffsetDown: 0.3 },
-  { file: '14', name: "Blue hat", scale: 1.2, yOffsetDown: 0.3 },
+  { file: '13', name: "Red cap", scale: 1.1, yOffsetDown: 0.3 },
+  { file: '14', name: "Blue hat", scale: 1.3, yOffsetDown: 0.3 },
   { file: '15', name: "Santa hat", scale: 1.4, yOffsetDown: 0.25 },
-  { file: '16', name: "Square academic cap", scale: 1.2, yOffsetDown: 0.25 },
-  { file: '17', name: "Viking helmet", scale: 1.7, yOffsetDown: 0.2 },
+  { file: '16', name: "Square academic cap", scale: 1.3, yOffsetDown: 0.25 },
+  { file: '17', name: "Viking helmet", scale: 1.9, yOffsetDown: 0.2 },
   { file: '18', name: "Mexican hat", scale: 1.35, yOffsetDown: 0.2 },
   { file: '19', name: "Cat ears", scale: 1.2, yOffsetDown: 0.3 },
-  { file: '20', name: "Brown hat", scale: 1.5, yOffsetDown: 0.4 },
+  { file: '20', name: "Brown hat", scale: 1.6, yOffsetDown: 0.4 },
 ];
 const glassesData = [
   { file: '0', name: "Deal with it", scale: 1.4, yOffsetUp: 0.5 },
@@ -103,26 +100,38 @@ function initUI() {
   jitterLimitInput.addEventListener('change', function () {
     jitterLimit = jitterLimitOutput.value = parseInt(jitterLimitInput.value);
   });
-}
 
-function getVideoConstraint() {
-  if (isMobileDevice()) {
-    // TODO(sasha): figure out why getUserMedia(...) in utils.js
-    // swap width and height for mobile devices.
-    videoConstraint = {
-      facingMode: { exact: "user" },
-      //width: { ideal: window.screen.width },
-      //height: { ideal: window.screen.height }
-      width: { ideal: window.screen.height },
-      height: { ideal: window.screen.width }
-    };
-  } else {
-    if (window.innerWidth < 960) {
-      videoConstraint = resolutions['qvga'];
-    } else {
-      videoConstraint = resolutions['vga'];
+  // TakePhoto event by clicking takePhotoButton.
+  let takePhotoButton = document.getElementById('takePhotoButton');
+  takePhotoButton.addEventListener('click', function () {
+    // Here we are not using takePhoto() per se.
+    // new ImageCapture(videoTrack) gives image without applied filter.
+    let dstCanvas = document.getElementById('gallery');
+    drawCanvas(dstCanvas, canvasOutput);
+  });
+
+  controls = {
+    frontCamera: null,
+    backCamera: null,
+    facingMode: '',
+  };
+
+  // TODO(sasha): move to utils.js.
+  let facingModeButton = document.getElementById('facingModeButton');
+  // Switch to face or environment mode by clicking facingModeButton.
+  facingModeButton.addEventListener('click', function () {
+    if (controls.facingMode == 'user') {
+      controls.facingMode = 'environment';
+      videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
+      facingModeButton.innerText = 'camera_front';
+    } else if (controls.facingMode == 'environment') {
+      controls.facingMode = 'user';
+      videoConstraint.deviceId = { exact: controls.frontCamera.deviceId };
+      facingModeButton.innerText = 'camera_rear';
     }
-  }
+    utils.stopCamera();
+    utils.startCamera(videoConstraint, 'videoInput', startVideoProcessing);
+  });
 }
 
 function closeTabset() {
@@ -158,14 +167,13 @@ function hideMenu() {
 
 function showOrHideImageElements() {
   if (tabPanelVisible) {
-    tabPanelVisible = false;
     document.getElementsByClassName('tabset')[0].classList.add("hidden");
     hideMenu();
   } else {
-    tabPanelVisible = true;
     document.getElementsByClassName('tabset')[0].classList.remove("hidden");
     showMenu();
   }
+  tabPanelVisible = !tabPanelVisible;
 }
 
 // TODO(sasha): 1. Check image licences;
@@ -248,9 +256,14 @@ function deleteGlasses() {
   });
 }
 
-function resizeTabSet() {
+function initTabSet() {
   let tabset = document.getElementsByClassName('tabset')[0];
   tabset.style.top =
     `${video.height - tabset.offsetHeight - carousels[0].offsetHeight}px`;
   tabset.style.width = `${video.width}px`;
 }
+
+// Resize width of carousel on window resizing.
+window.onresize = function () {
+  resizeMenu();
+};
