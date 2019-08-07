@@ -177,20 +177,14 @@ function isMobileDevice() {
   return false;
 };
 
-function getVideoConstraint() {
-  let navBarHeight = 0;
-  try {
-    navBarHeight =
-      parseInt(getComputedStyle(document.querySelector('.camera-bar-wrapper')).height);
-  } catch (e) { }
-
+function getVideoConstraint(menuHeight) {
   if (isMobileDevice()) {
     // TODO(sasha): figure out why getUserMedia(...) in utils.js
     // swap width and height for mobile devices.
     videoConstraint = {
       //width: { ideal: window.screen.width },
-      //height: { ideal: window.screen.height - navBarHeight }
-      width: { ideal: window.screen.height - navBarHeight },
+      //height: { ideal: window.screen.height - menuHeight }
+      width: { ideal: window.screen.height - menuHeight },
       height: { ideal: window.screen.width }
     };
   } else {
@@ -205,8 +199,6 @@ function getVideoConstraint() {
 function setMainCanvasProperties(video) {
   video.width = video.videoWidth;
   video.height = video.videoHeight;
-  //canvasOutput.style.width = `${video.width}px`;
-  //canvasOutput.style.height = `${video.height}px`;
   document.getElementById('mainContent').style.width = `${video.width}px`;
   document.querySelector('.canvas-wrapper').style.height =
     `${video.height}px`;
@@ -217,6 +209,8 @@ function onVideoStarted() {
   videoTrack = video.srcObject.getVideoTracks()[0];
   imageCapturer = new ImageCapture(videoTrack);
   setMainCanvasProperties(video);
+  videoTrack = video.srcObject.getVideoTracks()[0];
+  imageCapturer = new ImageCapture(videoTrack);
   document.getElementById('mainContent').classList.remove('hidden');
   completeStyling();
   initOpencvObjects();
@@ -253,11 +247,13 @@ function initCameraSettingsAndStart() {
       });
       // Disable facingModeButton if there is no environment or user mode.
       let facingModeButton = document.getElementById('facingModeButton');
-      if (controls.frontCamera == null || controls.backCamera == null) {
-        facingModeButton.style.color = 'gray';
-        facingModeButton.style.border = '2px solid gray';
-      } else {
-        facingModeButton.disabled = false;
+      if (facingModeButton) {
+        if (controls.frontCamera == null || controls.backCamera == null) {
+          facingModeButton.style.color = 'gray';
+          facingModeButton.style.border = '2px solid gray';
+        } else {
+          facingModeButton.disabled = false;
+        }
       }
 
       // Set initial facingMode value if camera is available.
@@ -281,8 +277,8 @@ function drawCanvas(canvas, img) {
     x, y, img.width * ratio, img.height * ratio);
 }
 
-function takePhoto() {
-  imageCapturer.takePhoto()
+function takePhoto(photoSettings = null) {
+  imageCapturer.takePhoto(photoSettings)
     .then(blob => createImageBitmap(blob))
     .then(imageBitmap => {
       const canvas = document.getElementById('gallery');

@@ -13,7 +13,7 @@
 </head>
 
 <body>
-  <p class="err centered" id="errorMessage"></p>
+  <p id="errorMessage" class="err centered"></p>
   <div id="mainContent" class="centered hidden">
     <div class="canvas-wrapper">
       <video id="videoInput" class="canvas-big"></video>
@@ -76,17 +76,17 @@
 
     <div class="camera-bar-wrapper">
       <ul id="camera-bar">
-        <li>
+        <li class="camera-bar-item">
           <div class="gallery-wrapper">
             <canvas id="gallery" class="camera-bar-icon"></canvas>
           </div>
         </li>
-        <li>
+        <li class="camera-bar-item">
           <div class="take-photo-wrapper">
             <button id="takePhotoButton" class="camera-bar-icon material-icons" disabled>photo_camera</button>
           </div>
         </li>
-        <li>
+        <li class="camera-bar-item">
           <div class="face-mode-wrapper">
             <button id="facingModeButton" class="camera-bar-icon material-icons" disabled>camera_front</button>
           </div>
@@ -96,8 +96,8 @@
   </div>
 
   <script src="../../utils/utils.js" type="text/javascript"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/index.js"></script>
+  <script src="js/ui.js" type="text/javascript"></script>
+  <script src="js/index.js" type="text/javascript"></script>
 </body>
 
 </html>

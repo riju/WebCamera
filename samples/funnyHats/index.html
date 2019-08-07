@@ -14,7 +14,7 @@
 </head>
 
 <body>
-  <p class="err centered" id="errorMessage"></p>
+  <p id="errorMessage" class="err centered"></p>
   <div id="mainContent" class="hidden centered">
     <div class="canvas-wrapper">
       <canvas id="canvasOutput" class="canvas-big"></canvas>
@@ -40,17 +40,17 @@
 
     <div class="camera-bar-wrapper">
       <ul id="camera-bar">
-        <li>
+        <li class="camera-bar-item">
           <div class="gallery-wrapper">
             <canvas id="gallery" class="camera-bar-icon"></canvas>
           </div>
         </li>
-        <li>
+        <li class="camera-bar-item">
           <div class="take-photo-wrapper">
             <button id="takePhotoButton" class="camera-bar-icon material-icons" disabled>photo_camera</button>
           </div>
         </li>
-        <li>
+        <li class="camera-bar-item">
           <div class="face-mode-wrapper">
             <button id="facingModeButton" class="camera-bar-icon material-icons" disabled>camera_rear</button>
           </div>
@@ -64,8 +64,8 @@
     </div>
 
     <div class="jitterLimit centered">
-      <label for="jitterLimit">Jitter limit in pixels:
-      <output id="jitterLimitOutput">3</output>
+      <label for="jitterLimit">Jitter limit:
+      <output id="jitterLimitOutput">3</output> pixels
       <input type="range" id="jitterLimit" value="3" min="0" max="100" step="1"></label>
     </div>
   </div>

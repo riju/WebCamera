@@ -13,7 +13,9 @@ const icons = [
 ];
 
 function initUI() {
-  getVideoConstraint();
+  let menuHeight = parseInt(getComputedStyle(
+    document.querySelector('.camera-bar-wrapper')).height);
+  getVideoConstraint(menuHeight);
 
   controls = {
     lastProIcon: 'exposureTime',
@@ -51,7 +53,7 @@ function initUI() {
 
   // Torch settings.
   controls.torch = false;
-  let = torchIcon = document.querySelector(`i[for=torch]`);
+  let torchIcon = document.querySelector(`i[for=torch]`);
   torchIcon.addEventListener('click', function () {
     if (controls.torch) torchIcon.innerText = 'flash_off';
     else torchIcon.innerText = 'flash_on';

@@ -13,7 +13,7 @@
 </head>
 
 <body>
-  <p class="err centered" id="errorMessage"></p>
+  <p id="errorMessage" class="err centered"></p>
   <div id="mainContent" class="hidden centered">
     <div class="canvas-wrapper">
       <canvas id="canvasOutput" class="canvas-big"></canvas>
@@ -173,17 +173,17 @@
 
     <div class="camera-bar-wrapper">
       <ul id="camera-bar">
-        <li>
+        <li class="camera-bar-item">
           <div class="gallery-wrapper">
             <canvas id="gallery" class="camera-bar-icon"></canvas>
           </div>
         </li>
-        <li>
+        <li class="camera-bar-item">
           <div class="take-photo-wrapper">
             <button id="takePhotoButton" class="camera-bar-icon material-icons" disabled>photo_camera</button>
           </div>
         </li>
-        <li>
+        <li class="camera-bar-item">
           <div class="face-mode-wrapper">
             <button id="facingModeButton" class="camera-bar-icon material-icons" disabled>camera_rear</button>
           </div>

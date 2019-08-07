@@ -54,8 +54,10 @@ const glassesData = [
 ];
 
 function initUI() {
+  let menuHeight = parseInt(getComputedStyle(
+    document.querySelector('.camera-bar-wrapper')).height);
+  getVideoConstraint(menuHeight);
   initStats();
-  getVideoConstraint();
   loadHats();
   loadGlasses();
 

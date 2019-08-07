@@ -1,7 +1,17 @@
-.camera-bar-wrapper {
+.camera-bar-wrapper, .output-bar-wrapper {
   height: 100px;
   background: black;
   display: flex;
+}
+.output {
+  color: white;
+  height: 30px;
+  padding: 20px 0px;
+}
+.output label {
+  display: block;
+  line-height: 30px;
+  vertical-align: middle;
 }
 #camera-bar {
   width: 100%;
@@ -9,11 +19,15 @@
   margin: 0px;
   padding: 0px 30px;
 }
-#camera-bar li {
+.camera-bar-item {
   display: inline-block;
   width: 33.33%;
 }
-#camera-bar li div {
+.scanner-bar-item {
+  display: inline-block;
+  width: 100%;
+}
+.camera-bar-item div, .scanner-bar-item div {
   width: 100%;
   justify-content: center;
   display: flex;
@@ -27,7 +41,7 @@
 .gallery-wrapper {
   padding: 23px 0px;
 }
-.take-photo-wrapper {
+.take-photo-wrapper, .refresh-button-wrapper {
   padding: 14px 0px;
 }
 .face-mode-wrapper {
@@ -37,7 +51,7 @@
   height: 50px;
   width: 50px;
 }
-#takePhotoButton {
+#takePhotoButton, #retryButton, #doneButton {
   font-size: 48px;
   padding: 10px;
   width: 72px;
@@ -50,4 +64,8 @@
   font-size: 30px;
   padding: 10px;
   width: 55px;
+}
+#retryButton {
+  color: black;
+  background-color: white;
 }

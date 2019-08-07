@@ -4,34 +4,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Face Detection 🕵️‍</title>
+  <title>Credit card scanning</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="../css/base.css" rel="stylesheet" type="text/css">
   <link href="../css/camera-bar.css" rel="stylesheet" type="text/css">
+  <link href="../css/settings.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
   <p id="errorMessage" class="err centered"></p>
+
   <div id="mainContent" class="hidden centered">
+
+    <div class="output-bar-wrapper centered">
+      <div class="output">
+        <label id="cardType" class="card-output"></label>
+        <label for="cardNumber" class="card-output hidden">Number:
+          <input type="text" id="cardNumber">
+          <button id="copyButton">Copy</button>
+        </label>
+      </div>
+    </div>
+
     <div class="canvas-wrapper">
       <canvas id="canvasOutput" class="canvas-big"></canvas>
     </div>
 
     <div class="camera-bar-wrapper">
       <ul id="camera-bar">
-        <li  class="camera-bar-item">
-          <div class="gallery-wrapper">
-            <canvas id="gallery" class="camera-bar-icon"></canvas>
-          </div>
-        </li>
-        <li class="camera-bar-item">
-          <div class="take-photo-wrapper">
-            <button id="takePhotoButton" class="camera-bar-icon material-icons" disabled>photo_camera</button>
-          </div>
-        </li>
-        <li class="camera-bar-item">
-          <div class="face-mode-wrapper">
-            <button id="facingModeButton" class="camera-bar-icon material-icons" disabled>camera_rear</button>
+        <li class="scanner-bar-item">
+          <div class="refresh-button-wrapper">
+            <button id="retryButton" class="camera-bar-icon material-icons" disabled>refresh</button>
           </div>
         </li>
       </ul>
@@ -41,15 +44,24 @@
       <label id="hideStatsLabel" class="hidden" for="hideStats">Hide statistics</label>
       <input id="hideStats" class="hidden" type="checkbox" checked>
     </div>
+
+    <div class="edgeError centered">
+      <label for="edgeError">Edge error:
+        <output id="edgeErrorOutput">10</output> pixels
+        <input type="range" id="edgeError" value="10" min="0" max="99" step="1"></label>
+    </div>
+
+    <canvas id="outputImage" class="centered hidden"></canvas>
   </div>
 
   <video id="videoInput" class="hidden"></video>
+  <img id="ocrFont" src="resources/ocr_digits.png" class="hidden"></img>
 
-  <script src="../../libs/adapter-latest.js" type="text/javascript"></script>
   <script src="../../libs/stats.min.js" type="text/javascript"></script>
   <script src="../../utils/utils.js" type="text/javascript"></script>
   <script src="../../utils/statsInit.js" type="text/javascript"></script>
-  <script src="index.js" type="text/javascript"></script>
+  <script src="js/cardProcessing.js" type="text/javascript"></script>
+  <script src="js/index.js" type="text/javascript"></script>
 </body>
 
 </html>
