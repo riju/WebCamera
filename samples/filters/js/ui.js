@@ -20,9 +20,11 @@ const filters = {
 };
 
 function initUI() {
-  initStats();
-  getVideoConstraint();
+  let menuHeight = parseInt(getComputedStyle(
+    document.querySelector('.camera-bar-wrapper')).height);
+  getVideoConstraint(menuHeight);
   calculateSmallVideoConstraint();
+  initStats();
 
   controls = {
     filter: 'passThrough',

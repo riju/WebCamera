@@ -10,7 +10,6 @@ let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
 
 let videoCapturer = null;
-let image = null;
 let src = null;
 let gray = null;
 let faces = null;
@@ -118,7 +117,9 @@ function cleanupAndStop() {
 }
 
 function initUI() {
-  getVideoConstraint();
+  let menuHeight = parseInt(getComputedStyle(
+    document.querySelector('.camera-bar-wrapper')).height);
+  getVideoConstraint(menuHeight);
   initStats();
 
   // TakePhoto event by clicking takePhotoButton.
