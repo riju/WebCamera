@@ -22,6 +22,13 @@ const faceDetectionUrl = '../../data/classifiers/haarcascade_frontalface_default
 const eyeDetectionPath = 'haarcascade_eye.xml';
 const eyeDetectionUrl = '../../data/classifiers/haarcascade_eye.xml';
 
+// Test Intel Face Detection Model.
+let faceNet = null;
+const faceModelXmlUrl = '../../data/classifiers/face-detection-adas-0001.xml';
+const faceModelXmlPath = 'face-detection-adas-0001.xml';
+const faceModelBinUrl = '../../data/classifiers/face-detection-adas-0001.bin';
+const faceModelBinPath = 'face-detection-adas-0001.bin';
+
 const faceColor = [0, 255, 255, 255];
 const eyesColor = [0, 0, 255, 255];
 
@@ -157,9 +164,15 @@ function initUI() {
 
 utils.loadOpenCv(() => {
   utils.createFileFromUrl(faceDetectionPath, faceDetectionUrl, () => {
-    utils.createFileFromUrl(eyeDetectionPath, eyeDetectionUrl, () => {
-      initUI();
-      initCameraSettingsAndStart();
-    });
+  utils.createFileFromUrl(eyeDetectionPath, eyeDetectionUrl, () => {
+  utils.createFileFromUrl(faceModelXmlPath, faceModelXmlUrl, () => {
+  utils.createFileFromUrl(faceModelBinPath, faceModelBinUrl, () => {
+  // faceNet = cv.readNet(faceModelXmlPath, faceModelBinPath);
+  faceNet = cv.readNetFromModelOptimizer(faceModelXmlPath, faceModelBinPath);
+  initUI();
+  initCameraSettingsAndStart();
   });
-});
+  });
+  });
+  });
+  });
