@@ -1,0 +1,19 @@
+{
+  "name": "webcamera",
+  "version": "1.0.0",
+  "description": "",
+  "main": "samples/js/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/riju/WebCamera.git"
+  },
+  "author": "Intel Corporation",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/riju/WebCamera/issues"
+  },
+  "homepage": "https://github.com/riju/WebCamera#readme"
+}

@@ -44,6 +44,9 @@
   font-size: 24px;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
   text-align: center;
+}
+.pro-icon input {
+  width: 24px;
   pointer-events: auto;
 }
 .pro-icon:hover {
@@ -75,7 +78,14 @@
   display: block;
   position: relative;
 }
-.settings-bar input[type=range], #jitterLimit {
+.jitterLimit, .edgeError {
+  width: 100%;
+  padding: 5px;
+}
+#edgeError {
+  width: 130px;
+}
+.settings-bar input[type=range], #jitterLimit, #edgeError {
   display: block;
   -webkit-appearance: none;
   margin: 7px 2px;
@@ -83,11 +93,13 @@
 .pro-settings input[type=range] {
   width: 200px;
 }
-.settings-bar input[type=range]:focus, #jitterLimit:focus {
+.settings-bar input[type=range]:focus,
+#jitterLimit:focus, #edgeError:focus {
   outline: none;
 }
 .settings-bar input[type=range]::-webkit-slider-runnable-track,
-#jitterLimit::-webkit-slider-runnable-track {
+#jitterLimit::-webkit-slider-runnable-track,
+#edgeError::-webkit-slider-runnable-track {
   width: 100%;
   height: 4px;
   background: white;
@@ -97,7 +109,8 @@
   cursor: pointer;
 }
 .settings-bar input[type=range]::-webkit-slider-thumb,
-#jitterLimit::-webkit-slider-thumb {
+#jitterLimit::-webkit-slider-thumb,
+#edgeError::-webkit-slider-thumb {
   width: 9px;
   height: 20px;
   -webkit-appearance: none;
@@ -109,7 +122,8 @@
   cursor: pointer;
 }
 .settings-bar input[type=range]:focus::-webkit-slider-runnable-track,
-#jitterLimit:focus::-webkit-slider-runnable-track {
+#jitterLimit:focus::-webkit-slider-runnable-track,
+#edgeError:focus::-webkit-slider-runnable-track {
   background: white;
 }
 @media screen and (max-width: 960px) {
