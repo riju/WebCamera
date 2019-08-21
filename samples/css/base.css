@@ -37,11 +37,3 @@ body {
 .canvas-big:hover {
   cursor: pointer;
 }
-
-.jitterLimit, .edgeError {
-  width: 100%;
-  padding: 5px;
-}
-#edgeError {
-  width: 130px;
-}

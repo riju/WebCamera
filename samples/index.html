@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <link rel="manifest" href="../manifest.json" />
   <link href="css/doxygen.css" rel="stylesheet" type="text/css" />
   <title>Web &#x1F493 Camera demos</title>
 
@@ -45,6 +46,21 @@
       </ul>
     </div>
   </div>
+  <script>
+    // Check that service workers are supported
+    if ('serviceWorker' in navigator) {
+      // Use the window load event to keep the page load performant
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('../sw.js')
+          .then(function (registration) {
+            console.log('Registration successful, scope is:', registration.scope);
+          })
+          .catch(function (error) {
+            console.log('Service worker registration failed, error:', error);
+          });
+      });
+    }
+  </script>
 </body>
 
 </html>

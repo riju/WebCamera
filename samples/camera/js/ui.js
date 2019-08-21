@@ -3,7 +3,7 @@ const settingsInputIds = [
   'iso', 'exposureTime',
   'focusDistance', 'colorTemperature', 'zoom'
 ];
-const standartSettingsIds = [
+const standardSettingsIds = [
   'contrast', 'saturation', 'sharpness', 'brightness', 'exposureCompensation'
 ];
 const icons = [
@@ -18,14 +18,14 @@ function initUI() {
   getVideoConstraint(menuHeight);
 
   controls = {
-    lastProIcon: 'exposureTime',
+    lastProIcon: 'standard',
     settingsVisible: false,
     frontCamera: null,
     backCamera: null,
     facingMode: '',
   };
 
-  settingsInputIds.unshift(...standartSettingsIds);
+  settingsInputIds.unshift(...standardSettingsIds);
   let settingsInputElements =
     settingsInputIds.map(id => document.getElementById(id));
 
@@ -91,7 +91,7 @@ function initUI() {
   resetButton.addEventListener('click', function () {
     let constraint = { advanced: [{}] };
     if (controls.lastProIcon == 'standard') {
-      standartSettingsIds.forEach(function (id, i) {
+      standardSettingsIds.forEach(function (id, i) {
         controls[id].value =
           (controls[id].max - controls[id].min) / 2 + Number(controls[id].min);
         if (!controls[id].disabled)

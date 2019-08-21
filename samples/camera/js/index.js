@@ -24,7 +24,7 @@ function applyInitialSettings() {
         roundValue(videoSettings[id]);
     } else {
       console.log(id, 'not supported.');
-      if (!(i in standartSettingsIds)) {
+      if (!(i in standardSettingsIds)) {
         let icon = document.querySelector(`i[for=${id}]`);
         icon.style.pointerEvents = 'none';
         icon.style.color = 'gray';
