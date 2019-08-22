@@ -17,7 +17,7 @@ const faceDetectionUrl =
 const eyeDetectionPath = 'haarcascade_eye.xml';
 const eyeDetectionUrl = '../../data/classifiers/haarcascade_eye.xml';
 
-function deleteObjectsForOldFaces() {
+function deleteObjectsForOldFaces(faces) {
   if (hatFrames.length > faces.size() && faces.size() > 0) {
     for (let i = faces.size(); i < hatFrames.length; ++i) {
       hatFrames[i].src.delete();
@@ -48,7 +48,10 @@ function getHatCoords(face) {
   if (yUpper < 0) yUpper = 0;
   return {
     width: scaledWidth, height: scaledHeight,
-    coords: { xUpper: xUpper, xBottom: xBottom, yUpper: yUpper, yBottom: yBottom, show: true }
+    coords: {
+      xUpper: xUpper, xBottom: xBottom, yUpper: yUpper, yBottom: yBottom,
+      show: true
+    }
   };
 }
 
@@ -94,37 +97,30 @@ function exceedJitterLimit(i, coords) {
   else return false;
 }
 
-function detectEyes(face) {
-  let faceGray = gray.roi(face);
-  eyeCascade.detectMultiScale(faceGray, eyes, 1.1, 3);
+function detectEyes(face, src) {
+  let faceGray = src.roi(face);
+  eyeCascade.detectMultiScale(faceGray, eyes);
   faceGray.delete();
 }
 
 function getGlassesCoords(leftEye, rightEye, face) {
-  const eyesDistance =
-    eyes.get(rightEye).x + eyes.get(rightEye).width - eyes.get(leftEye).x;
-  const scaledWidth =
-    parseInt(glassesData[currentGlasses].scale * eyesDistance);
+  const eyesDistance = rightEye.x + rightEye.width - leftEye.x;
+  const scaledWidth = parseInt(glassesData[currentGlasses].scale * eyesDistance);
   const scaledHeight = parseInt(scaledWidth *
-    (glassesData[currentGlasses].src.rows
-      / glassesData[currentGlasses].src.cols));
+    (glassesData[currentGlasses].src.rows / glassesData[currentGlasses].src.cols));
   const yOffset = Number(glassesData[currentGlasses].yOffsetUp);
-  const centeredY = (eyes.get(leftEye).y + eyes.get(rightEye).y) / 2;
-  const centeredHeight =
-    (eyes.get(leftEye).height + eyes.get(rightEye).height) / 2;
+  const centeredY = (leftEye.y + rightEye.y) / 2;
+  const centeredHeight = (leftEye.height + rightEye.height) / 2;
 
   // Coordinates after resizing.
-  let xUpper = face.x + eyes.get(leftEye).x +
-    parseInt(eyesDistance / 2 - scaledWidth / 2);
+  let xUpper = face.x + leftEye.x + parseInt(eyesDistance / 2 - scaledWidth / 2);
   let xBottom = xUpper + scaledWidth;
   let yUpper = face.y + centeredY - Math.round(yOffset * centeredHeight);
   let yBottom = yUpper + scaledHeight;
 
   // Find angle.
-  const deltaX = eyes.get(rightEye).x + eyes.get(rightEye).width / 2
-    - eyes.get(leftEye).x - eyes.get(leftEye).width / 2;
-  const deltaY = eyes.get(rightEye).y + eyes.get(rightEye).height / 2
-    - eyes.get(leftEye).y - eyes.get(leftEye).height / 2;
+  const deltaX = rightEye.x + rightEye.width / 2 - leftEye.x - leftEye.width / 2;
+  const deltaY = rightEye.y + rightEye.height / 2 - leftEye.y - leftEye.height / 2;
   const angleRad = -Math.atan2(deltaY, deltaX);
   const angleDeg = parseInt(angleRad * (180 / Math.PI));
 
@@ -192,7 +188,7 @@ function resizeGlasses(glasses, i) {
   glassesFrames[i].mask = glassesMaskDst.clone();
 }
 
-function processGlasses(i, face, option) {
+function processGlasses(i, pyrDownFace, originalFace, src, xRatio, yRatio, option) {
   function createEmptyFrame() {
     if (option == "new") glassesFrames.splice(i, 0, { show: false });
     else { // (option == "replace") Replace if not new.
@@ -204,17 +200,29 @@ function processGlasses(i, face, option) {
     glassesFrames[i].mask = new cv.Mat();
   }
 
-  detectEyes(face);
+  detectEyes(pyrDownFace, src);
   // Don't draw glasses because only one eye was detected.
   if (eyes.size() < 2) createEmptyFrame();
   else {
-    let leftEye = 0;
-    let rightEye = 1;
     let glasses;
+    let firstEye = eyes.get(0);
+    let secondEye = eyes.get(1);
+    let leftEye; let rightEye;
 
-    if (eyes.get(leftEye).x > eyes.get(rightEye).x)
-      glasses = getGlassesCoords(rightEye, leftEye, face);
-    else glasses = getGlassesCoords(leftEye, rightEye, face);
+    // Find left and right eyes.
+    if (firstEye.x > secondEye.x) {
+      leftEye = secondEye; rightEye = firstEye;
+    } else {
+      leftEye = firstEye; rightEye = secondEye;
+    }
+
+    // Convert eyes to original coordinates.
+    leftEye = new cv.Rect(leftEye.x * xRatio, leftEye.y * yRatio,
+      leftEye.width * xRatio, leftEye.height * yRatio);
+    rightEye = new cv.Rect(rightEye.x * xRatio, rightEye.y * yRatio,
+      rightEye.width * xRatio, rightEye.height * yRatio);
+
+    glasses = getGlassesCoords(leftEye, rightEye, originalFace);
 
     // Check that glasses coords are inside the canvas.
     if (glasses.coords.yUpper > 0 && glasses.coords.yBottom < video.height &&

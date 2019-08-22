@@ -26,6 +26,10 @@ self.addEventListener('message', (event) => {
  */
 self.__precacheManifest = [
   {
+    "url": "workbox-config.js",
+    "revision": "8cdce8194c7e870938ce82fbd85d1ae5"
+  },
+  {
     "url": "build/wasm/desktop/opencv_js.worker.js",
     "revision": "e4275d159d55a14cebb567bf27557533"
   },
@@ -56,142 +60,6 @@ self.__precacheManifest = [
   {
     "url": "data/photo_camera_192.png",
     "revision": "89c3e03b3ad202c36c4f601ad987f97a"
-  },
-  {
-    "url": "libs/adapter-latest.js",
-    "revision": "3c04f87e5422cc851fca358dc2eb30ee"
-  },
-  {
-    "url": "libs/dat.gui.min.js",
-    "revision": "71ce89f002ba241ca5d36d6b04d496d1"
-  },
-  {
-    "url": "libs/stats.min.js",
-    "revision": "7ca0e502ddf12b4130a98c9b8fa1bfca"
-  },
-  {
-    "url": "samples/camera/index.html",
-    "revision": "43a62969dbdcb8b5ab53649eca021bc9"
-  },
-  {
-    "url": "samples/camera/js/index.js",
-    "revision": "9d9363474e6b4baf2b6551350c49b7b3"
-  },
-  {
-    "url": "samples/camera/js/ui.js",
-    "revision": "0f741139df7d30342be336ab1b0153d6"
-  },
-  {
-    "url": "samples/cardScanner/index.html",
-    "revision": "495797f60cc8c7f2fbff4e666ccec990"
-  },
-  {
-    "url": "samples/cardScanner/js/cardProcessing.js",
-    "revision": "ede284ab222b962b6f631d2046bf1fc5"
-  },
-  {
-    "url": "samples/cardScanner/js/index.js",
-    "revision": "b33a18d9cefd20868bdc9a80ef25f17a"
-  },
-  {
-    "url": "samples/cardScanner/resources/card_1.png",
-    "revision": "e95331187dd4845286fb4df611596780"
-  },
-  {
-    "url": "samples/cardScanner/resources/card_2.png",
-    "revision": "dfd6a8175cfa78cfaa78a2c113cfba62"
-  },
-  {
-    "url": "samples/cardScanner/resources/card_3.png",
-    "revision": "8b6acbf31ff1e3919abb8f9bdf356c09"
-  },
-  {
-    "url": "samples/cardScanner/resources/card_5.png",
-    "revision": "632980febaaa34839372d4d898ea96bf"
-  },
-  {
-    "url": "samples/cardScanner/resources/ocr_digits.png",
-    "revision": "3fd91c7e08e68a7615c683741fed38db"
-  },
-  {
-    "url": "samples/css/base.css",
-    "revision": "05b00e682f0c6da0a6d54584482934ad"
-  },
-  {
-    "url": "samples/css/camera-bar.css",
-    "revision": "42266c555fac5339f5cd26d94bb4a156"
-  },
-  {
-    "url": "samples/css/doxygen.css",
-    "revision": "1968fd946d1d63d06b7ca1d97c714063"
-  },
-  {
-    "url": "samples/css/google-icons.css",
-    "revision": "a46f730e8b5715865cdf1276d391707b"
-  },
-  {
-    "url": "samples/css/menu.css",
-    "revision": "9720fcdabde003569ad4669d7ddb215f"
-  },
-  {
-    "url": "samples/css/settings.css",
-    "revision": "6aec958c6df0013a01002e53f1d95e41"
-  },
-  {
-    "url": "samples/css/style.css",
-    "revision": "45176e45131938c24a353adfbb7e9c9c"
-  },
-  {
-    "url": "samples/exposureTime/index.html",
-    "revision": "b0fb53c53564f0e867fa2c8175b8c84c"
-  },
-  {
-    "url": "samples/faceDetection/index.html",
-    "revision": "194f26b57a9f0b5aa35bca20e79c6610"
-  },
-  {
-    "url": "samples/faceDetection/index.js",
-    "revision": "b2df3cc680ddebb1bf8463d5791fa831"
-  },
-  {
-    "url": "samples/filters/index.html",
-    "revision": "7378ae751651260e840b46f7a8a23377"
-  },
-  {
-    "url": "samples/filters/js/filters.js",
-    "revision": "44a74768a62cd6b41a771b4cfcfee803"
-  },
-  {
-    "url": "samples/filters/js/index.js",
-    "revision": "ac5deb09a4c30577b6dc10b1d1ea216f"
-  },
-  {
-    "url": "samples/filters/js/ui.js",
-    "revision": "47e74deabc2860ff72bf089e8117b55d"
-  },
-  {
-    "url": "samples/focusDistance/index.html",
-    "revision": "b0fb53c53564f0e867fa2c8175b8c84c"
-  },
-  {
-    "url": "samples/funnyHats/css/tabs.css",
-    "revision": "4cf5b05c26baa6ac32459a00c4688310"
-  },
-  {
-    "url": "samples/funnyHats/index.html",
-    "revision": "f25962e3156ab85fc60f6596898cad1b"
-  },
-  {
-    "url": "samples/funnyHats/js/hatsAndGlassesProcessing.js",
-    "revision": "751c5923b1916f28727816bb1b466f55"
-  },
-  {
-    "url": "samples/funnyHats/js/index.js",
-    "revision": "d9b0360e2af15732a669f2c94905a30e"
-  },
-  {
-    "url": "samples/funnyHats/js/ui.js",
-    "revision": "af160f42d4d4c1117e0cc88e62e7f6d7"
   },
   {
     "url": "samples/funnyHats/resources/glasses/0.png",
@@ -326,24 +194,20 @@ self.__precacheManifest = [
     "revision": "c653beff9c0c00330463f6a677b23651"
   },
   {
-    "url": "samples/hdr/index-wasm.html",
-    "revision": "c5d48a88e411f2e99266888404d9a3f6"
+    "url": "samples/cardScanner/resources/ocr_digits.png",
+    "revision": "3fd91c7e08e68a7615c683741fed38db"
   },
   {
-    "url": "samples/hdr/index.html",
-    "revision": "32c3c818a8cf669513f21a5999c670c6"
+    "url": "libs/adapter-latest.js",
+    "revision": "3c04f87e5422cc851fca358dc2eb30ee"
   },
   {
-    "url": "samples/hdr/js/index.js",
-    "revision": "a746941d8649ecb620f06b3321d3b8b3"
+    "url": "libs/dat.gui.min.js",
+    "revision": "71ce89f002ba241ca5d36d6b04d496d1"
   },
   {
-    "url": "samples/index.html",
-    "revision": "4ffde3417540b435efa8cb6f115a74ac"
-  },
-  {
-    "url": "samples/panTilt/index.html",
-    "revision": "0c4f20a1f585b273476e29db2d7e94ee"
+    "url": "libs/stats.min.js",
+    "revision": "7ca0e502ddf12b4130a98c9b8fa1bfca"
   },
   {
     "url": "utils/menu.js",
@@ -358,8 +222,144 @@ self.__precacheManifest = [
     "revision": "281110b7dfd300e191d1ef9f4678d677"
   },
   {
-    "url": "workbox-config.js",
-    "revision": "8cdce8194c7e870938ce82fbd85d1ae5"
+    "url": "samples/css/base.css",
+    "revision": "05b00e682f0c6da0a6d54584482934ad"
+  },
+  {
+    "url": "samples/css/camera-bar.css",
+    "revision": "42266c555fac5339f5cd26d94bb4a156"
+  },
+  {
+    "url": "samples/css/doxygen.css",
+    "revision": "1968fd946d1d63d06b7ca1d97c714063"
+  },
+  {
+    "url": "samples/css/google-icons.css",
+    "revision": "a46f730e8b5715865cdf1276d391707b"
+  },
+  {
+    "url": "samples/css/menu.css",
+    "revision": "9720fcdabde003569ad4669d7ddb215f"
+  },
+  {
+    "url": "samples/css/settings.css",
+    "revision": "6aec958c6df0013a01002e53f1d95e41"
+  },
+  {
+    "url": "samples/css/style.css",
+    "revision": "45176e45131938c24a353adfbb7e9c9c"
+  },
+  {
+    "url": "samples/camera/js/ui.js",
+    "revision": "0f741139df7d30342be336ab1b0153d6"
+  },
+  {
+    "url": "samples/camera/js/index.js",
+    "revision": "9d9363474e6b4baf2b6551350c49b7b3"
+  },
+  {
+    "url": "samples/camera/index.html",
+    "revision": "43a62969dbdcb8b5ab53649eca021bc9"
+  },
+  {
+    "url": "samples/cardScanner/js/cardProcessing.js",
+    "revision": "ede284ab222b962b6f631d2046bf1fc5"
+  },
+  {
+    "url": "samples/cardScanner/js/index.js",
+    "revision": "b33a18d9cefd20868bdc9a80ef25f17a"
+  },
+  {
+    "url": "samples/cardScanner/index.html",
+    "revision": "495797f60cc8c7f2fbff4e666ccec990"
+  },
+  {
+    "url": "samples/cardScanner/resources/card_1.png",
+    "revision": "e95331187dd4845286fb4df611596780"
+  },
+  {
+    "url": "samples/cardScanner/resources/card_2.png",
+    "revision": "dfd6a8175cfa78cfaa78a2c113cfba62"
+  },
+  {
+    "url": "samples/cardScanner/resources/card_3.png",
+    "revision": "8b6acbf31ff1e3919abb8f9bdf356c09"
+  },
+  {
+    "url": "samples/cardScanner/resources/card_5.png",
+    "revision": "632980febaaa34839372d4d898ea96bf"
+  },
+  {
+    "url": "samples/exposureTime/index.html",
+    "revision": "b0fb53c53564f0e867fa2c8175b8c84c"
+  },
+  {
+    "url": "samples/faceDetection/index.js",
+    "revision": "b2df3cc680ddebb1bf8463d5791fa831"
+  },
+  {
+    "url": "samples/faceDetection/index.html",
+    "revision": "194f26b57a9f0b5aa35bca20e79c6610"
+  },
+  {
+    "url": "samples/filters/js/filters.js",
+    "revision": "44a74768a62cd6b41a771b4cfcfee803"
+  },
+  {
+    "url": "samples/filters/js/ui.js",
+    "revision": "47e74deabc2860ff72bf089e8117b55d"
+  },
+  {
+    "url": "samples/filters/js/index.js",
+    "revision": "ac5deb09a4c30577b6dc10b1d1ea216f"
+  },
+  {
+    "url": "samples/filters/index.html",
+    "revision": "7378ae751651260e840b46f7a8a23377"
+  },
+  {
+    "url": "samples/focusDistance/index.html",
+    "revision": "b0fb53c53564f0e867fa2c8175b8c84c"
+  },
+  {
+    "url": "samples/funnyHats/css/tabs.css",
+    "revision": "4cf5b05c26baa6ac32459a00c4688310"
+  },
+  {
+    "url": "samples/funnyHats/js/hatsAndGlassesProcessing.js",
+    "revision": "751c5923b1916f28727816bb1b466f55"
+  },
+  {
+    "url": "samples/funnyHats/js/ui.js",
+    "revision": "af160f42d4d4c1117e0cc88e62e7f6d7"
+  },
+  {
+    "url": "samples/funnyHats/js/index.js",
+    "revision": "d9b0360e2af15732a669f2c94905a30e"
+  },
+  {
+    "url": "samples/funnyHats/index.html",
+    "revision": "f25962e3156ab85fc60f6596898cad1b"
+  },
+  {
+    "url": "samples/hdr/js/index.js",
+    "revision": "a746941d8649ecb620f06b3321d3b8b3"
+  },
+  {
+    "url": "samples/hdr/index-wasm.html",
+    "revision": "c5d48a88e411f2e99266888404d9a3f6"
+  },
+  {
+    "url": "samples/hdr/index.html",
+    "revision": "32c3c818a8cf669513f21a5999c670c6"
+  },
+  {
+    "url": "samples/index.html",
+    "revision": "4ffde3417540b435efa8cb6f115a74ac"
+  },
+  {
+    "url": "samples/panTilt/index.html",
+    "revision": "0c4f20a1f585b273476e29db2d7e94ee"
   }
 ].concat(self.__precacheManifest || []);
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});

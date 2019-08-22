@@ -8,12 +8,14 @@ let videoTrack = null;
 
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
+let canvasOutputCtx = null;
+let canvasInput = null;
+let canvasInputCtx = null;
 
-let videoCapturer = null;
 let src = null;
 let gray = null;
-let faces = null;
-let eyes = null;
+let eyeVec = null;
+let faceVec = null;
 let faceCascade = null;
 let eyeCascade = null;
 
@@ -25,32 +27,43 @@ const eyeDetectionUrl = '../../data/classifiers/haarcascade_eye.xml';
 const faceColor = [0, 255, 255, 255];
 const eyesColor = [0, 0, 255, 255];
 
+// In face and eyes detection, downscaleLevel parameter is used
+// to downscale resolution of input stream and insrease speed of detection.
+let downscaleLevel = 1;
 
 function initOpencvObjects() {
-  videoCapturer = new cv.VideoCapture(video);
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   gray = new cv.Mat();
 
-  faces = new cv.RectVector();
+  faceVec = new cv.RectVector();
   faceCascade = new cv.CascadeClassifier();
   // TODO(sasha): Use Web Workers to load files.
   faceCascade.load(faceDetectionPath);
 
-  eyes = new cv.RectVector();
+  eyeVec = new cv.RectVector();
   eyeCascade = new cv.CascadeClassifier();
   eyeCascade.load(eyeDetectionPath);
 }
 
 function deleteOpencvObjects() {
   src.delete(); gray.delete();
-  faces.delete(); faceCascade.delete();
-  eyes.delete(); eyeCascade.delete();
+  faceVec.delete(); faceCascade.delete();
+  eyeVec.delete(); eyeCascade.delete();
 }
 
 function completeStyling() {
   let cameraBar = document.querySelector('.camera-bar-wrapper');
-  cameraBar.style.width = `${video.videoWidth}px`;
+  cameraBar.style.width = `${video.width}px`;
   document.getElementById('takePhotoButton').disabled = false;
+
+  canvasInput = document.createElement('canvas');
+  canvasInput.width = video.width;
+  canvasInput.height = video.height;
+  canvasInputCtx = canvasInput.getContext('2d');
+
+  canvasOutput.width = video.width;
+  canvasOutput.height = video.height;
+  canvasOutputCtx = canvasOutput.getContext('2d');
 }
 
 function processVideo() {
@@ -60,39 +73,37 @@ function processVideo() {
       return;
     }
     stats.begin();
-    videoCapturer.read(src);
+    let faces = [];
+    let eyes = [];
+    canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
+    let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
+    src.data.set(imageData.data);
 
     // Detect faces.
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
-    faceCascade.detectMultiScale(gray, faces,
-      1.1, 3); // scaleFactor=1.1, minNeighbors=3
+    for (let i = 0; i < downscaleLevel; ++i) cv.pyrDown(gray, gray);
+    let matSize = gray.size();
+    faceCascade.detectMultiScale(gray, faceVec);
 
-    for (let i = 0; i < faces.size(); ++i) {
-      let face = faces.get(i);
+    for (let i = 0; i < faceVec.size(); ++i) {
+      let face = faceVec.get(i);
       // Draw face.
-      let facePointUpperLeft = new cv.Point(face.x, face.y);
-      let facePointBottomRight =
-        new cv.Point(face.x + face.width, face.y + face.height);
-      cv.rectangle(src, facePointUpperLeft, facePointBottomRight, faceColor);
+      faces.push(face);
 
       // Detect eyes in face ROI.
       let faceGray = gray.roi(face);
-      let faceSrc = src.roi(face);
-      eyeCascade.detectMultiScale(faceGray, eyes, 1.1, 3);
+      eyeCascade.detectMultiScale(faceGray, eyeVec);
 
-      for (let j = 0; j < eyes.size(); ++j) {
+      for (let j = 0; j < eyeVec.size() && j < 2; ++j) {
         // Draw eye.
-        let eyePointUpperLeft = new cv.Point(eyes.get(j).x, eyes.get(j).y);
-        let eyePointBottomRight =
-          new cv.Point(eyes.get(j).x + eyes.get(j).width,
-            eyes.get(j).y + eyes.get(j).height);
-        cv.rectangle(faceSrc, eyePointUpperLeft,
-          eyePointBottomRight, eyesColor);
+        let eye = eyeVec.get(j);
+        eyes.push(new cv.Rect(face.x + eye.x, face.y + eye.y, eye.width, eye.height));
       }
-      faceGray.delete(); faceSrc.delete();
+      faceGray.delete();
     }
-    image = src;
-    cv.imshow('canvasOutput', src);
+    canvasOutputCtx.drawImage(canvasInput, 0, 0, video.width, video.height);
+    drawResults(canvasOutputCtx, faces, '#FFFF00', matSize); // Yellow color.
+    drawResults(canvasOutputCtx, eyes, '#00FFFF', matSize); // Turquoise color.
 
     stats.end();
     requestAnimationFrame(processVideo);
@@ -100,6 +111,17 @@ function processVideo() {
     utils.printError(err);
   }
 };
+
+function drawResults(ctx, results, color, size) {
+  for (let i = 0; i < results.length; ++i) {
+    let rect = results[i];
+    let xRatio = video.width / size.width;
+    let yRatio = video.height / size.height;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = color;
+    ctx.strokeRect(rect.x * xRatio, rect.y * yRatio, rect.width * xRatio, rect.height * yRatio);
+  }
+}
 
 function startCamera() {
   if (!streaming) {
@@ -152,6 +174,32 @@ function initUI() {
     }
     utils.stopCamera();
     utils.startCamera(videoConstraint, 'videoInput', startVideoProcessing);
+  });
+
+  if (!isMobileDevice()) {
+    // Init threads number.
+    let threadsControl = document.getElementsByClassName('threads-control')[0];
+    threadsControl.classList.remove('hidden');
+    let threadsNumLabel = document.getElementById('threadsNumLabel');
+    let threadsNum = document.getElementById('threadsNum');
+    threadsNum.max = navigator.hardwareConcurrency;
+    threadsNumLabel.innerHTML = `Number of threads (1 - ${threadsNum.max}):&nbsp;`;
+    if (3 <= threadsNum.max) threadsNum.value = 3;
+    else threadsNum.value = 1;
+    cv.parallel_pthreads_set_threads_num(parseInt(threadsNum.value));
+    threadsNum.addEventListener('change', () => {
+      cv.parallel_pthreads_set_threads_num(parseInt(threadsNum.value));
+    });
+  }
+
+  // Event listener for dowscale parameter.
+  let downscaleLevelInput = document.getElementById('downscaleLevel');
+  let downscaleLevelOutput = document.getElementById('downscaleLevelOutput');
+  downscaleLevelInput.addEventListener('input', function () {
+    downscaleLevel = downscaleLevelOutput.value = parseInt(downscaleLevelInput.value);
+  });
+  downscaleLevelInput.addEventListener('change', function () {
+    downscaleLevel = downscaleLevelOutput.value = parseInt(downscaleLevelInput.value);
   });
 }
 
