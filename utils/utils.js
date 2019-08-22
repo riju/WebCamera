@@ -8,7 +8,8 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
   let self = this;
   this.errorOutput = document.getElementById(errorOutputId);
 
-  const OPENCV_URL = '../../build/wasm/opencv.js';  //local build
+  let opencvUrl = '../../build/wasm/desktop/opencv.js';
+  if (isMobileDevice()) opencvUrl = '../../build/wasm/mobile/opencv.js';
   this.loadOpenCv = function (onloadCallback) {
     let script = document.createElement('script');
     script.setAttribute('async', '');
@@ -27,9 +28,9 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
       }
     });
     script.addEventListener('error', () => {
-      self.printError('Failed to load ' + OPENCV_URL);
+      self.printError('Failed to load ' + opencvUrl);
     });
-    script.src = OPENCV_URL;
+    script.src = opencvUrl;
     let node = document.getElementsByTagName('script')[0];
     node.parentNode.insertBefore(script, node);
   };

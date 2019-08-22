@@ -26,20 +26,28 @@ self.addEventListener('message', (event) => {
  */
 self.__precacheManifest = [
   {
-    "url": "build/wasm/opencv_js.worker.js",
-    "revision": "f95a202fe0e8fa623bb12f96ccdd2178"
+    "url": "build/wasm/desktop/opencv_js.worker.js",
+    "revision": "e4275d159d55a14cebb567bf27557533"
   },
   {
-    "url": "build/wasm/opencv.js",
-    "revision": "1f1ec76d2afb0a91ca267610e25d0b0f"
+    "url": "build/wasm/desktop/opencv.js",
+    "revision": "2d92b97e42c79b3253924bf55ade66ce"
+  },
+  {
+    "url": "build/wasm/mobile/opencv_js.js",
+    "revision": "1b73209d47ad04f258486f749c41e601"
+  },
+  {
+    "url": "build/wasm/mobile/opencv.js",
+    "revision": "72bbdda4ac0c91b04018cb524f55f543"
   },
   {
     "url": "data/classifiers/haarcascade_eye.xml",
-    "revision": "ece2c63a648de8978173df40f9831e00"
+    "revision": "2d6fac0caaec1f9558872755ff34818d"
   },
   {
     "url": "data/classifiers/haarcascade_frontalface_default.xml",
-    "revision": "663f963eabf3df6eb215c50ff06bcc22"
+    "revision": "a03f92a797e309e76e6a034ab9e02616"
   },
   {
     "url": "data/google_icons_font.woff2",
@@ -51,39 +59,39 @@ self.__precacheManifest = [
   },
   {
     "url": "libs/adapter-latest.js",
-    "revision": "4153182069a4df2b3d9be6c02de9fdc8"
+    "revision": "3c04f87e5422cc851fca358dc2eb30ee"
   },
   {
     "url": "libs/dat.gui.min.js",
-    "revision": "a4a57da65af836dbfe3b319ea4017984"
+    "revision": "71ce89f002ba241ca5d36d6b04d496d1"
   },
   {
     "url": "libs/stats.min.js",
-    "revision": "929122621ee5a424a212bfdb62288c7d"
+    "revision": "7ca0e502ddf12b4130a98c9b8fa1bfca"
   },
   {
     "url": "samples/camera/index.html",
-    "revision": "ab8ddda107371ab37ef7804f0f511c54"
+    "revision": "43a62969dbdcb8b5ab53649eca021bc9"
   },
   {
     "url": "samples/camera/js/index.js",
-    "revision": "ae69fa57cebbc8786294c8c59775282d"
+    "revision": "9d9363474e6b4baf2b6551350c49b7b3"
   },
   {
     "url": "samples/camera/js/ui.js",
-    "revision": "f2ac4ba06186ac416464e2d3f499e0c5"
+    "revision": "0f741139df7d30342be336ab1b0153d6"
   },
   {
     "url": "samples/cardScanner/index.html",
-    "revision": "4273f7f0fcab6b9f8fec4a7842da273c"
+    "revision": "495797f60cc8c7f2fbff4e666ccec990"
   },
   {
     "url": "samples/cardScanner/js/cardProcessing.js",
-    "revision": "fb3048227124b3c4fd3f6bd83dbc966e"
+    "revision": "ede284ab222b962b6f631d2046bf1fc5"
   },
   {
     "url": "samples/cardScanner/js/index.js",
-    "revision": "ffa9988a1bad3814c95ccf08a42e6855"
+    "revision": "b33a18d9cefd20868bdc9a80ef25f17a"
   },
   {
     "url": "samples/cardScanner/resources/card_1.png",
@@ -107,83 +115,83 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/css/base.css",
-    "revision": "055a38f7298097b891e9f50776d573d9"
+    "revision": "05b00e682f0c6da0a6d54584482934ad"
   },
   {
     "url": "samples/css/camera-bar.css",
-    "revision": "6144959cf2690a16f150b6f288d6bda6"
+    "revision": "42266c555fac5339f5cd26d94bb4a156"
   },
   {
     "url": "samples/css/doxygen.css",
-    "revision": "97b2ca6896fb7607e51df1f10d49ed41"
+    "revision": "1968fd946d1d63d06b7ca1d97c714063"
   },
   {
     "url": "samples/css/google-icons.css",
-    "revision": "42c7e2d1288f3ae8b124e509e830cfd5"
+    "revision": "a46f730e8b5715865cdf1276d391707b"
   },
   {
     "url": "samples/css/menu.css",
-    "revision": "e77e40cdf18348565b4787e40bdbad98"
+    "revision": "9720fcdabde003569ad4669d7ddb215f"
   },
   {
     "url": "samples/css/settings.css",
-    "revision": "fa14d437627c6dca843de3deb0dde882"
+    "revision": "6aec958c6df0013a01002e53f1d95e41"
   },
   {
     "url": "samples/css/style.css",
-    "revision": "3d2168dc810bb2435b0ece19389ac1f8"
+    "revision": "45176e45131938c24a353adfbb7e9c9c"
   },
   {
     "url": "samples/exposureTime/index.html",
-    "revision": "810978699d2d986a5f4dc61b7cae9bec"
+    "revision": "b0fb53c53564f0e867fa2c8175b8c84c"
   },
   {
     "url": "samples/faceDetection/index.html",
-    "revision": "b3167bceca6ae046167b2205e929b7a4"
+    "revision": "194f26b57a9f0b5aa35bca20e79c6610"
   },
   {
     "url": "samples/faceDetection/index.js",
-    "revision": "9e1ab4f05af3e8c1dd7db3443cec19bb"
+    "revision": "b2df3cc680ddebb1bf8463d5791fa831"
   },
   {
     "url": "samples/filters/index.html",
-    "revision": "b0ebbb9035a01fca3ee854738904dbd9"
+    "revision": "7378ae751651260e840b46f7a8a23377"
   },
   {
     "url": "samples/filters/js/filters.js",
-    "revision": "8d4868bd2ff0e69231f54c4b02e89f6c"
+    "revision": "44a74768a62cd6b41a771b4cfcfee803"
   },
   {
     "url": "samples/filters/js/index.js",
-    "revision": "ae3e351b5863787c7efbd6bc1f29942d"
+    "revision": "ac5deb09a4c30577b6dc10b1d1ea216f"
   },
   {
     "url": "samples/filters/js/ui.js",
-    "revision": "c6d2ed6299034a4fdaeb16e6ba64680f"
+    "revision": "47e74deabc2860ff72bf089e8117b55d"
   },
   {
     "url": "samples/focusDistance/index.html",
-    "revision": "810978699d2d986a5f4dc61b7cae9bec"
+    "revision": "b0fb53c53564f0e867fa2c8175b8c84c"
   },
   {
     "url": "samples/funnyHats/css/tabs.css",
-    "revision": "29b2affff178b0372a74defb27239fb7"
+    "revision": "4cf5b05c26baa6ac32459a00c4688310"
   },
   {
     "url": "samples/funnyHats/index.html",
-    "revision": "3ebb07b02f2285a5d17f334c229562a6"
+    "revision": "f25962e3156ab85fc60f6596898cad1b"
   },
   {
     "url": "samples/funnyHats/js/hatsAndGlassesProcessing.js",
-    "revision": "58454faa0b63912eeaa2ce9a5d01de58"
+    "revision": "751c5923b1916f28727816bb1b466f55"
   },
   {
     "url": "samples/funnyHats/js/index.js",
-    "revision": "0d91fd146e9f6197a96b510caa0efde1"
+    "revision": "d9b0360e2af15732a669f2c94905a30e"
   },
   {
     "url": "samples/funnyHats/js/ui.js",
-    "revision": "676d42801ff29a2cc45074865db7554e"
+    "revision": "af160f42d4d4c1117e0cc88e62e7f6d7"
   },
   {
     "url": "samples/funnyHats/resources/glasses/0.png",
@@ -319,39 +327,39 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/hdr/index-wasm.html",
-    "revision": "7d49526ae1de32dc0eac32cf93ebe674"
+    "revision": "c5d48a88e411f2e99266888404d9a3f6"
   },
   {
     "url": "samples/hdr/index.html",
-    "revision": "932bfa1e18a4a848fbf977cb9e67e7b2"
+    "revision": "32c3c818a8cf669513f21a5999c670c6"
   },
   {
     "url": "samples/hdr/js/index.js",
-    "revision": "fbf73df0036700b735f3b663d86bc2b2"
+    "revision": "a746941d8649ecb620f06b3321d3b8b3"
   },
   {
     "url": "samples/index.html",
-    "revision": "54dc90dbff3698e1b25e0c251b566310"
+    "revision": "4ffde3417540b435efa8cb6f115a74ac"
   },
   {
     "url": "samples/panTilt/index.html",
-    "revision": "f8ed3e51cad82b5ecb3dc98524efa6e1"
+    "revision": "0c4f20a1f585b273476e29db2d7e94ee"
   },
   {
     "url": "utils/menu.js",
-    "revision": "0fed4250bd7727334c130e451b38b3d8"
+    "revision": "c54b9dc4832340a0f3eddc6c34f235da"
   },
   {
     "url": "utils/statsInit.js",
-    "revision": "e5e0e96d88631259ad9fb63d5b40bed8"
+    "revision": "eb7250e9a01017fe1502f03b80ccafdf"
   },
   {
     "url": "utils/utils.js",
-    "revision": "4667efab20e6732bf46a78b637aa36e3"
+    "revision": "281110b7dfd300e191d1ef9f4678d677"
   },
   {
     "url": "workbox-config.js",
-    "revision": "3e7f259e9451ad3c9dc86628a1200196"
+    "revision": "8cdce8194c7e870938ce82fbd85d1ae5"
   }
 ].concat(self.__precacheManifest || []);
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
