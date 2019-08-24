@@ -65,8 +65,19 @@
 
     <div class="jitterLimit centered">
       <label for="jitterLimit">Jitter limit:
-        <output id="jitterLimitOutput">3</output> pixels
-        <input type="range" id="jitterLimit" value="3" min="0" max="100" step="1"></label>
+        <output id="jitterLimitOutput">3</output> pixels &nbsp;</label>
+        <input type="range" id="jitterLimit" value="3" min="0" max="100" step="1">
+    </div>
+
+    <div class="threads-control centered hidden">
+      <label for="threadsNum" id="threadsNumLabel"></label>
+      <input type="number" id="threadsNum" min="1" max="16">
+    </div>
+
+    <div class="downscale-level centered">
+      <label for="downscaleLevel">Downscale level:
+        <output id="downscaleLevelOutput">1</output>x &nbsp;</label>
+        <input type="range" id="downscaleLevel" value="1" min="0" max="4" step="1">
     </div>
   </div>
   <video id="videoInput" class="hidden"></video>

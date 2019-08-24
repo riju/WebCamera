@@ -10,6 +10,10 @@ let menuVisible = true;
 // have moved more than 3 pixels.
 let jitterLimit = 3;
 
+// In face and eyes detection, downscaleLevel parameter is used
+// to downscale resolution of input stream and insrease speed of detection.
+let downscaleLevel = 1;
+
 // #menuSelector switches between these types of menu.
 const menuTypes = { hats: '🎩', glasses: '🕶️' };
 
@@ -93,7 +97,7 @@ function initUI() {
     showOrHideImageElements();
   });
 
-  // Event listener for jitter limit
+  // Event listener for jitter limit.
   let jitterLimitInput = document.getElementById('jitterLimit');
   let jitterLimitOutput = document.getElementById('jitterLimitOutput');
   jitterLimitInput.addEventListener('input', function () {
@@ -133,6 +137,33 @@ function initUI() {
     }
     utils.stopCamera();
     utils.startCamera(videoConstraint, 'videoInput', startVideoProcessing);
+  });
+
+  if (!isMobileDevice()) {
+    // Init threads number.
+    let threadsControl = document.getElementsByClassName('threads-control')[0];
+    threadsControl.classList.remove('hidden');
+    let threadsNumLabel = document.getElementById('threadsNumLabel');
+    let threadsNum = document.getElementById('threadsNum');
+    threadsNum.max = navigator.hardwareConcurrency;
+    threadsNumLabel.innerHTML = `Number of threads (1 - ${threadsNum.max}):&nbsp;`;
+    if (3 <= threadsNum.max) threadsNum.value = 3;
+    else threadsNum.value = 1;
+    cv.parallel_pthreads_set_threads_num(parseInt(threadsNum.value));
+    threadsNum.addEventListener('change', () => {
+      cv.parallel_pthreads_set_threads_num(parseInt(parseInt(threadsNum.value)));
+    });
+  }
+
+  // Event listener for dowscale parameter.
+  let downscaleLevelInput = document.getElementById('downscaleLevel');
+  let downscaleLevelOutput = document.getElementById('downscaleLevelOutput');
+  downscaleLevel = parseInt(downscaleLevelInput.value);
+  downscaleLevelInput.addEventListener('input', function () {
+    downscaleLevel = downscaleLevelOutput.value = parseInt(downscaleLevelInput.value);
+  });
+  downscaleLevelInput.addEventListener('change', function () {
+    downscaleLevel = downscaleLevelOutput.value = parseInt(downscaleLevelInput.value);
   });
 }
 

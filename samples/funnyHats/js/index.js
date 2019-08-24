@@ -77,21 +77,27 @@ function processVideo() {
 
     // Detect faces.
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
-    let scaleFactor = 1.1;
-    let minNeighbors = 3;
-    faceCascade.detectMultiScale(gray, faces, scaleFactor, minNeighbors);
-    deleteObjectsForOldFaces();
+    for (let i = 0; i < downscaleLevel; ++i) cv.pyrDown(gray, gray);
+    faceCascade.detectMultiScale(gray, faces);
+    deleteObjectsForOldFaces(faces);
+
+    let matSize = gray.size();
+    let xRatio = video.width / matSize.width;
+    let yRatio = video.height / matSize.height;
 
     // Process hat and glasses for each face.
     for (let i = 0; i < faces.size(); ++i) {
-      let face = faces.get(i);
-      let hat = getHatCoords(face);
+      let pyrDownFace = faces.get(i);
+      let originalFace = new cv.Rect(pyrDownFace.x * xRatio,
+        pyrDownFace.y * yRatio, pyrDownFace.width * xRatio,
+        pyrDownFace.height * yRatio);
+      let hat = getHatCoords(originalFace);
 
       if (!hatFrames[i]) {
         // Create new hat frame and glasses frame.
         hatFrames.splice(i, 0, hat.coords);
         resizeHat(hat.width, hat.height, i);
-        processGlasses(i, face, "new");
+        processGlasses(i, pyrDownFace, originalFace, gray, xRatio, yRatio, "new");
 
       } else if (exceedJitterLimit(i, hat.coords) || hatOrGlassesChanged) {
         // Replace old hat frame and glasses frame.
@@ -99,9 +105,9 @@ function processVideo() {
         replaceOldHatFrame(i, hat.coords);
         resizeHat(hat.width, hat.height, i);
         if (!glassesFrames[i])
-          processGlasses(i, face, "new");
+          processGlasses(i, pyrDownFace, originalFace, gray, xRatio, yRatio, "new");
         else
-          processGlasses(i, face, "replace");
+          processGlasses(i, pyrDownFace, originalFace, gray, xRatio, yRatio, "replace");
       }
 
       // Draw hat.

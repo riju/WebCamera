@@ -17,9 +17,12 @@
 body {
   margin: 0px;
 }
-.stats-settings {
+
+.stats-settings, .threads-control, .jitterLimit, .edgeError,
+.downscale-level {
   padding: 10px;
   width: 100%;
+  border-bottom: dotted silver 1px;
 }
 .stats-settings #hideStats:hover {
   cursor: pointer;
