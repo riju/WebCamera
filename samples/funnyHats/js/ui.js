@@ -1,3 +1,5 @@
+let carousels = document.querySelectorAll('.carousel-wrapper');
+
 let currentHat = 0;
 let currentGlasses = 0;
 
@@ -81,15 +83,15 @@ function initUI() {
   hatsTab.addEventListener('click', function () {
     closeTabset();
     document.getElementById('menuSelector').innerText = menuTypes.hats;
-    carouselWrappers[1].classList.add('hidden');
-    carouselWrappers[0].classList.remove('hidden');
+    carousels[1].classList.add('hidden');
+    carousels[0].classList.remove('hidden');
   });
   let glassesTab = document.getElementById('glassesTab');
   glassesTab.addEventListener('click', function () {
     closeTabset();
     document.getElementById('menuSelector').innerText = menuTypes.glasses;
-    carouselWrappers[0].classList.add('hidden');
-    carouselWrappers[1].classList.remove('hidden');
+    carousels[0].classList.add('hidden');
+    carousels[1].classList.remove('hidden');
   });
 
   // Hide or show images elements by clicking on main canvas.
@@ -186,16 +188,15 @@ function openTabset() {
 function showMenu() {
   menuVisible = true;
   if (document.getElementById('menuSelector').innerText == menuTypes.hats)
-    carouselWrappers[0].classList.remove('hidden');
-  else carouselWrappers[1].classList.remove('hidden');
-  window.onresize();
+  carousels[0].classList.remove('hidden');
+  else carousels[1].classList.remove('hidden');
 }
 
 function hideMenu() {
   menuVisible = false;
   if (document.getElementById('menuSelector').innerText == menuTypes.hats)
-    carouselWrappers[0].classList.add('hidden');
-  else carouselWrappers[1].classList.add('hidden');
+  carousels[0].classList.add('hidden');
+  else carousels[1].classList.add('hidden');
 }
 
 function showOrHideImageElements() {
@@ -267,7 +268,7 @@ function loadGlasses() {
 }
 
 function createImgNode(id, carouselName) {
-  let liNode = document.createElement('li');
+  let liNode = document.createElement('div');
   liNode.classList.add('card');
   let imgNode = document.createElement('img');
   imgNode.id = id;
@@ -292,11 +293,6 @@ function deleteGlasses() {
 function initTabSet() {
   let tabset = document.getElementsByClassName('tabset')[0];
   tabset.style.top =
-    `${video.height - tabset.offsetHeight - carousels[0].offsetHeight}px`;
+    `${video.height - tabset.offsetHeight - carousels[0].offsetWidth}px`;
   tabset.style.width = `${video.width}px`;
 }
-
-// Resize width of carousel on window resizing.
-window.onresize = function () {
-  resizeMenu();
-};

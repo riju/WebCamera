@@ -118,7 +118,7 @@ function getGlassesCoords(leftEye, rightEye, face) {
   let yUpper = face.y + centeredY - Math.round(yOffset * centeredHeight);
   let yBottom = yUpper + scaledHeight;
 
-  // Find angle.
+  // Find angle of rotation.
   const deltaX = rightEye.x + rightEye.width / 2 - leftEye.x - leftEye.width / 2;
   const deltaY = rightEye.y + rightEye.height / 2 - leftEye.y - leftEye.height / 2;
   const angleRad = -Math.atan2(deltaY, deltaX);
@@ -143,7 +143,7 @@ function getGlassesCoords(leftEye, rightEye, face) {
     const centerX = xUpper + center.x;
     const centerY = yUpper + center.y;
 
-    // Coordinates of rotated rectangle
+    // Coordinates of rotated rectangle.
     const xUpperLeftRotated =
       parseInt(centerX + (xUpper - centerX) * cos + (yUpper - centerY) * sin);
     const yUpperLeftRotated =

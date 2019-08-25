@@ -51,7 +51,7 @@ function deleteOpencvObjects() {
 
 function completeStyling() {
   let cameraBar = document.querySelector('.camera-bar-wrapper');
-  cameraBar.style.width = `${video.videoWidth}px`;
+  cameraBar.style.width = `${video.width}px`;
 
   videoSmall.width = videoSmall.videoWidth;
   videoSmall.height = videoSmall.videoHeight;
