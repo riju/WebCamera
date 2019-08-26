@@ -173,7 +173,7 @@ function showFilterSettings(filter) {
     // Set appropriate position for settings wrapper.
     let settingsWrapper = document.querySelector('.settings-wrapper');
     settingsWrapper.style.bottom =
-      `${settingsWrapper.offsetHeight + carousels[0].offsetHeight}px`;
+      `${settingsWrapper.offsetHeight + carousels[0].offsetWidth}px`;
   }
 }
 
@@ -227,7 +227,7 @@ function initMenuLabels() {
 window.onresize = function () {
   let settingsWrapper = document.querySelector('.settings-wrapper');
   settingsWrapper.style.bottom =
-    `${settingsWrapper.offsetHeight + carousels[0].offsetHeight}px`;
+    `${settingsWrapper.offsetHeight + carousels[0].offsetWidth}px`;
 
 };
 

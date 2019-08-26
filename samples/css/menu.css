@@ -1,7 +1,7 @@
 ::-webkit-scrollbar{width:2px;height:2px;}
 ::-webkit-scrollbar-button{width:2px;height:2px;}
 
-.carousel-wrapper{
+.carousel-wrapper {
   position: absolute;
   display: block;
   overflow-y: auto;
