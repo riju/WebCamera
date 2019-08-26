@@ -14,14 +14,14 @@
   font-size: 14px;
   color: white;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-  padding: 5px 10px 0px;
+  padding: 8px 10px 0px;
   border: 1px solid transparent;
   border-bottom: 0;
   cursor: pointer;
   border-radius: 10px;
 }
 .tabset > input:checked + label {
-  background-color: #9bb4e2;
+  background-color: rgba(0, 0, 0, 0.4);
 }
 #menuSelector {
   font-size: 24px;

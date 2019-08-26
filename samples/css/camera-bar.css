@@ -51,19 +51,24 @@
   height: 50px;
   width: 50px;
 }
-#takePhotoButton, #retryButton, #doneButton {
+#takePhotoButton, #retryButton {
   font-size: 48px;
   padding: 10px;
   width: 72px;
+  outline: none;
 }
-#takePhotoButton:active {
+#takePhotoButton:active, #facingModeButton:active {
   color: silver;
   border: 2px solid silver;
+}
+#retryButton:active {
+  color: gray;
 }
 #facingModeButton {
   font-size: 30px;
   padding: 10px;
   width: 55px;
+  outline: none;
 }
 #retryButton {
   color: black;

@@ -1,5 +1,7 @@
 let controls;
 
+let carousels = document.querySelectorAll('.carousel-wrapper');
+
 const filters = {
   'passThrough': 'No Filter',
   'gray': 'Gray',
@@ -185,13 +187,13 @@ function hideFilterSettings(filter) {
 
 function showMenu() {
   controls.menuVisible = true;
-  carouselWrappers[0].classList.remove('hidden');
+  carousels[0].classList.remove('hidden');
   window.onresize();
 }
 
 function hideMenu() {
   controls.menuVisible = false;
-  carouselWrappers[0].classList.add('hidden');
+  carousels[0].classList.add('hidden');
 }
 
 function showOrHideCanvasElements() {
@@ -223,7 +225,6 @@ function initMenuLabels() {
 }
 
 window.onresize = function () {
-  resizeMenu();
   let settingsWrapper = document.querySelector('.settings-wrapper');
   settingsWrapper.style.bottom =
     `${settingsWrapper.offsetHeight + carousels[0].offsetHeight}px`;
