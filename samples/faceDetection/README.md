@@ -43,7 +43,7 @@ OpenCV function `detectMultiScale(...)` detects faces. Arguments of the function
 
 **4. Detect eyes**
 
-For each face we copy face rectangle and pass it eye detection classifier:
+For each face we copy face rectangle and pass it to eye detection classifier:
 
 ```javascript
 let faceGray = gray.roi(face);
