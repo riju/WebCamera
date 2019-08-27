@@ -18,12 +18,12 @@ as well as setting the exposure time in time units.
 Shutter speed needs to be controlled to take low-light pictures or
 create motion-blur effects. This can also be used to create HDR images.
 
-Image Capture API also has an API for setting focusMode to manual, 
-but it is not very useful if the focus distance cannot be set. 
-This API provides an interface for getting focus range values as 
+Image Capture API also has an API for setting focusMode to manual,
+but it is not very useful if the focus distance cannot be set.
+This API provides an interface for getting focus range values as
 well as setting focus distance value.
 
-This can be used to create Depth of Field or "bokeh" effect, and 
+This can be used to create Depth of Field or "bokeh" effect, and
 will also be useful for Focus Stacking.
 
 Implementation information for other properties can be found in [here](https://github.com/w3c/mediacapture-image/blob/master/implementation-status.md).
