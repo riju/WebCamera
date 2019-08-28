@@ -179,6 +179,8 @@ function isMobileDevice() {
 };
 
 function getVideoConstraint(menuHeight) {
+  menuHeight = menuHeight + 120; // Add 120 pixels for browser panel.
+
   if (isMobileDevice()) {
     // TODO(sasha): figure out why getUserMedia(...) in utils.js
     // swap width and height for mobile devices.

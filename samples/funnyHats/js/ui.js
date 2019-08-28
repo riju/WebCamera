@@ -137,6 +137,7 @@ function initUI() {
       videoConstraint.deviceId = { exact: controls.frontCamera.deviceId };
       facingModeButton.innerText = 'camera_rear';
     }
+    utils.clearError();
     utils.stopCamera();
     utils.startCamera(videoConstraint, 'videoInput', startVideoProcessing);
   });

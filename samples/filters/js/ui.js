@@ -25,7 +25,6 @@ function initUI() {
   let menuHeight = parseInt(getComputedStyle(
     document.querySelector('.camera-bar-wrapper')).height);
   getVideoConstraint(menuHeight);
-  calculateSmallVideoConstraint();
   initStats();
 
   controls = {
@@ -108,10 +107,6 @@ function initUI() {
     drawCanvas(dstCanvas, canvasOutput);
   });
 
-  // Set initial facingMode value for small video.
-  if (controls.backCamera != null) {
-    smallVideoConstraint.facingMode = controls.facingMode;
-  }
   // TODO(sasha): move to utils.js.
   let facingModeButton = document.getElementById('facingModeButton');
   // Switch to face or environment mode by clicking facingModeButton.
@@ -119,37 +114,16 @@ function initUI() {
     if (controls.facingMode == 'user') {
       controls.facingMode = 'environment';
       videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
-      smallVideoConstraint.deviceId = { exact: controls.backCamera.deviceId };
       facingModeButton.innerText = 'camera_front';
     } else if (controls.facingMode == 'environment') {
       controls.facingMode = 'user';
       videoConstraint.deviceId = { exact: controls.frontCamera.deviceId };
-      smallVideoConstraint.deviceId = { exact: controls.frontCamera.deviceId };
       facingModeButton.innerText = 'camera_rear';
     }
-    stopCamera(video);
-    stopCamera(videoSmall);
-    utils.startCamera(videoConstraint, 'videoInputMain', () => {
-      // TODO(sasha): figure out why some cameras don't work
-      // if we create two streams.
-      utils.startCamera(smallVideoConstraint,
-        'videoInputSmall', startVideoProcessing);
-    });
+    utils.clearError();
+    utils.stopCamera();
+    utils.startCamera(videoConstraint, 'videoInput', startVideoProcessing);
   });
-}
-
-function calculateSmallVideoConstraint() {
-  if (isMobileDevice()) {
-    smallVideoConstraint = {
-      width: { ideal: parseInt(window.screen.width / 5) },
-      height: { ideal: parseInt(window.screen.width / 5) }
-    };
-  } else { // Create 5 times lower square resolution.
-    smallVideoConstraint = {
-      width: { ideal: parseInt(videoConstraint.height.exact / 5) },
-      height: { ideal: parseInt(videoConstraint.height.exact / 5) }
-    };
-  }
 }
 
 function setFilter(filter) {
@@ -210,7 +184,7 @@ function initMenuLabels() {
   let fontSize;
   if (video.width >= 500) fontSize = `16px`;
   else if (video.width >= 400) fontSize = `14px`;
-  else if (video.width >= 300) fontSize = `12px`;
+  else if (video.width >= 300) fontSize = `10px`;
   else fontSize = `10px`;
   carousels.forEach(function (carousel) {
     carousel.style.fontSize = fontSize;

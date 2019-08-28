@@ -1,17 +1,16 @@
 let utils = new Utils('errorMessage');
 let stats = null;
 let videoConstraint;
-let smallVideoConstraint;
 let streaming = false;
 let imageCapturer = null;
 let videoTrack = null;
 
-let video = document.getElementById('videoInputMain');
-let videoSmall = document.getElementById('videoInputSmall');
+let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
+let smallCanvasInput = null;
+let smallCanvasInputCtx = null;
 
 let videoCapturer = null;
-let videoCapturerSmall = null;
 let src = null;
 let dstC1 = null;
 let dstC3 = null;
@@ -21,20 +20,21 @@ let dstC1Small = null;
 let dstC3Small = null;
 let dstC4Small = null;
 
+// This object will keep size and coordinates for filtered previews.
+let previews = {};
 
 function initOpencvObjects() {
   videoCapturer = new cv.VideoCapture(video);
-  videoCapturerSmall = new cv.VideoCapture(videoSmall);
 
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   dstC1 = new cv.Mat(video.height, video.width, cv.CV_8UC1);
   dstC3 = new cv.Mat(video.height, video.width, cv.CV_8UC3);
   dstC4 = new cv.Mat(video.height, video.width, cv.CV_8UC4);
 
-  srcSmall = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC4);
-  dstC1Small = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC1);
-  dstC3Small = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC3);
-  dstC4Small = new cv.Mat(videoSmall.height, videoSmall.width, cv.CV_8UC4);
+  srcSmall = new cv.Mat(previews.finalWidth, previews.finalWidth, cv.CV_8UC4);
+  dstC1Small = new cv.Mat(previews.finalWidth, previews.finalWidth, cv.CV_8UC1);
+  dstC3Small = new cv.Mat(previews.finalWidth, previews.finalWidth, cv.CV_8UC3);
+  dstC4Small = new cv.Mat(previews.finalWidth, previews.finalWidth, cv.CV_8UC4);
 }
 
 function deleteOpencvObjects() {
@@ -53,21 +53,35 @@ function completeStyling() {
   let cameraBar = document.querySelector('.camera-bar-wrapper');
   cameraBar.style.width = `${video.width}px`;
 
-  videoSmall.width = videoSmall.videoWidth;
-  videoSmall.height = videoSmall.videoHeight;
-  initMenu(videoSmall.height, videoSmall.height);
+  // Each filter will be shown in a small square canvas,
+  // so we have to find width of this square and x, y positions where
+  // to start clipping from original image to make it as a square.
+  let smallCanvasWidth = parseInt(video.width / 6);
+  let smallCanvasHeight = parseInt(video.height / 6);
+  if (smallCanvasWidth > smallCanvasHeight) {
+    previews.originalWidth = video.height;
+    previews.finalWidth = smallCanvasHeight;
+    previews.x = (video.width - video.height) / 2;
+    previews.y = 0;
+  } else {
+    previews.originalWidth = video.width;
+    previews.finalWidth = smallCanvasWidth;
+    previews.x = 0;
+    previews.y = (video.height - video.width) / 2;
+  }
 
+  initMenu(previews.finalWidth, previews.finalWidth);
   initMenuLabels();
   initFiltersSettings();
 
-  document.getElementById('takePhotoButton').disabled = false;
-}
+  // Create extra canvas to put there resized original image
+  // for processing of filtered previews.
+  smallCanvasInput = document.createElement('canvas');
+  smallCanvasInput.width = previews.finalWidth;
+  smallCanvasInput.height = previews.finalWidth;
+  smallCanvasInputCtx = smallCanvasInput.getContext('2d');
 
-function applyFacingModeToSmallVideo() {
-  let smallVideoTrack = videoSmall.srcObject.getVideoTracks()[0];
-  let constraints = smallVideoTrack.getConstraints();
-  constraints.facingMode = { exact: controls.facingMode };
-  smallVideoTrack.applyConstraints(constraints).catch(e => console.log(e));
+  document.getElementById('takePhotoButton').disabled = false;
 }
 
 function applyCurrentFilter() {
@@ -101,7 +115,15 @@ function processVideo() {
   videoCapturer.read(src);
   cv.imshow('canvasOutput', applyCurrentFilter());
 
-  videoCapturerSmall.read(srcSmall);
+  // Resize original image for processing of filtered previews.
+  smallCanvasInputCtx.drawImage(video, previews.x, previews.y,
+    previews.originalWidth, previews.originalWidth,
+    0, 0, previews.finalWidth, previews.finalWidth);
+  let imageData = smallCanvasInputCtx
+    .getImageData(0, 0, previews.finalWidth, previews.finalWidth);
+  srcSmall.data.set(imageData.data);
+
+  // Show filtered previews.
   cv.imshow('passThroughCanvas', passThrough(srcSmall));
   cv.imshow('grayCanvas', gray(srcSmall, dstC1Small));
   cv.imshow('hsvCanvas', hsv(srcSmall, dstC3Small));
@@ -128,44 +150,20 @@ function processVideo() {
 }
 
 function startCamera() {
-  // Set initial facingMode for small video.
-  if (controls.backCamera != null) {
-    controls.facingMode = 'environment';
-    smallVideoConstraint.deviceId = { exact: controls.backCamera.deviceId };
-  }
 
   if (!streaming) {
     utils.clearError();
-    utils.startCamera(videoConstraint, 'videoInputMain', () => {
-      // TODO(sasha): figure out why some cameras don't work
-      // if we create two streams.
-      utils.startCamera(smallVideoConstraint,
-        'videoInputSmall', onVideoStarted);
-    });
+    utils.startCamera(videoConstraint, 'videoInput', onVideoStarted);
   } else {
-    stopCamera(video);
-    stopCamera(videoSmall);
+    utils.stopCamera();
     onVideoStopped();
   }
 }
 
 function cleanupAndStop() {
   deleteOpencvObjects();
-  stopCamera(video);
-  stopCamera(videoSmall);
-  onVideoStopped();
+  utils.stopCamera(); onVideoStopped();
 }
-
-function stopCamera(videoElem) {
-  if (videoElem) {
-    videoElem.pause();
-    videoElem.srcObject = null;
-    videoElem.removeEventListener('canplay', utils.onVideoCanPlay);
-  }
-  if (videoElem.srcObject) {
-    videoElem.srcObject.getVideoTracks()[0].stop();
-  }
-};
 
 utils.loadOpenCv(() => {
   initUI();
