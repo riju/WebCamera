@@ -48,8 +48,8 @@ function processVideo() {
     // Convert image to gray and apply canny filter.
     cv.cvtColor(src, dst, cv.COLOR_RGB2GRAY, 0);
     //cv.GaussianBlur(dst, dst, { width: 5, height: 5 }, 0, 0, cv.BORDER_DEFAULT);
-    // 15 and 45 are values of the first and second thresholds, 3 is aperture size.
-    cv.Canny(dst, dst, 15, 45, 3, false);
+    // 15 and 45 are values of the first and second thresholds.
+    cv.Canny(dst, dst, 15, 45);
 
     let contours = new cv.MatVector();
     let hierarchy = new cv.Mat();
@@ -64,7 +64,7 @@ function processVideo() {
 
       if (approxCnt.rows == 4) { // If contour approximation has 4 angles.
         // Get coordinates of contour and sort them clockwise
-        // with upper left point as the first.
+        // with upper left point as the first point.
         let sortedCoordinates = getContourCoordinates(approxCnt);
 
         if (isCloseToExpectedContour(sortedCoordinates)) {
@@ -112,10 +112,6 @@ function initUI() {
   initStats();
 
   controls = {
-    frontCamera: null,
-    backCamera: null,
-    facingMode: '',
-
     // We draw rectangle on video stream to position card inside it
     // so expected contour includes vertices of this rectangle.
     expectedContour: [],

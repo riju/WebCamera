@@ -289,3 +289,45 @@ function takePhoto(photoSettings = null) {
     })
     .catch((err) => console.error("takePhoto() failed: ", err));
 }
+
+function getContourCoordinates(contour) {
+  let coordinates = [];
+  let sum = [];
+  for (let i = 0; i < contour.rows; i++) {
+    coordinates.push({ x: contour.data32S[i * 2], y: contour.data32S[i * 2 + 1] });
+    sum.push(coordinates[i].x + coordinates[i].y);
+  }
+
+  let sortedCoordinates = [0, 0, 0, 0];
+  let firstIndex = sum.indexOf(Math.min(...sum));
+  if (firstIndex == 0) {
+    sortedCoordinates[0] = coordinates[0];
+    sortedCoordinates[1] = coordinates[3];
+    sortedCoordinates[2] = coordinates[2];
+    sortedCoordinates[3] = coordinates[1];
+  } else { // firstIndex == 1
+    sortedCoordinates[0] = coordinates[1];
+    sortedCoordinates[1] = coordinates[0];
+    sortedCoordinates[2] = coordinates[3];
+    sortedCoordinates[3] = coordinates[2];
+  }
+  return sortedCoordinates;
+}
+
+function resizeImage(image, width = 'undefined', height = 'undefined') {
+  let dim;
+
+  if (width == 'undefined' && height == 'undefined')
+    return image;
+
+  let ratio;
+  if (width == 'undefined') {
+    ratio = height / image.rows;
+    dim = new cv.Size(parseInt(image.cols * ratio), height);
+  } else {
+    ratio = width / image.cols;
+    dim = new cv.Size(width, parseInt(image.rows * ratio));
+  }
+
+  cv.resize(image, image, dim, cv.INTER_AREA);
+}

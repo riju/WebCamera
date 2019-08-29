@@ -5,24 +5,6 @@ CARD_TYPE = {
   "6": "Discover Card"
 }
 
-function resize(image, width = 'undefined', height = 'undefined') {
-  let dim;
-
-  if (width == 'undefined' && height == 'undefined')
-    return image;
-
-  let ratio;
-  if (width == 'undefined') {
-    ratio = height / image.rows;
-    dim = new cv.Size(parseInt(image.cols * ratio), height);
-  } else {
-    ratio = width / image.cols;
-    dim = new cv.Size(width, parseInt(image.rows * ratio));
-  }
-
-  cv.resize(image, image, dim, cv.INTER_AREA);
-}
-
 // Sort rectangles according to x coordinate.
 function compareRect(a, b) {
   if (a.x > b.x) return 1;
@@ -30,7 +12,7 @@ function compareRect(a, b) {
   return 0;
 }
 
-function getSortedRectangles(contours) {
+function getRectangles(contours) {
   let rectangles = [];
   // Extract rectangle from each contour.
   for (let i = 0; i < contours.size(); ++i) {
@@ -54,7 +36,7 @@ function getReferenceDigits(imgId, refSize) {
   let hierarchy = new cv.Mat();
   cv.findContours(src, contours, hierarchy, cv.RETR_EXTERNAL,
     cv.CHAIN_APPROX_SIMPLE);
-  let rectangles = getSortedRectangles(contours);
+  let rectangles = getRectangles(contours);
   contours.delete(); hierarchy.delete();
 
   let digits = [];
@@ -78,7 +60,7 @@ function loadCardImg(src, grayCard, rectPointUpperLeft, rectPointBottomRight) {
   cardImg = src.roi(rect);
 
   // Resize card and convert it to grayscale.
-  resize(cardImg, width = 300);
+  resizeImage(cardImg, width = 300);
   cv.cvtColor(cardImg, grayCard, cv.COLOR_BGR2GRAY);
   cardImg.delete();
 }
@@ -132,7 +114,7 @@ function findDigitGroups(filteredCard) {
   let hierarchy = new cv.Mat();
   cv.findContours(filteredCard, contours, hierarchy, cv.RETR_EXTERNAL,
     cv.CHAIN_APPROX_SIMPLE);
-  let groupRectangles = getSortedRectangles(contours);
+  let groupRectangles = getRectangles(contours);
 
   let digitGroups = [];
   for (let i = 0; i < groupRectangles.length; ++i) {
@@ -184,12 +166,12 @@ function detectDigitsInGroup(groupRect, grayCard, refDigits, refSize) {
   cv.threshold(groupSrc, groupSrc, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
   //outputToCanvas(groupSrc);
 
-  // Detect the contours of each individual digit in the group,
+  // Detect the contour of each individual digit in the group,
   // then sort the digit contours from left to right.
   let contours = new cv.MatVector();
   let hierarchy = new cv.Mat();
   cv.findContours(groupSrc, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-  let digitRectangles = getSortedRectangles(contours);
+  let digitRectangles = getRectangles(contours);
   contours.delete(); hierarchy.delete();
 
   // Initialize the list of group digits.
@@ -265,30 +247,6 @@ function startCardProcessing(src, rectPointUpperLeft, rectPointBottomRight) {
   showCard(grayCard, rectPointUpperLeft, rectPointBottomRight);
 
   deleteMatObjects(refDigits, grayCard, filteredCard);
-}
-
-function getContourCoordinates(contour) {
-  let coordinates = [];
-  let sum = [];
-  for (let i = 0; i < contour.rows; i++) {
-    coordinates.push({ x: contour.data32S[i * 2], y: contour.data32S[i * 2 + 1] });
-    sum.push(coordinates[i].x + coordinates[i].y);
-  }
-
-  let sortedCoordinates = [0, 0, 0, 0];
-  let firstIndex = sum.indexOf(Math.min(...sum));
-  if (firstIndex == 0) {
-    sortedCoordinates[0] = coordinates[0];
-    sortedCoordinates[1] = coordinates[3];
-    sortedCoordinates[2] = coordinates[2];
-    sortedCoordinates[3] = coordinates[1];
-  } else { // firstIndex == 1
-    sortedCoordinates[0] = coordinates[1];
-    sortedCoordinates[1] = coordinates[0];
-    sortedCoordinates[2] = coordinates[3];
-    sortedCoordinates[3] = coordinates[2];
-  }
-  return sortedCoordinates;
 }
 
 function isCloseToExpectedContour(coordinates) {
