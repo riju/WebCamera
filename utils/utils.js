@@ -251,7 +251,7 @@ function initCameraSettingsAndStart() {
       // Disable facingModeButton if there is no environment or user mode.
       let facingModeButton = document.getElementById('facingModeButton');
       if (facingModeButton) {
-        if (controls.frontCamera == null || controls.backCamera == null) {
+        if (controls.frontCamera == 'undefined' || controls.backCamera == 'undefined') {
           facingModeButton.style.color = 'gray';
           facingModeButton.style.border = '2px solid gray';
         } else {
@@ -260,7 +260,7 @@ function initCameraSettingsAndStart() {
       }
 
       // Set initial facingMode value if camera is available.
-      if (controls.backCamera != null) {
+      if (controls.backCamera != 'undefined') {
         controls.facingMode = 'environment';
         videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
       }
@@ -290,6 +290,8 @@ function takePhoto(photoSettings = null) {
     .catch((err) => console.error("takePhoto() failed: ", err));
 }
 
+// Get coordinates of contour and sort them clockwise
+// with upper left point as the first point.
 function getContourCoordinates(contour) {
   let coordinates = [];
   let sum = [];

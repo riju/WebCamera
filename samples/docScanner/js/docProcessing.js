@@ -1,20 +1,50 @@
 const MIN_AREA = 5000;
+const DEFAULT_EDGE_OFFSET = 15; // In pixels.
+const TOUCH_DETECTION_RADIUS = 20; // In pixels.
+
+let approxCoords; // Four points.
+let isDragging = false;
+let selectedCoords = [];
+let isPointdragging = [false, false, false, false];
 
 function startProcessing(src) {
-  // 1. Detect edges of the document.
-  // Convert image to gray, gaussian blur and canny filter.
+  // Detect edges of the document.
   dst = new cv.Mat();
-  cv.cvtColor(src, dst, cv.COLOR_RGB2GRAY);
-  cv.GaussianBlur(dst, dst, { width: 5, height: 5 }, 0, 0, cv.BORDER_DEFAULT);
-  // 75 and 200 are values of the first and second thresholds.
-  cv.Canny(dst, dst, 75, 200);
+  detectDocEdges(src, dst);
 
   let contours = new cv.MatVector();
   let hierarchy = new cv.Mat();
   let approxCnt = new cv.Mat();
-  cv.findContours(dst, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
 
-  //let maxPerimeter = 0;
+  // Use the edges in the image to find the contour
+  // representing the piece of paper being scanned.
+  cv.findContours(dst, contours, hierarchy,
+    cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+  let maxAreaResult = findMaxAreaContour(contours, approxCnt);
+  showContour(src, contours, approxCnt, maxAreaResult);
+
+  addCanvasEventListeners();
+
+  // Remove takePhoto button, add retry and ok button.
+  let cameraBar = document.getElementById('cameraBar');
+  cameraBar.removeChild(cameraBar.children[0]);
+  createRetryButton(src);
+  createOkButton(src, approxCoords);
+
+  dst.delete();
+  contours.delete();
+  hierarchy.delete();
+  approxCnt.delete();
+}
+
+function detectDocEdges(src, dst) {
+  cv.cvtColor(src, dst, cv.COLOR_RGB2GRAY);
+  cv.GaussianBlur(dst, dst, { width: 5, height: 5 }, 0, 0, cv.BORDER_DEFAULT);
+  // 75 and 200 are values of the first and second thresholds.
+  cv.Canny(dst, dst, 75, 200);
+}
+
+function findMaxAreaContour(contours, approxCnt) {
   let maxArea = 0;
   let index;
   for (let i = 0; i < contours.size(); ++i) {
@@ -23,85 +53,45 @@ function startProcessing(src) {
     // Approximate the contour with the (0.01 * perimeter) precision.
     cv.approxPolyDP(cnt, approxCnt, 0.01 * perimeter, true);
     let area = cv.contourArea(cnt);
-
-    // If contour approximation has 4 angles and
-    // perimeter of this contour is the biggest.
+    // Check that contour has 4 angles.
     if (approxCnt.rows == 4 && area > maxArea) {
       maxArea = area;
-      //maxPerimeter = perimeter;
       index = i;
     }
     cnt.delete();
   }
+  return { maxArea: maxArea, i: index };
+}
 
-  let srcClone = src.clone();
-  let color = [0, 255, 0, 255];
-  let rect;
-  if (maxArea > MIN_AREA) { // Don't show small contours as documents.
+function setCanvasBackground() {
+  // Generate image from the canvas.
+  var imageDataURL = canvasOutput.toDataURL();
+  // Set this image as canvas background
+  // so we don't need to redraw it every time.
+  canvasOutput.style.background = "url('" + imageDataURL + "')";
+}
+
+function showContour(src, contours, approxCnt, res) {
+  if (res.maxArea > MIN_AREA) { // Don't show small contours as documents.
     let approxContours = new cv.MatVector();
-    let cnt = contours.get(index);
+    let cnt = contours.get(res.i);
     let perimeter = cv.arcLength(cnt, true);
     cv.approxPolyDP(cnt, approxCnt, 0.01 * perimeter, true);
     approxContours.push_back(approxCnt);
     // Add edge of the document to the image source and show.
-    rect = getContourCoordinates(approxCnt);
-    cv.drawContours(srcClone, approxContours, 0, color, 2);
-    cv.imshow('canvasOutput', srcClone);
+    approxCoords = getContourCoordinates(approxCnt);
     approxContours.delete();
+    cnt.delete();
   } else {
-    // Output borders of the entire image as we didn't detect any doc.
-    rect = [{ x: 5, y: 5 }, { x: srcClone.cols - 5, y: 5 },
-      { x: srcClone.cols - 5, y: srcClone.rows - 5 },
-      { x: 5, y: srcClone.rows - 5 }];
-    cv.rectangle(srcClone, rect[0], rect[2], color, 2);
-    cv.imshow('canvasOutput', srcClone);
+    // Create default edges because we didn't detect any doc.
+    approxCoords = [{ x: DEFAULT_EDGE_OFFSET, y: DEFAULT_EDGE_OFFSET },
+    { x: src.cols - DEFAULT_EDGE_OFFSET, y: DEFAULT_EDGE_OFFSET },
+    { x: src.cols - DEFAULT_EDGE_OFFSET, y: src.rows - DEFAULT_EDGE_OFFSET },
+    { x: DEFAULT_EDGE_OFFSET, y: src.rows - DEFAULT_EDGE_OFFSET }];
   }
-
-  let cameraBar = document.getElementById('cameraBar');
-  cameraBar.removeChild(cameraBar.children[0]);
-  addButtonToCameraBar('retryButton', 'refresh', 2);
-  addButtonToCameraBar('okButton', 'done', 2);
-
-  let retryButton = document.getElementById('retryButton');
-  retryButton.addEventListener('click', function () {
-    cameraBar.removeChild(cameraBar.children[0]);
-    cameraBar.removeChild(cameraBar.children[0]);
-    addButtonToCameraBar('takePhotoButton', 'photo_camera', 1);
-    startDocProcessing = false;
-    requestAnimationFrame(processVideo);
-    if (approxCnt != 'undefined' && !approxCnt.isDeleted()) approxCnt.delete();
-    let takePhotoButton = document.getElementById('takePhotoButton');
-    takePhotoButton.addEventListener('click', function () {
-      startDocProcessing = true;
-      startProcessing(src);
-    });
-  });
-  let okButton = document.getElementById('okButton');
-  okButton.addEventListener('click', function () {
-    cameraBar.removeChild(cameraBar.children[1]);
-    addButtonToCameraBar('saveButton', 'save_alt', 2);
-    // Obtain a consistent order of contour points.
-    let warpedImage = new cv.Mat();
-    fourPointTransform(src, rect, warpedImage);
-    cv.cvtColor(warpedImage, warpedImage, cv.COLOR_BGR2GRAY);
-    cv.adaptiveThreshold(warpedImage, warpedImage, 250,
-      cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,
-      11, 10); // block size is 11, offset is 10.
-
-    let videoAspectRatio = video.height / video.width;
-    let docAspectRatio = warpedImage.rows / warpedImage.cols;
-    if (docAspectRatio > videoAspectRatio)
-      resizeImage(warpedImage, undefined, height = video.height);
-    else resizeImage(warpedImage, width = video.width);
-
-    cv.imshow('canvasOutput', warpedImage);
-    warpedImage.delete();
-    approxCnt.delete();
-  });
-
-  dst.delete(); srcClone.delete();
-  contours.delete();
-  hierarchy.delete();
+  // Show image with document as background because we don't need to redraw it.
+  setCanvasBackground();
+  drawPoints();
 }
 
 function addButtonToCameraBar(id, text, maxItems) {
@@ -125,6 +115,101 @@ function addButtonToCameraBar(id, text, maxItems) {
   divElement.appendChild(button);
   liElement.appendChild(divElement);
   cameraBar.appendChild(liElement);
+}
+
+function createTakePhotoListener() {
+  let takePhotoButton = document.getElementById('takePhotoButton');
+  takePhotoButton.addEventListener('click', function () {
+    selectedCoords = [];
+    startDocProcessing = true;
+    document.getElementsByTagName('body')[0]
+      .style.overscrollBehaviorY = 'contain';
+    startProcessing(src);
+  });
+}
+
+function createRetryButton(src) {
+  let cameraBar = document.getElementById('cameraBar');
+  addButtonToCameraBar('retryButton', 'refresh', 2);
+  let retryButton = document.getElementById('retryButton');
+
+  retryButton.addEventListener('click', function () {
+    cameraBar.removeChild(cameraBar.children[0]);
+    cameraBar.removeChild(cameraBar.children[0]);
+    addButtonToCameraBar('takePhotoButton', 'photo_camera', 1);
+
+    document.getElementsByTagName('body')[0]
+      .style.overscrollBehaviorY = 'auto';
+    createTakePhotoListener();
+    removeCanvasEventListeners();
+    canvasOutput.style.background = 'initial';
+    isDragging = false;
+    selectedCoords = [];
+    startDocProcessing = false;
+    requestAnimationFrame(processVideo);
+  });
+}
+
+function createOkButton(src, approxCoords) {
+  let cameraBar = document.getElementById('cameraBar');
+  addButtonToCameraBar('okButton', 'done', 2);
+  let okButton = document.getElementById('okButton');
+
+  okButton.addEventListener('click', function () {
+    cameraBar.removeChild(cameraBar.children[1]);
+    addButtonToCameraBar('saveButton', 'save_alt', 2);
+
+    document.getElementsByTagName('body')[0]
+      .style.overscrollBehaviorY = 'auto';
+    removeCanvasEventListeners();
+    processDocument(src, approxCoords);
+  });
+}
+
+function processDocument(src, approxCoords) {
+  // Apply a perspective transform to obtain the top-down view of the document.
+  let warpedImage = new cv.Mat();
+  fourPointTransform(src, approxCoords, warpedImage);
+
+  let thresholdedImage = new cv.Mat();
+  // To obtain the black and white feel to the image,
+  // we convert warped image to grayscale and apply adaptive thresholding.
+  cv.cvtColor(warpedImage, warpedImage, cv.COLOR_BGR2GRAY);
+  cv.adaptiveThreshold(warpedImage, thresholdedImage, 250,
+    cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,
+    9,   // Block size
+    10); // Offset
+
+  resizeDoc(thresholdedImage);
+  //showScannedDoc(thresholdedImage);
+  cv.imshow('canvasOutput', thresholdedImage);
+
+  warpedImage.delete(); thresholdedImage.delete();
+}
+
+function resizeDoc(image) {
+  let videoAspectRatio = video.height / video.width;
+  let docAspectRatio = image.rows / image.cols;
+  if (docAspectRatio > videoAspectRatio)
+    resizeImage(image, undefined, height = video.height);
+  else resizeImage(image, width = video.width);
+}
+
+function showScannedDoc(image) {
+  //canvasContext.clearRect(0, 0, video.width, video.height);
+
+  //let imageDst = new cv.Mat(image.rows, image.cols, cv.CV_8UC4);
+  //image.convertTo(image, cv.CV_32S);
+
+  // Extract image data.
+  let imgData = new ImageData(new Uint8ClampedArray(image.data),
+    image.cols, image.rows);
+
+  let startX = (video.width - image.cols) / 2;
+  let startY = (video.height - image.rows) / 2;
+  canvasContext.putImageData(imgData, startX, startY);
+
+  //imageDst.delete();
 }
 
 function fourPointTransform(image, rect, warpedImage) {
@@ -160,3 +245,134 @@ function fourPointTransform(image, rect, warpedImage) {
 
   M.delete(); imgTri.delete(); dstTri.delete();
 }
+
+function drawPoints() {
+  canvasContext.strokeStyle = '#57CC65';
+  for (let i = 0; i < approxCoords.length; i++) {
+    canvasContext.beginPath();
+    canvasContext.arc(approxCoords[i].x, approxCoords[i].y, 5, 0, 2 * Math.PI, false);
+    canvasContext.lineWidth = 10;
+    canvasContext.stroke();
+  }
+  canvasContext.beginPath();
+  canvasContext.moveTo(approxCoords[0].x, approxCoords[0].y);
+  canvasContext.lineTo(approxCoords[1].x, approxCoords[1].y);
+  canvasContext.lineTo(approxCoords[2].x, approxCoords[2].y);
+  canvasContext.lineTo(approxCoords[3].x, approxCoords[3].y);
+  canvasContext.lineTo(approxCoords[0].x, approxCoords[0].y);
+  canvasContext.lineWidth = 3;
+  canvasContext.stroke();
+}
+
+function addCanvasEventListeners() {
+  if (isMobileDevice()) {
+    canvasOutput.addEventListener('touchstart', startDragging);
+    canvasOutput.addEventListener('touchmove', drag);
+    canvasOutput.addEventListener('touchend', endDragging);
+    canvasOutput.addEventListener('touchcancel', cancelDragging);
+  } else {
+    canvasOutput.addEventListener('mousedown', startDragging);
+    canvasOutput.addEventListener('mousemove', drag);
+    canvasOutput.addEventListener('mouseup', endDragging);
+    canvasOutput.addEventListener('mouseout', cancelDragging);
+  }
+}
+
+function removeCanvasEventListeners() {
+  if (isMobileDevice()) {
+    canvasOutput.addEventListener('touchstart', startDragging);
+    canvasOutput.addEventListener('touchmove', drag);
+    canvasOutput.addEventListener('touchend', endDragging);
+    canvasOutput.addEventListener('touchcancel', cancelDragging);
+  } else {
+    canvasOutput.removeEventListener("mousedown", startDragging);
+    canvasOutput.removeEventListener("mousemove", drag);
+    canvasOutput.removeEventListener("mouseup", endDragging);
+    canvasOutput.removeEventListener("mouseout", cancelDragging);
+  }
+}
+
+function startDragging(e) {
+  isDragging = true;
+  let position;
+  if (isMobileDevice()) position = getTouchPos(e);
+  else position = getMousePos(e);
+
+  for (let i = 0; i < approxCoords.length; ++i) {
+    canvasContext.beginPath();
+    canvasContext.rect(approxCoords[i].x - TOUCH_DETECTION_RADIUS,
+      approxCoords[i].y - TOUCH_DETECTION_RADIUS,
+      TOUCH_DETECTION_RADIUS * 2, TOUCH_DETECTION_RADIUS * 2);
+
+    if (canvasContext.isPointInPath(position.x, position.y)) {
+      isPointdragging[i] = true;
+      approxCoords[i] = position;
+      break;
+
+    } else {
+      isPointdragging[i] = false;
+    }
+  }
+}
+
+function drag(e) {
+  let position;
+  if (isMobileDevice()) position = getTouchPos(e);
+  else position = getMousePos(e);
+  changeCursorStyle(position);
+
+  if (isDragging) {
+    canvasContext.clearRect(0, 0, video.width, video.height);
+
+    for (let i = 0; i < approxCoords.length; ++i) {
+      if (isPointdragging[i]) {
+        approxCoords[i] = position;
+        break;
+      }
+    }
+
+    drawPoints();
+  }
+}
+
+function endDragging() {
+  isDragging = false;
+  for (let i = 0; i < approxCoords.length; ++i) {
+    isPointdragging[i] = false;
+  }
+}
+
+function cancelDragging() {
+  isDragging = false;
+  for (let i = 0; i < approxCoords.length; ++i) {
+    isPointdragging[i] = false;
+  }
+}
+
+function getMousePos(e) {
+  let mouseX = Math.round(e.pageX - canvasOutput.offsetLeft);
+  let mouseY = Math.round(e.pageY - canvasOutput.offsetTop);
+  return { x: mouseX, y: mouseY };
+}
+
+function getTouchPos(e) {
+  let touchX = Math.round(e.touches[0].pageX - canvasOutput.offsetLeft);
+  let touchY = Math.round(e.touches[0].pageY - canvasOutput.offsetTop);
+  return { x: touchX, y: touchY };
+}
+
+function changeCursorStyle(position) {
+  canvasOutput.style.cursor = 'default';
+  for (let i = 0; i < approxCoords.length; ++i) {
+    canvasContext.beginPath();
+    canvasContext.rect(approxCoords[i].x - TOUCH_DETECTION_RADIUS,
+      approxCoords[i].y - TOUCH_DETECTION_RADIUS,
+      TOUCH_DETECTION_RADIUS * 2, TOUCH_DETECTION_RADIUS * 2);
+
+    if (canvasContext.isPointInPath(position.x, position.y)) {
+      canvasOutput.style.cursor = 'grab';
+      break;
+    }
+  }
+}
+

@@ -76,11 +76,11 @@
 }
 #retryButton {
   color: black;
-  background-color: rgb(255, 60, 60);
+  background-color: rgb(255, 94, 94);
   border: none;
 }
 #okButton, #saveButton {
   color: black;
-  background-color: rgb(48, 197, 48);
+  background-color: rgb(117, 231, 117);
   border: none;
 }

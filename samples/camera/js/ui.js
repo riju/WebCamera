@@ -20,9 +20,6 @@ function initUI() {
   controls = {
     lastProIcon: 'standard',
     settingsVisible: false,
-    frontCamera: null,
-    backCamera: null,
-    facingMode: '',
   };
 
   settingsInputIds.unshift(...standardSettingsIds);

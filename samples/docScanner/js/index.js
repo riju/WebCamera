@@ -1,5 +1,4 @@
 let utils = new Utils('errorMessage');
-let stats = null;
 let controls = {};
 let videoConstraint;
 let streaming = false;
@@ -7,6 +6,7 @@ let videoTrack = null;
 let imageCapturer = null;
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
+var canvasContext = canvasOutput.getContext('2d');
 let videoCapturer = null;
 let src = null;
 let dst = null;
@@ -40,13 +40,9 @@ function processVideo() {
     } else if (startDocProcessing) {
       return;
     }
-    stats.begin();
     videoCapturer.read(src);
     cv.imshow('canvasOutput', src);
-
-    stats.end();
     requestAnimationFrame(processVideo);
-
   } catch (err) {
     utils.printError(err);
   }
@@ -56,14 +52,9 @@ function initUI() {
   let menuHeight = parseInt(getComputedStyle(
     document.querySelector('.camera-bar-wrapper')).height);
   getVideoConstraint(menuHeight);
-  initStats();
 
   // TakePhoto event by clicking takePhotoButton.
-  let takePhotoButton = document.getElementById('takePhotoButton');
-  takePhotoButton.addEventListener('click', function () {
-    startDocProcessing = true;
-    startProcessing(src);
-  });
+  createTakePhotoListener();
 }
 
 function startCamera() {
