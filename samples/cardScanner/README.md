@@ -2,6 +2,14 @@
 
 Demonstrate card scanning using OpenCV.js filters.
 
+**Note**
+
+To accurately detect card edges and numbers you should use:
+* monotonic smooth surface that is different in color from the card background,
+* credit card with monotonic background and good contrast between background and card numbers,
+* good lighting in the room and light should not create glare on the card.
+Otherwise, the card edges or digits may not be detected or digits can be recognized incorrectly.
+
 ## Steps of card scanning
 
 **1. Detect the edges of the credit card**

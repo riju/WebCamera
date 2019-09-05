@@ -34,10 +34,6 @@ function initUI() {
     settingsVisible: true,
     menuVisible: true,
 
-    frontCamera: null,
-    backCamera: null,
-    facingMode: '',
-
     morphologyOperationValues: {
       'MORPH_ERODE': cv.MORPH_ERODE,
       'MORPH_DILATE': cv.MORPH_DILATE,

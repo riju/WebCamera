@@ -118,12 +118,6 @@ function initUI() {
     drawCanvas(dstCanvas, canvasOutput);
   });
 
-  controls = {
-    frontCamera: null,
-    backCamera: null,
-    facingMode: '',
-  };
-
   // TODO(sasha): move to utils.js.
   let facingModeButton = document.getElementById('facingModeButton');
   // Switch to face or environment mode by clicking facingModeButton.

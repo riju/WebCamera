@@ -31,9 +31,9 @@
     </div>
 
     <div class="camera-bar-wrapper">
-      <ul id="camera-bar">
-        <li class="scanner-bar-item">
-          <div class="refresh-button-wrapper">
+      <ul id="cameraBar">
+        <li class="camera-bar-item bar-with-one-item">
+          <div class="retry-button-wrapper">
             <button id="retryButton" class="camera-bar-icon material-icons" disabled>refresh</button>
           </div>
         </li>
@@ -45,13 +45,11 @@
       <input id="hideStats" class="hidden" type="checkbox" checked>
     </div>
 
-    <div class="edgeError centered">
+    <div class="edge-error centered">
       <label for="edgeError">Edge error:
         <output id="edgeErrorOutput">10</output> pixels
         <input type="range" id="edgeError" value="10" min="0" max="99" step="1"></label>
     </div>
-
-    <canvas id="outputImage" class="centered hidden"></canvas>
   </div>
 
   <video id="videoInput" class="hidden"></video>

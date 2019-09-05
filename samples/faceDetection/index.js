@@ -3,7 +3,6 @@ let stats = null;
 let controls = {};
 let videoConstraint;
 let streaming = false;
-let imageCapturer = null;
 let videoTrack = null;
 
 let video = document.getElementById('videoInput');
@@ -152,12 +151,6 @@ function initUI() {
     let dstCanvas = document.getElementById('gallery');
     drawCanvas(dstCanvas, canvasOutput);
   });
-
-  controls = {
-    frontCamera: null,
-    backCamera: null,
-    facingMode: '',
-  };
 
   // TODO(sasha): move to utils.js.
   let facingModeButton = document.getElementById('facingModeButton');
