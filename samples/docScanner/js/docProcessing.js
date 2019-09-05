@@ -286,12 +286,11 @@ function drawPoints() {
 }
 
 function addCanvasEventListeners() {
-  if (isMobileDevice()) {
-    canvasOutput.addEventListener('touchstart', startDragging);
-    canvasOutput.addEventListener('touchmove', drag);
-    canvasOutput.addEventListener('touchend', endDragging);
-    canvasOutput.addEventListener('touchcancel', cancelDragging);
-  } else {
+  canvasOutput.addEventListener('touchstart', startDragging);
+  canvasOutput.addEventListener('touchmove', drag);
+  canvasOutput.addEventListener('touchend', endDragging);
+  canvasOutput.addEventListener('touchcancel', cancelDragging);
+  if (!isMobileDevice()) {
     canvasOutput.addEventListener('mousedown', startDragging);
     canvasOutput.addEventListener('mousemove', drag);
     canvasOutput.addEventListener('mouseup', endDragging);
@@ -300,12 +299,11 @@ function addCanvasEventListeners() {
 }
 
 function removeCanvasEventListeners() {
-  if (isMobileDevice()) {
-    canvasOutput.removeEventListener('touchstart', startDragging);
-    canvasOutput.removeEventListener('touchmove', drag);
-    canvasOutput.removeEventListener('touchend', endDragging);
-    canvasOutput.removeEventListener('touchcancel', cancelDragging);
-  } else {
+  canvasOutput.removeEventListener('touchstart', startDragging);
+  canvasOutput.removeEventListener('touchmove', drag);
+  canvasOutput.removeEventListener('touchend', endDragging);
+  canvasOutput.removeEventListener('touchcancel', cancelDragging);
+  if (!isMobileDevice()) {
     canvasOutput.removeEventListener("mousedown", startDragging);
     canvasOutput.removeEventListener("mousemove", drag);
     canvasOutput.removeEventListener("mouseup", endDragging);
@@ -315,9 +313,7 @@ function removeCanvasEventListeners() {
 
 function startDragging(e) {
   isDragging = true;
-  let position;
-  if (isMobileDevice()) position = getTouchPos(e);
-  else position = getMousePos(e);
+  let position = (e.touches != undefined) ? getTouchPos(e) : getMousePos(e);
 
   for (let i = 0; i < approxCoords.length; ++i) {
     canvasContext.beginPath();
@@ -337,9 +333,7 @@ function startDragging(e) {
 }
 
 function drag(e) {
-  let position;
-  if (isMobileDevice()) position = getTouchPos(e);
-  else position = getMousePos(e);
+  let position = (e.touches != undefined) ? getTouchPos(e) : getMousePos(e);
   changeCursorStyle(position);
 
   if (isDragging) {
