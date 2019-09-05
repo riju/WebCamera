@@ -6,6 +6,7 @@ let approxCoords; // Four points.
 let isDragging = false;
 let selectedCoords = [];
 let isPointdragging = [false, false, false, false];
+let showingScannedDoc = false;
 
 function startProcessing(src) {
   // Detect edges of the document.
@@ -145,6 +146,7 @@ function createRetryButton(src) {
     canvasOutput.style.background = 'initial';
     isDragging = false;
     selectedCoords = [];
+    showingScannedDoc = false;
     startDocProcessing = false;
     requestAnimationFrame(processVideo);
   });
@@ -177,10 +179,11 @@ function processDocument(src, approxCoords) {
   cv.cvtColor(warpedImage, warpedImage, cv.COLOR_BGR2GRAY);
   cv.adaptiveThreshold(warpedImage, thresholdedImage, 250,
     cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,
-    9,   // Block size
-    10); // Offset
+    thresholdBlockSize, thresholdOffset);
 
   resizeDoc(thresholdedImage);
+
+  showingScannedDoc = true;
   //showScannedDoc(thresholdedImage);
   cv.imshow('canvasOutput', thresholdedImage);
 
@@ -196,10 +199,7 @@ function resizeDoc(image) {
 }
 
 function showScannedDoc(image) {
-  //canvasContext.clearRect(0, 0, video.width, video.height);
-
-  //let imageDst = new cv.Mat(image.rows, image.cols, cv.CV_8UC4);
-  //image.convertTo(image, cv.CV_32S);
+  canvasContext.clearRect(0, 0, video.width, video.height);
 
   // Extract image data.
   let imgData = new ImageData(new Uint8ClampedArray(image.data),
@@ -208,8 +208,6 @@ function showScannedDoc(image) {
   let startX = (video.width - image.cols) / 2;
   let startY = (video.height - image.rows) / 2;
   canvasContext.putImageData(imgData, startX, startY);
-
-  //imageDst.delete();
 }
 
 function fourPointTransform(image, rect, warpedImage) {

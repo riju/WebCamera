@@ -81,14 +81,15 @@
 #jitterLimit, #edgeError {
   width: 130px;
 }
-#downscaleLevel {
+#downscaleLevel, #thresholdBlockSize, #thresholdOffset {
   width: 93px;
 }
 #threadsNum {
   width: 90px;
 }
 .settings-bar input[type=range],
-#jitterLimit, #edgeError, #downscaleLevel {
+#jitterLimit, #edgeError, #downscaleLevel,
+#thresholdBlockSize,#thresholdOffset {
   display: block;
   -webkit-appearance: none;
   margin: 7px 2px;
@@ -97,13 +98,16 @@
   width: 200px;
 }
 .settings-bar input[type=range]:focus,
-#jitterLimit:focus, #edgeError:focus, #downscaleLevel:focus {
+#jitterLimit:focus, #edgeError:focus, #downscaleLevel:focus,
+#thresholdBlockSize:focus, #thresholdOffset:focus {
   outline: none;
 }
 .settings-bar input[type=range]::-webkit-slider-runnable-track,
 #jitterLimit::-webkit-slider-runnable-track,
 #edgeError::-webkit-slider-runnable-track,
-#downscaleLevel::-webkit-slider-runnable-track {
+#downscaleLevel::-webkit-slider-runnable-track,
+#thresholdBlockSize::-webkit-slider-runnable-track,
+#thresholdOffset::-webkit-slider-runnable-track {
   width: 100%;
   height: 4px;
   background: white;
@@ -115,7 +119,9 @@
 .settings-bar input[type=range]::-webkit-slider-thumb,
 #jitterLimit::-webkit-slider-thumb,
 #edgeError::-webkit-slider-thumb,
-#downscaleLevel::-webkit-slider-thumb {
+#downscaleLevel::-webkit-slider-thumb,
+#thresholdBlockSize::-webkit-slider-thumb,
+#thresholdOffset::-webkit-slider-thumb {
   width: 9px;
   height: 20px;
   -webkit-appearance: none;
@@ -129,7 +135,9 @@
 .settings-bar input[type=range]:focus::-webkit-slider-runnable-track,
 #jitterLimit:focus::-webkit-slider-runnable-track,
 #edgeError:focus::-webkit-slider-runnable-track,
-#downscaleLevel:focus::-webkit-slider-runnable-track {
+#downscaleLevel:focus::-webkit-slider-runnable-track,
+#thresholdBlockSize:focus::-webkit-slider-runnable-track,
+#thresholdOffset:focus::-webkit-slider-runnable-track {
   background: white;
 }
 @media screen and (max-width: 960px) {

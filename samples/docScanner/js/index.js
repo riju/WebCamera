@@ -11,6 +11,8 @@ let videoCapturer = null;
 let src = null;
 let dst = null;
 let startDocProcessing = false;
+let thresholdBlockSize = 9;
+let thresholdOffset = 10;
 
 
 function initOpencvObjects() {
@@ -53,7 +55,40 @@ function initUI() {
     document.querySelector('.camera-bar-wrapper')).height);
   getVideoConstraint(menuHeight);
 
-  // TakePhoto event by clicking takePhotoButton.
+  // Event listener for threshold blockSize parameter.
+  let thresholdBlockSizeInput = document.getElementById('thresholdBlockSize');
+  let thresholdBlockSizeOutput =
+    document.getElementById('thresholdBlockSizeOutput');
+  thresholdBlockSizeInput.addEventListener('input', function () {
+    thresholdBlockSize = thresholdBlockSizeOutput.value
+      = parseInt(thresholdBlockSizeInput.value);
+    if (showingScannedDoc) processDocument(src, approxCoords);
+  });
+  thresholdBlockSizeInput.addEventListener('change', function () {
+    thresholdBlockSize = thresholdBlockSizeOutput.value
+      = parseInt(thresholdBlockSizeInput.value);
+    if (showingScannedDoc) processDocument(src, approxCoords);
+  });
+  thresholdBlockSizeOutput.value =
+    thresholdBlockSizeInput.value = thresholdBlockSize;
+
+  // Event listener for threshold offset parameter.
+  let thresholdOffsetInput = document.getElementById('thresholdOffset');
+  let thresholdOffsetOutput =
+    document.getElementById('thresholdOffsetOutput');
+  thresholdOffsetInput.addEventListener('input', function () {
+    thresholdOffset = thresholdOffsetOutput.value
+      = parseInt(thresholdOffsetInput.value);
+    if (showingScannedDoc) processDocument(src, approxCoords);
+  });
+  thresholdOffsetInput.addEventListener('change', function () {
+    thresholdOffset = thresholdOffsetOutput.value
+      = Number(thresholdOffsetInput.value);
+    if (showingScannedDoc) processDocument(src, approxCoords);
+  });
+  thresholdOffsetOutput.value =
+    thresholdOffsetInput.value = thresholdOffset;
+
   createTakePhotoListener();
 }
 

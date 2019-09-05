@@ -18,8 +18,8 @@ body {
   margin: 0px;
 }
 
-.stats-settings, .threads-control, .jitterLimit, .edgeError,
-.downscale-level {
+.stats-settings, .threads-control, .jitter-limit, .edge-error,
+.downscale-level, .threshold-block-size, .threshold-offset {
   padding: 10px;
   width: 100%;
   border-bottom: dotted silver 1px;
