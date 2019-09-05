@@ -4,7 +4,6 @@ let controls = {};
 let videoConstraint;
 let streaming = false;
 let videoTrack = null;
-let imageCapturer = null;
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
 let videoCapturer = null;

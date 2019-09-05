@@ -209,8 +209,6 @@ function setMainCanvasProperties(video) {
 
 function onVideoStarted() {
   streaming = true;
-  videoTrack = video.srcObject.getVideoTracks()[0];
-  imageCapturer = new ImageCapture(videoTrack);
   setMainCanvasProperties(video);
   videoTrack = video.srcObject.getVideoTracks()[0];
   imageCapturer = new ImageCapture(videoTrack);
@@ -251,7 +249,7 @@ function initCameraSettingsAndStart() {
       // Disable facingModeButton if there is no environment or user mode.
       let facingModeButton = document.getElementById('facingModeButton');
       if (facingModeButton) {
-        if (controls.frontCamera == 'undefined' || controls.backCamera == 'undefined') {
+        if (controls.frontCamera === undefined || controls.backCamera === undefined) {
           facingModeButton.style.color = 'gray';
           facingModeButton.style.border = '2px solid gray';
         } else {
@@ -260,7 +258,7 @@ function initCameraSettingsAndStart() {
       }
 
       // Set initial facingMode value if camera is available.
-      if (controls.backCamera != 'undefined') {
+      if (controls.backCamera !== undefined) {
         controls.facingMode = 'environment';
         videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
       }
@@ -319,11 +317,11 @@ function getContourCoordinates(contour) {
 function resizeImage(image, width = 'undefined', height = 'undefined') {
   let dim;
 
-  if (width == 'undefined' && height == 'undefined')
+  if (width === 'undefined' && height === 'undefined')
     return image;
 
   let ratio;
-  if (width == 'undefined') {
+  if (width === 'undefined') {
     ratio = height / image.rows;
     dim = new cv.Size(parseInt(image.cols * ratio), height);
   } else {

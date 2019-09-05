@@ -1,24 +1,27 @@
 const MIN_AREA = 5000;
 const DEFAULT_EDGE_OFFSET = 15; // In pixels.
 const TOUCH_DETECTION_RADIUS = 20; // In pixels.
+const DEFAULT_THRESHOLD_BLOCKSIZE = 9;
+const DEFAULT_THRESHOLD_OFFSET = 10;
 
 let approxCoords; // Four points.
 let isDragging = false;
 let selectedCoords = [];
 let isPointdragging = [false, false, false, false];
 let showingScannedDoc = false;
+let thresholdBlockSize = DEFAULT_THRESHOLD_BLOCKSIZE;
+let thresholdOffset = DEFAULT_THRESHOLD_OFFSET;
 
 function startProcessing(src) {
   // Detect edges of the document.
   dst = new cv.Mat();
-  detectDocEdges(src, dst);
+  obtainImageEdges(src, dst);
 
   let contours = new cv.MatVector();
   let hierarchy = new cv.Mat();
   let approxCnt = new cv.Mat();
 
-  // Use the edges in the image to find the contour
-  // representing the piece of paper being scanned.
+  // Find the contour representing the piece of paper being scanned.
   cv.findContours(dst, contours, hierarchy,
     cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
   let maxAreaResult = findMaxAreaContour(contours, approxCnt);
@@ -29,7 +32,7 @@ function startProcessing(src) {
   // Remove takePhoto button, add retry and ok button.
   let cameraBar = document.getElementById('cameraBar');
   cameraBar.removeChild(cameraBar.children[0]);
-  createRetryButton(src);
+  createRetryButton();
   createOkButton(src, approxCoords);
 
   dst.delete();
@@ -38,7 +41,7 @@ function startProcessing(src) {
   approxCnt.delete();
 }
 
-function detectDocEdges(src, dst) {
+function obtainImageEdges(src, dst) {
   cv.cvtColor(src, dst, cv.COLOR_RGB2GRAY);
   cv.GaussianBlur(dst, dst, { width: 5, height: 5 }, 0, 0, cv.BORDER_DEFAULT);
   // 75 and 200 are values of the first and second thresholds.
@@ -74,24 +77,20 @@ function setCanvasBackground() {
 
 function showContour(src, contours, approxCnt, res) {
   if (res.maxArea > MIN_AREA) { // Don't show small contours as documents.
-    let approxContours = new cv.MatVector();
     let cnt = contours.get(res.i);
     let perimeter = cv.arcLength(cnt, true);
     cv.approxPolyDP(cnt, approxCnt, 0.01 * perimeter, true);
-    approxContours.push_back(approxCnt);
-    // Add edge of the document to the image source and show.
     approxCoords = getContourCoordinates(approxCnt);
-    approxContours.delete();
     cnt.delete();
   } else {
-    // Create default edges because we didn't detect any doc.
+    // Create default edges because we didn't detect any document.
     approxCoords = [{ x: DEFAULT_EDGE_OFFSET, y: DEFAULT_EDGE_OFFSET },
     { x: src.cols - DEFAULT_EDGE_OFFSET, y: DEFAULT_EDGE_OFFSET },
     { x: src.cols - DEFAULT_EDGE_OFFSET, y: src.rows - DEFAULT_EDGE_OFFSET },
     { x: DEFAULT_EDGE_OFFSET, y: src.rows - DEFAULT_EDGE_OFFSET }];
   }
   // Show image with document as background because we don't need to redraw it.
-  setCanvasBackground();
+  //setCanvasBackground();
   drawPoints();
 }
 
@@ -129,7 +128,7 @@ function createTakePhotoListener() {
   });
 }
 
-function createRetryButton(src) {
+function createRetryButton() {
   let cameraBar = document.getElementById('cameraBar');
   addButtonToCameraBar('retryButton', 'refresh', 2);
   let retryButton = document.getElementById('retryButton');
@@ -144,10 +143,23 @@ function createRetryButton(src) {
     createTakePhotoListener();
     removeCanvasEventListeners();
     canvasOutput.style.background = 'initial';
+
+    // Hide BlockSize and Offset sliders.
+    let blockSizeSettings =
+      document.getElementsByClassName('threshold-block-size')[0];
+    blockSizeSettings.classList.add('hidden');
+    let offsetSettings =
+      document.getElementsByClassName('threshold-offset')[0];
+    offsetSettings.classList.add('hidden');
+
+
+    thresholdBlockSize = DEFAULT_THRESHOLD_BLOCKSIZE;
+    thresholdOffset = DEFAULT_THRESHOLD_OFFSET;
     isDragging = false;
     selectedCoords = [];
     showingScannedDoc = false;
     startDocProcessing = false;
+
     requestAnimationFrame(processVideo);
   });
 }
@@ -160,6 +172,14 @@ function createOkButton(src, approxCoords) {
   okButton.addEventListener('click', function () {
     cameraBar.removeChild(cameraBar.children[1]);
     addButtonToCameraBar('saveButton', 'save_alt', 2);
+
+    // Show BlockSize and Offset sliders.
+    let blockSizeSettings =
+      document.getElementsByClassName('threshold-block-size')[0];
+    blockSizeSettings.classList.remove('hidden');
+    let offsetSettings =
+      document.getElementsByClassName('threshold-offset')[0];
+    offsetSettings.classList.remove('hidden');
 
     document.getElementsByTagName('body')[0]
       .style.overscrollBehaviorY = 'auto';
@@ -184,8 +204,7 @@ function processDocument(src, approxCoords) {
   resizeDoc(thresholdedImage);
 
   showingScannedDoc = true;
-  //showScannedDoc(thresholdedImage);
-  cv.imshow('canvasOutput', thresholdedImage);
+  showScannedDoc(thresholdedImage);
 
   warpedImage.delete(); thresholdedImage.delete();
 }
@@ -199,9 +218,11 @@ function resizeDoc(image) {
 }
 
 function showScannedDoc(image) {
+  // Clear canvas.
   canvasContext.clearRect(0, 0, video.width, video.height);
 
   // Extract image data.
+  cv.cvtColor(image, image, cv.COLOR_GRAY2RGBA);
   let imgData = new ImageData(new Uint8ClampedArray(image.data),
     image.cols, image.rows);
 
@@ -245,6 +266,8 @@ function fourPointTransform(image, rect, warpedImage) {
 }
 
 function drawPoints() {
+  cv.imshow('canvasOutput', src);
+
   canvasContext.strokeStyle = '#57CC65';
   for (let i = 0; i < approxCoords.length; i++) {
     canvasContext.beginPath();
@@ -278,10 +301,10 @@ function addCanvasEventListeners() {
 
 function removeCanvasEventListeners() {
   if (isMobileDevice()) {
-    canvasOutput.addEventListener('touchstart', startDragging);
-    canvasOutput.addEventListener('touchmove', drag);
-    canvasOutput.addEventListener('touchend', endDragging);
-    canvasOutput.addEventListener('touchcancel', cancelDragging);
+    canvasOutput.removeEventListener('touchstart', startDragging);
+    canvasOutput.removeEventListener('touchmove', drag);
+    canvasOutput.removeEventListener('touchend', endDragging);
+    canvasOutput.removeEventListener('touchcancel', cancelDragging);
   } else {
     canvasOutput.removeEventListener("mousedown", startDragging);
     canvasOutput.removeEventListener("mousemove", drag);

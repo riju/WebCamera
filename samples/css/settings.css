@@ -78,10 +78,10 @@
   display: block;
   position: relative;
 }
-#jitterLimit, #edgeError {
+#jitterLimit, #edgeError, #thresholdBlockSize, #thresholdOffset {
   width: 130px;
 }
-#downscaleLevel, #thresholdBlockSize, #thresholdOffset {
+#downscaleLevel {
   width: 93px;
 }
 #threadsNum {

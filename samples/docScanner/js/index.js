@@ -1,18 +1,20 @@
 let utils = new Utils('errorMessage');
 let controls = {};
+
 let videoConstraint;
 let streaming = false;
 let videoTrack = null;
 let imageCapturer = null;
+
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
-var canvasContext = canvasOutput.getContext('2d');
+let canvasContext = canvasOutput.getContext('2d');
+
 let videoCapturer = null;
 let src = null;
 let dst = null;
+
 let startDocProcessing = false;
-let thresholdBlockSize = 9;
-let thresholdOffset = 10;
 
 
 function initOpencvObjects() {

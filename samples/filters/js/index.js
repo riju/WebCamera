@@ -2,7 +2,6 @@ let utils = new Utils('errorMessage');
 let stats = null;
 let videoConstraint;
 let streaming = false;
-let imageCapturer = null;
 let videoTrack = null;
 
 let video = document.getElementById('videoInput');
