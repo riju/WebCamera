@@ -36,10 +36,15 @@ Try out the demos (Chrome 72+):
     </td>
   </tr>
   <tr>
-    <td align="center" valign="center" colspan="2">
+    <td align="center" valign="center">
       <img src="cardScanning.gif" alt="cardScanning.gif is not yet loaded" width="360"/>
       <br />
       <b>Card Scanning</b>
+    </td>
+    <td align="center" valign="center">
+      <img src="docScanning.gif" alt="docScanning.gif is not yet loaded" width="360"/>
+      <br />
+      <b>Document Scanning</b>
     </td>
   </tr>
 </table>
