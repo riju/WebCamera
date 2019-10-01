@@ -47,6 +47,15 @@ Try out the demos (Chrome 72+):
       <b>Document Scanning</b>
     </td>
   </tr>
+  <tr>
+    <td align="center" valign="center">
+      <img src="barcodeScanning.gif" alt="barcodeScanning.gif is not yet loaded" width="360"/>
+      <br />
+      <b>Barcode/QRcode Scanning</b>
+    </td>
+    <td align="center" valign="center">
+    </td>
+  </tr>
 </table>
 
 ![](exposureDemo.gif)
