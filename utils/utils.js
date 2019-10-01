@@ -331,3 +331,26 @@ function resizeImage(image, width = 'undefined', height = 'undefined') {
 
   cv.resize(image, image, dim, cv.INTER_AREA);
 }
+
+function addButtonToCameraBar(id, text, maxItems) {
+  let cameraBar = document.getElementById('cameraBar');
+  let liElement = document.createElement('li');
+  liElement.classList.add('camera-bar-item');
+  if (maxItems == 3) {
+    liElement.classList.add('bar-with-three-items');
+  } else if (maxItems == 2) {
+    liElement.classList.add('bar-with-two-items');
+  } else { // 1 item
+    liElement.classList.add('bar-with-one-item');
+  }
+  let divElement = document.createElement('div');
+  divElement.classList.add('take-photo-wrapper');
+  let button = document.createElement('button');
+  button.setAttribute('id', id);
+  button.classList.add('camera-bar-icon');
+  button.classList.add('material-icons');
+  button.innerText = text;
+  divElement.appendChild(button);
+  liElement.appendChild(divElement);
+  cameraBar.appendChild(liElement);
+}
