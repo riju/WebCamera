@@ -2,7 +2,9 @@ let barcodeScale = 1.0;
 
 function startProcessing() {
   if (window.BarcodeDetector == undefined) {
-    // TODO(sasha): Provide polyfill detection implementation.
+    // TODO(sasha): Provide polyfill detection implementation
+    // preferably using opencv.js for browsers not yet implementing
+    // Shape Detection API.
     document.getElementById("errorMessage").innerText =
       "barcodeDetector API is not supported in this browser version.";
     return;
@@ -21,7 +23,6 @@ function startProcessing() {
         let barcodeStatus = document.getElementById('barcodeStatus');
         barcodeStatus.classList.remove('hidden');
         barcodeStatus.innerText = 'No barcode detected';
-
       } else {
         // TODO(sasha): Show all barcodes but not only the first one.
         const boundingBox = barcodes[0].boundingBox;

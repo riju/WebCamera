@@ -1,6 +1,6 @@
 # Goal
 
-Demonstrate barcode scanning using Google's Shape Detection API.
+Demonstrate barcode scanning using [Shape Detection API](https://wicg.github.io/shape-detection-api/).
 
 ## Steps of barcode scanning
 
@@ -12,7 +12,7 @@ Demonstrate barcode scanning using Google's Shape Detection API.
 
 **4. Show bounding box of the first barcode**
 
-**5. Output barcode value in input tag**
+**5. Display barcode value**
 
 
 ### Sample code:
