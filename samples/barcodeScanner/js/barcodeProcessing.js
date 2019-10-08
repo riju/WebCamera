@@ -2,8 +2,8 @@ let barcodeScale = 1.0;
 
 function startProcessing() {
   if (window.BarcodeDetector == undefined) {
-    // TODO(sasha): Provide polyfill detection implementation
-    // preferably using opencv.js for browsers not yet implementing
+    // TODO(sasha): Provide polyfill detection preferably
+    // using opencv.js for browsers not yet implementing
     // Shape Detection API.
     document.getElementById("errorMessage").innerText =
       "barcodeDetector API is not supported in this browser version.";

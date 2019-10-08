@@ -19,13 +19,12 @@ function startProcessing(src) {
 
   let contours = new cv.MatVector();
   let hierarchy = new cv.Mat();
-  let approxCnt = new cv.Mat();
 
   // Find the contour representing the piece of paper being scanned.
   cv.findContours(dst, contours, hierarchy,
     cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-  let maxAreaResult = findMaxAreaContour(contours, approxCnt);
-  showContour(src, contours, approxCnt, maxAreaResult);
+  let maxAreaResult = findMaxAreaContour(contours);
+  showContour(src, contours, maxAreaResult);
 
   addCanvasEventListeners();
 
@@ -38,7 +37,6 @@ function startProcessing(src) {
   dst.delete();
   contours.delete();
   hierarchy.delete();
-  approxCnt.delete();
 }
 
 function obtainImageEdges(src, dst) {
@@ -46,25 +44,6 @@ function obtainImageEdges(src, dst) {
   cv.GaussianBlur(dst, dst, { width: 5, height: 5 }, 0, 0, cv.BORDER_DEFAULT);
   // 75 and 200 are values of the first and second thresholds.
   cv.Canny(dst, dst, 75, 200);
-}
-
-function findMaxAreaContour(contours, approxCnt) {
-  let maxArea = 0;
-  let index;
-  for (let i = 0; i < contours.size(); ++i) {
-    let cnt = contours.get(i);
-    let perimeter = cv.arcLength(cnt, true);
-    // Approximate the contour with the (0.01 * perimeter) precision.
-    cv.approxPolyDP(cnt, approxCnt, 0.01 * perimeter, true);
-    let area = cv.contourArea(cnt);
-    // Check that contour has 4 angles.
-    if (approxCnt.rows == 4 && area > maxArea) {
-      maxArea = area;
-      index = i;
-    }
-    cnt.delete();
-  }
-  return { maxArea: maxArea, i: index };
 }
 
 function setCanvasBackground() {
@@ -75,7 +54,8 @@ function setCanvasBackground() {
   canvasOutput.style.background = "url('" + imageDataURL + "')";
 }
 
-function showContour(src, contours, approxCnt, res) {
+function showContour(src, contours, res) {
+  let approxCnt = new cv.Mat();
   if (res.maxArea > MIN_AREA) { // Don't show small contours as documents.
     let cnt = contours.get(res.i);
     let perimeter = cv.arcLength(cnt, true);
@@ -92,6 +72,7 @@ function showContour(src, contours, approxCnt, res) {
   // Show image with document as background because we don't need to redraw it.
   //setCanvasBackground();
   drawPoints();
+  approxCnt.delete();
 }
 
 function createTakePhotoListener() {
@@ -371,4 +352,3 @@ function changeCursorStyle(position) {
     }
   }
 }
-
