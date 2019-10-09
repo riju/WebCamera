@@ -1,31 +1,49 @@
 let utils = new Utils('errorMessage');
 let video = document.getElementById('videoInput');
 let videoConstraint;
-let imageCapturer = null;
 let videoTrack = null;
+let imageCapturer = null;
+let controls = {};
 
-function applyInitialSettings() {
-  const videoSettings = videoTrack.getSettings();
-  const capabilities = videoTrack.getCapabilities()
+function initUI() {
+  let menuHeight = parseInt(getComputedStyle(
+    document.querySelector('.camera-bar-wrapper')).height);
+  getVideoConstraint(menuHeight);
 
-  function roundValue(value) {
-    let result = value.toFixed(2);
-    if (result == 0) {
-      result = value.toPrecision(1);
+  let resetButton = document.querySelector('.reset-button');
+  resetButton.addEventListener('click', function () {
+    settings.reset();
+    resetButton.classList.add('hidden');
+  });
+
+  const settings = document.querySelector('settings-pane');
+  settings.addEventListener('constraintschange', e => {
+    videoTrack.applyConstraints(e.detail.constraints).catch(e => console.log(e));
+    resetButton.classList.remove('hidden');
+  });
+  settings.addEventListener('click', () => {
+    resetButton.classList.add('hidden');
+    settings.hide();
+  })
+
+  let takePhotoButton = document.getElementById('takePhotoButton');
+  takePhotoButton.addEventListener('click', () => takePhoto());
+
+  let facingModeButton = document.getElementById('facingModeButton');
+  facingModeButton.addEventListener('click', () => {
+    switch(controls.facingMode) {
+      case 'user':
+        controls.facingMode = 'environment';
+        videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
+        facingModeButton.innerText = 'camera_front';
+        break;
+      case 'environment':
+        controls.facingMode = 'user';
+        videoConstraint.deviceId = { exact: controls.frontCamera.deviceId };
+        facingModeButton.innerText = 'camera_rear';
     }
-    return Number(result);
-  }
 
-  settingsInputIds.forEach(function (id, i) {
-    // Check whether capability is supported or not.
-    if (capabilities[id]) {
-      controls[id].min = roundValue(capabilities[id].min);
-      controls[id].max = roundValue(capabilities[id].max);
-      controls[id].step = roundValue(capabilities[id].step);
-    } else {
-      console.log(id, 'is not supported.');
-      //controls[id].disabled = true;
-    }
+    startCamera({ restart: true });
   });
 }
 
@@ -59,18 +77,30 @@ function completeStyling() {
   document.getElementById('takePhotoButton').disabled = false;
 }
 
-function startCamera() {
-  utils.startCamera(videoConstraint, 'videoInput', onCameraStarted);
-}
+function startCamera(options = { restart: false }) {
+  const restart = !!options.restart;
+  if (restart) {
+    utils.clearError();
+    utils.stopCamera();
+  }
 
-function onCameraStarted() {
-  videoTrack = video.srcObject.getVideoTracks()[0];
-  imageCapturer = new ImageCapture(videoTrack);
-  completeStyling();
-  // Timeout needed in Chrome, see https://crbug.com/711524.
-  setTimeout(() => {
-    applyInitialSettings();
-  }, 500);
+  const onCameraStarted = () => {
+    videoTrack = video.srcObject.getVideoTracks()[0];
+    imageCapturer = new ImageCapture(videoTrack);
+
+    if (!restart) {
+      completeStyling();
+    }
+
+    // Timeout needed in Chrome, see https://crbug.com/711524.
+    const settings = document.querySelector('settings-pane');
+    setTimeout(async () => {
+      await customElements.whenDefined('settings-pane');
+      settings.applyFromTrack(videoTrack);
+    }, 500);
+  }
+
+  utils.startCamera(videoConstraint, 'videoInput', onCameraStarted);
 }
 
 initUI();

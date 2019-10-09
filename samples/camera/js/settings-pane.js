@@ -89,6 +89,36 @@ class SettingsPane extends LitElement {
 
   activePane = null;
 
+  async applyFromTrack(videoTrack) {
+    // Make sure elements have been rendered before accessing them.
+    await this.updateComplete;
+
+    const capabilities = videoTrack.getCapabilities();
+
+    function roundValue(value) {
+      let result = value.toFixed(2);
+      if (result == 0) {
+        result = value.toPrecision(1);
+      }
+      return Number(result);
+    }
+
+    ['iso', 'exposureTime', 'focusDistance', 'colorTemperature', 'zoom'].forEach(id => {
+      const control = this.shadowRoot.querySelector(`#${id}`);
+
+      // Check whether capability is supported or not.
+      if (capabilities[id]) {
+        console.log(capabilities[id]);
+        control.min = roundValue(capabilities[id].min);
+        control.max = roundValue(capabilities[id].max);
+        control.step = roundValue(capabilities[id].step);
+      } else {
+        console.log(id, 'is not supported.');
+        control.disabled = true;
+      }
+    });
+  }
+
   hide() {
     const bar = this.shadowRoot.querySelector('#settings-bar');
     let panes = Array.from(bar.children);
@@ -160,7 +190,7 @@ class SettingsPane extends LitElement {
         const id = e.target.getAttribute('id');
         const value = e.detail.value;
         console.log(id, ":", value);
-  
+
         let constraints = { advanced: [{}] };
         constraints.advanced[0][id] = value;
         if (id == 'exposureTime')
