@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <link rel="manifest" href="../manifest.json" />
+  <link href="css/doxygen.css" rel="stylesheet" type="text/css" />
+  <title>Web &#x1F493 Camera demos</title>
+
+</head>
+
+<body>
+  <div class="header">
+    <div class="headertitle">
+      <div class="title">Web &#x1F9E1; Camera</div>
+    </div>
+  </div>
+  <div class="contents">
+    <div class="textblock">
+      <ul>
+        <li>
+          <p class="startli"><a class="el" href="camera/">Camera Pro mode</a></p>
+          <p class="startli"></p>
+        </li>
+        <li>
+          <p class="startli"><a class="el" href="hdr/">Camera with OpenCV.js post-processing for HDR imaging</a></p>
+          <p class="startli"></p>
+        </li>
+        <li>
+          <p class="startli"><a class="el" href="filters/">Instagram filters? Snapchat Lens?</a></p>
+          <p class="startli"></p>
+        </li>
+        <li>
+          <p class="startli"><a class="el" href="faceDetection/">Face detection</a></p>
+          <p class="startli"></p>
+        </li>
+        <li>
+          <p class="startli"><a class="el" href="funnyHats/">Funny hats</a></p>
+          <p class="startli"></p>
+        </li>
+        <li>
+          <p class="startli"><a class="el" href="cardScanner/">Credit card Scanner</a></p>
+          <p class="startli"></p>
+        </li>
+        <li>
+          <p class="startli"><a class="el" href="docScanner/">Document Scanner</a></p>
+          <p class="startli"></p>
+        </li>
+        <li>
+          <p class="startli"><a class="el" href="barcodeScanner/">Barcode Scanner</a></p>
+          <p class="startli"></p>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <script>
+    // Check that service workers are supported
+    if ('serviceWorker' in navigator) {
+      // Use the window load event to keep the page load performant
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('../sw.js')
+          .then(function (registration) {
+            console.log('Registration successful, scope is:', registration.scope);
+          })
+          .catch(function (error) {
+            console.log('Service worker registration failed, error:', error);
+          });
+      });
+    }
+  </script>
+</body>
+
+</html>

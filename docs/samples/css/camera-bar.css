@@ -1,0 +1,86 @@
+.camera-bar-wrapper, .output-bar-wrapper {
+  height: 100px;
+  background: black;
+  display: flex;
+}
+.output {
+  color: white;
+  height: 30px;
+  padding: 20px 0px;
+}
+.output label {
+  display: block;
+  line-height: 30px;
+  vertical-align: middle;
+}
+#cameraBar {
+  width: 100%;
+  display: flex;
+  margin: 0px;
+  padding: 0px 30px;
+}
+.camera-bar-item {
+  display: inline-block;
+}
+.bar-with-one-item {
+  width: 100%;
+}
+.bar-with-two-items {
+  width: 50%;
+}
+.bar-with-three-items {
+  width: 33.33%;
+}
+.camera-bar-item div {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+}
+.camera-bar-icon {
+  border: 2px solid white;
+  border-radius: 50px;
+  color: white;
+  background: black;
+}
+.gallery-wrapper {
+  padding: 23px 0px;
+}
+.take-photo-wrapper, .retry-button-wrapper {
+  padding: 14px 0px;
+}
+.face-mode-wrapper {
+  padding: 23px 0px;
+}
+#gallery {
+  height: 50px;
+  width: 50px;
+}
+#takePhotoButton, #retryButton, #okButton, #saveButton {
+  font-size: 48px;
+  padding: 10px;
+  width: 72px;
+  outline: none;
+}
+#takePhotoButton:active, #facingModeButton:active {
+  color: silver;
+  border: 2px solid silver;
+}
+#retryButton:active, #okButton:active, #saveButton:active {
+  color: silver;
+}
+#facingModeButton {
+  font-size: 30px;
+  padding: 10px;
+  width: 55px;
+  outline: none;
+}
+#retryButton {
+  color: black;
+  background-color: rgb(255, 94, 94);
+  border: none;
+}
+#okButton, #saveButton {
+  color: black;
+  background-color: rgb(117, 231, 117);
+  border: none;
+}

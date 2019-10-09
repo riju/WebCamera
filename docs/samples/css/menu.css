@@ -1,0 +1,60 @@
+::-webkit-scrollbar{width:2px;height:2px;}
+::-webkit-scrollbar-button{width:2px;height:2px;}
+
+.carousel-wrapper {
+  position: absolute;
+  display: block;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+}
+.card {
+  display: block;
+  padding: 5px;
+}
+.card label {
+  position: absolute;
+  text-align: center;
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+.card canvas {
+  border-width: medium;
+  border-color: yellow;
+  border-style: none;
+}
+.card canvas:hover {
+  cursor: pointer;
+}
+.card img {
+  border-width: medium;
+  border-color: yellow;
+  border-style: none;
+}
+.card img:hover {
+  cursor: pointer;
+}
+.card label:hover {
+  cursor: pointer;
+}
+.menu-button {
+  z-index: 10;
+  position: relative;
+  width: 40px;
+  font-size: 40px;
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  background: linear-gradient(to bottom, #9bb4e2 5%, #5c85b8 100%);
+  border: 1px solid #8f99b8;
+}
+.menu-button:hover {
+	background: linear-gradient(to bottom, #5c85b8 5%, #9bb4e2 100%);
+}
