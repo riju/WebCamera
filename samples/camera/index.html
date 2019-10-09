@@ -6,10 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Image Capture Capabilities</title>
   <link href="../css/base.css" rel="stylesheet" type="text/css">
-  <link href="../css/settings.css" rel="stylesheet" type="text/css">
   <link href="../css/camera-bar.css" rel="stylesheet" type="text/css">
-  <link href="../css/google-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
 </head>
+
+<script type="module" src="js/settings-pane.js"></script>
 
 <body>
   <p id="errorMessage" class="err centered"></p>
@@ -19,57 +21,7 @@
       <button class='reset-button hidden'>Reset</button>
 
       <div class="settings-wrapper">
-        <div class="settings-content">
-          <div class="settings-bar">
-            <div id="isoSettings" class="pro-settings hidden"><label for="iso">ISO:
-                <output id="isoOutput">0</output>
-                <input type="range" id="iso" min="0" max="0"></label>
-            </div>
-            <div id="exposureTimeSettings" class="pro-settings hidden"><label for="exposureTime">Exposure:
-                <output id="exposureTimeOutput">0</output>
-                <input type="range" id="exposureTime" min="0" max="0"></label>
-            </div>
-            <div id="focusDistanceSettings" class="pro-settings hidden"><label for="focusDistance">Focus distance:
-                <output id="focusDistanceOutput">0</output>
-                <input type="range" id="focusDistance" min="0" max="0"></label>
-            </div>
-            <div id="standardSettings" class="pro-settings hidden"><label for="contrast">Contrast:
-                <output id="contrastOutput">0</output>
-                <input type="range" id="contrast" min="0" max="0"></label>
-              <label for="saturation">Saturation:
-                <output id="saturationOutput">0</output>
-                <input type="range" id="saturation" min="0" max="0"></label>
-              <label for="sharpness">Sharpness:
-                <output id="sharpnessOutput">0</output>
-                <input type="range" id="sharpness" min="0" max="0"></label>
-              <label for="brightness">Brightness:
-                <output id="brightnessOutput">0</output>
-                <input type="range" id="brightness" min="0" max="0"></label>
-              <label for="exposureCompensation">Exposure Compensation:
-                <output id="exposureCompensationOutput">0</output>
-                <input type="range" id="exposureCompensation" min="0" max="0"></label>
-            </div>
-            <div id="colorTemperatureSettings" class="pro-settings hidden">
-              <label for="colorTemperature">Color Temperature:
-                <output id="colorTemperatureOutput"></output>
-                <i id="wbIcon" class="material-icons">wb_auto</i>
-                <input type="range" id="colorTemperature" min="0" max="0"></label>
-            </div>
-            <div id="zoomSettings" class="pro-settings hidden"><label for="zoom">Zoom:
-                <output id="zoomOutput">0</output>
-                <input type="range" id="zoom" min="0" max="0"></label>
-            </div>
-          </div>
-          <div class="pro-icons">
-            <i class="material-icons pro-icon" for="iso">iso</i>
-            <i class="material-icons pro-icon" for="exposureTime">exposure</i>
-            <i class="material-icons pro-icon" for="standard">tune</i>
-            <i class="material-icons pro-icon" for="focusDistance">center_focus_strong</i>
-            <i class="material-icons pro-icon" for="colorTemperature">ac_unit</i>
-            <i class="material-icons pro-icon" for="zoom">zoom_in</i>
-            <i class="material-icons pro-icon" for="torch">flash_off</i>
-          </div>
-        </div>
+        <settings-pane></settings-pane>
       </div>
     </div>
 

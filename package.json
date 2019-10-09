@@ -4,7 +4,7 @@
   "description": "",
   "main": "samples/js/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "es-dev-server --app-index samples/index.html --node-resolve --watch --open"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/riju/WebCamera/issues"
   },
-  "homepage": "https://github.com/riju/WebCamera#readme"
+  "homepage": "https://github.com/riju/WebCamera#readme",
+  "devDependencies": {
+    "es-dev-server": "^1.18.3"
+  }
 }

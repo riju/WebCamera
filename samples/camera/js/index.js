@@ -10,7 +10,9 @@ function applyInitialSettings() {
 
   function roundValue(value) {
     let result = value.toFixed(2);
-    if (result == 0) result = value.toPrecision(1);
+    if (result == 0) {
+      result = value.toPrecision(1);
+    }
     return Number(result);
   }
 
@@ -20,25 +22,11 @@ function applyInitialSettings() {
       controls[id].min = roundValue(capabilities[id].min);
       controls[id].max = roundValue(capabilities[id].max);
       controls[id].step = roundValue(capabilities[id].step);
-      controls[id].value = controls[`${id}Output`].value =
-        roundValue(videoSettings[id]);
     } else {
-      console.log(id, 'not supported.');
-      if (!(i in standardSettingsIds)) {
-        let icon = document.querySelector(`i[for=${id}]`);
-        icon.style.pointerEvents = 'none';
-        icon.style.color = 'gray';
-      } else document.querySelector(`label[for=${id}]`).style.opacity = 0.6;
-      controls[id].disabled = true;
+      console.log(id, 'is not supported.');
+      //controls[id].disabled = true;
     }
   });
-
-  // Check torch.
-  if (!capabilities.torch) {
-    let icon = document.querySelector(`i[for=torch]`);
-    icon.style.pointerEvents = 'none';
-    icon.style.color = 'gray';
-  }
 }
 
 function completeStyling() {
@@ -51,10 +39,6 @@ function completeStyling() {
 
   document.querySelector('.canvas-wrapper').style.height =
     `${video.videoHeight}px`;
-
-  findSettingsBottomValue();
-  let settingsContent = document.querySelector('.settings-content');
-  settingsContent.style.width = `${video.videoWidth}px`;
 
   let resetButton = document.querySelector('.reset-button');
   resetButton.classList.remove('hidden');
