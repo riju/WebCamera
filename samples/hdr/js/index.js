@@ -81,6 +81,7 @@ function gotMedia(mediastream) {
           exposureTimeSliderValue.value = exposureTimeSlider.value;
           videoTrack.applyConstraints({
               advanced: [{
+                  exposureMode: "manual",
                   exposureTime: exposureTimeSlider.value
               }]
           });
