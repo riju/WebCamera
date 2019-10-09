@@ -1,6 +1,6 @@
-import { html, css, LitElement } from '../../node_modules/lit-element';
-import { classMap } from '../../node_modules/lit-html/directives/class-map';
-import '../../node_modules/@material/mwc-slider';
+import { html, css, LitElement } from '../../../node_modules/lit-element';
+import { classMap } from '../../../node_modules/lit-html/directives/class-map';
+import '../../../node_modules/@material/mwc-slider';
 
 class SettingsSlider extends LitElement {
   static styles = css`

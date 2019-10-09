@@ -1,4 +1,4 @@
-import { html, css, LitElement } from '../../node_modules/lit-element';
+import { html, css, LitElement } from '../../../node_modules/lit-element';
 
 import './settings-slider.js';
 
