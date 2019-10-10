@@ -5,49 +5,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Image Capture Capabilities</title>
-  <link href="../css/base.css" rel="stylesheet" type="text/css">
-  <link href="../css/camera-bar.css" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
 </head>
 
-<script type="module" src="js/settings-pane.js"></script>
+<script type="module" src="js/camera-view.js"></script>
+<style>
+  body {
+    font-family: Roboto, sans-serif;
+    margin: 0;
+  }
+
+  camera-view {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .centered {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  #errorMessage {
+    position: relative;
+    top: 50px;
+    color: red;
+    font-weight: bold;
+    width: 300px;
+    margin: auto;
+  }
+</style>
 
 <body>
-  <p id="errorMessage" class="err centered"></p>
-  <div id="mainContent" class="centered hidden">
-    <div class="canvas-wrapper">
-      <video id="videoInput" class="canvas-big"></video>
-      <button class='reset-button hidden'>Reset</button>
-
-      <div class="settings-wrapper">
-        <settings-pane></settings-pane>
-      </div>
-    </div>
-
-    <div class="camera-bar-wrapper">
-      <ul id="cameraBar">
-        <li class="camera-bar-item bar-with-three-items">
-          <div class="gallery-wrapper">
-            <canvas id="gallery" class="camera-bar-icon"></canvas>
-          </div>
-        </li>
-        <li class="camera-bar-item bar-with-three-items">
-          <div class="take-photo-wrapper">
-            <button id="takePhotoButton" class="camera-bar-icon material-icons" disabled>photo_camera</button>
-          </div>
-        </li>
-        <li class="camera-bar-item bar-with-three-items">
-          <div class="face-mode-wrapper">
-            <button id="facingModeButton" class="camera-bar-icon material-icons" disabled>camera_front</button>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <script src="../../utils/utils.js"></script>
-  <script src="js/index.js"></script>
+  <p id="errorMessage" class="centered"></p>
+  <camera-view></camera-view>
 </body>
+<script src="../../utils/utils.js"></script>
 
 </html>

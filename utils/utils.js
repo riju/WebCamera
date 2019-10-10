@@ -110,8 +110,7 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
     }
   };
 
-  this.startCamera = function (videoConstraint, videoId, callback) {
-    let video = document.getElementById(videoId);
+  this.startCamera = function (videoConstraint, video, callback) {
     navigator.mediaDevices.getUserMedia({ video: videoConstraint, audio: false })
       .then(function (stream) {
         video.srcObject = stream;
@@ -197,6 +196,7 @@ function getVideoConstraint(menuHeight) {
       videoConstraint = resolutions['vga'];
     }
   }
+  return videoConstraint;
 }
 
 function setMainCanvasProperties(video) {
@@ -230,41 +230,38 @@ function startVideoProcessing() {
   requestAnimationFrame(processVideo);
 }
 
-function initCameraSettingsAndStart() {
-  // Detect back and front cameras.
-  navigator.mediaDevices.enumerateDevices()
-    .then(function (devices) {
-      devices.forEach(device => {
-        if (device.kind == 'videoinput') {
+async function initCameraSettingsAndStart() {
+  const devices = await navigator.mediaDevices.enumerateDevices();
 
-          if (device.facingMode == "environment"
-            || device.label.indexOf("facing back") >= 0)
-            controls.backCamera = device;
-
-          else if (device.facingMode == "user"
-            || device.label.indexOf("facing front") >= 0)
-            controls.frontCamera = device;
-        }
-      });
-      // Disable facingModeButton if there is no environment or user mode.
-      let facingModeButton = document.getElementById('facingModeButton');
-      if (facingModeButton) {
-        if (controls.frontCamera === undefined || controls.backCamera === undefined) {
-          facingModeButton.style.color = 'gray';
-          facingModeButton.style.border = '2px solid gray';
-        } else {
-          facingModeButton.disabled = false;
-        }
+  devices.forEach(device => {
+    if (device.kind == 'videoinput') {
+      if (device.facingMode == "environment"
+          || device.label.indexOf("facing back") >= 0) {
+        controls.backCamera = device;
+      } else if (device.facingMode == "user"
+        || device.label.indexOf("facing front") >= 0) {
+        controls.frontCamera = device;
       }
+    }
+  });
 
-      // Set initial facingMode value if camera is available.
-      if (controls.backCamera !== undefined) {
-        controls.facingMode = 'environment';
-        videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
-      }
+  // Disable facingModeButton if there is no environment or user mode.
+  let facingModeButton = document.getElementById('facingModeButton');
+  if (facingModeButton) {
+    if (!controls.frontCamera || !controls.backCamera) {
+      facingModeButton.style.color = 'gray';
+      facingModeButton.style.border = '2px solid gray';
+    } else {
+      facingModeButton.disabled = false;
+    }
+  }
 
-      startCamera();
-    });
+  if (controls.backCamera) {
+    controls.facingMode = 'environment';
+    videoConstraint.deviceId = { exact: controls.backCamera.deviceId };
+  }
+
+  return startCamera();
 }
 
 function drawCanvas(canvas, img) {

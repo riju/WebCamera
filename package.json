@@ -30,6 +30,8 @@
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@material/mwc-icon": "^0.9.1",
+    "@material/mwc-ripple": "^0.9.1",
     "@material/mwc-slider": "^0.9.1",
     "lit-element": "^2.2.1",
     "rollup-plugin-copy-glob": "^0.3.1",
