@@ -5,14 +5,13 @@ import '../../../node_modules/@material/mwc-ripple';
 
 import './settings-pane.js';
 
-let utils = new Utils('errorMessage');
-
 class CameraView extends LitElement {
   static styles = css`
     :host {
       display: block;
       width: 100vw;
       height: 100vh;
+      overflow: hidden;
     }
 
     .hidden {
@@ -26,7 +25,7 @@ class CameraView extends LitElement {
     video {
       display: inline;
     }
-    
+
     video:hover {
       cursor: pointer;
     }
@@ -40,26 +39,28 @@ class CameraView extends LitElement {
       background: none;
       border: none;
       z-index: 15;
+      outline: none;
     }
 
     .canvas-wrapper {
       position: relative;
       width: 100%;
     }
-    
+
     .settings-wrapper {
       position: absolute;
       top: 0;
       width: 100%;
       height: 100%;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: flex-end;
     }
 
     #cameraBar {
       height: 100px;
-      background-color: black;
+      background-color: transparent;
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
@@ -94,6 +95,8 @@ class CameraView extends LitElement {
     }
   `;
 
+  facingMode = "user";
+
   _onResetClicked(e) {
     const settings = this.shadowRoot.querySelector('settings-pane');
     settings.reset();
@@ -102,8 +105,15 @@ class CameraView extends LitElement {
     resetButton.classList.add('hidden');
   }
 
-  _onConstraintsChange(e) {
-    this.videoTrack.applyConstraints(e.detail.constraints).catch(e => console.log(e));
+  async _onConstraintsChange(e) {
+    try {
+      await this.videoTrack.applyConstraints(e.detail.constraints);
+
+      const settings = this.shadowRoot.querySelector('settings-pane');
+      settings.applyFromTrack(this.videoTrack);
+    } catch(err) {
+      console.error(err);
+    }
 
     const resetButton = this.shadowRoot.querySelector('#resetButton');
     resetButton.classList.remove('hidden');
@@ -118,26 +128,16 @@ class CameraView extends LitElement {
   }
 
   async _onFacingModeClicked() {
-    switch(this.facingMode) {
-      case 'user':
-        this.facingMode = 'environment';
-        this.constraints.deviceId = { exact: this.backCamera.deviceId };
-        facingModeButton.innerText = 'camera_front';
-        break;
-      case 'environment':
-        this.facingMode = 'user';
-        this.constraints.deviceId = { exact: this.frontCamera.deviceId };
-        facingModeButton.innerText = 'camera_rear';
-    }
+    this.selectedCamera = (this.selectedCamera + 1) % this.cameras.length;
+    const camera = this.cameras[this.selectedCamera];
+    this.constraints.deviceId = { exact: camera.deviceId };
+    this.facingMode = this.getFacingMode(camera);
+    this.requestUpdate();
 
-    utils.clearError();
-    utils.stopCamera();
+    this.stopCamera();
 
     const videoElement = this.shadowRoot.querySelector('video');
-
-    await new Promise(resolve => {
-      utils.startCamera(this.constraints, videoElement, resolve);
-    });
+    await this.startCamera(videoElement, this.constraints);
 
     // Timeout needed in Chrome, see https://crbug.com/711524.
     const settings = this.shadowRoot.querySelector('settings-pane');
@@ -166,66 +166,104 @@ class CameraView extends LitElement {
     }
   }
 
+  startCamera(target, constraints) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: constraints,
+          audio: false
+        });
+
+        this.video = target;
+        this.stream = stream;
+
+        target.srcObject = stream;
+        target.addEventListener('canplay', resolve, { once: true });
+        target.play();
+      } catch(err) {
+        reject(err);
+      }
+    });
+  }
+
+  stopCamera() {
+    if (this.video) {
+      this.video.pause();
+      this.video.srcObject = null;
+    }
+    if (this.stream) {
+      this.stream.getVideoTracks()[0].stop();
+    }
+  }
+
+  getFacingMode(device) {
+    if (device.facingMode == "environment"
+      || device.label.indexOf("facing back") >= 0) {
+      return "environment";
+    }
+    // We assume by default that cameras are user facing
+    // which is mostly the case for desktop.
+    return "user";
+  }
+
   async firstUpdated() {
     let menuHeight = parseInt(getComputedStyle(
       this.shadowRoot.querySelector('#cameraBar')).height);
-    this.constraints = getVideoConstraint(menuHeight);
+    this.constraints = {};
+    this.constraints.width = Math.ceil(visualViewport.width);
+    this.constraints.height = Math.ceil(visualViewport.height);
 
     const devices = await navigator.mediaDevices.enumerateDevices();
 
+    this.cameras = [];
+    this.selectedCamera = 0;
+
     devices.forEach(device => {
       if (device.kind == 'videoinput') {
-        if (device.facingMode == "environment"
-            || device.label.indexOf("facing back") >= 0) {
-          this.backCamera = device;
-        } else if (device.facingMode == "user"
-          || device.label.indexOf("facing front") >= 0) {
-          this.frontCamera = device;
+        if (this.getFacingMode(device) == "user") {
+          this.cameras.push(device);
+        } else {
+          this.cameras.unshift(device);
         }
       }
     });
-  
+
     // Disable facingModeButton if there is no environment or user mode.
     let facingModeButton = this.shadowRoot.getElementById('facingModeButton');
-    if (facingModeButton) {
-      if (!this.frontCamera || !this.backCamera) {
-        facingModeButton.style.color = 'gray';
-        facingModeButton.style.border = '2px solid gray';
-      } else {
-        facingModeButton.disabled = false;
-      }
+    if (this.cameras.length < 2) {
+      facingModeButton.style.color = 'gray';
+      facingModeButton.style.border = '2px solid gray';
+    } else {
+      facingModeButton.disabled = false;
     }
-  
-    if (this.backCamera) {
-      this.facingMode = 'environment';
-      this.constraints.deviceId = { exact: this.backCamera.deviceId };
-    }
-  
+
+    this.facingMode = this.getFacingMode(this.cameras[0]);
+    this.requestUpdate();
+    this.constraints.deviceId = { exact: this.cameras[0].deviceId};
+
     const videoElement = this.shadowRoot.querySelector('video');
 
-    await new Promise(resolve => {
-      utils.startCamera(this.constraints, videoElement, resolve);
-    });
+    await this.startCamera(videoElement, this.constraints);
 
     this.videoTrack = videoElement.srcObject.getVideoTracks()[0];
     this.imageCapturer = new ImageCapture(this.videoTrack);
 
     let cameraBar = this.shadowRoot.querySelector('#cameraBar');
     cameraBar.style.width = `${videoElement.videoWidth}px`;
-  
+
     let mainContent = this.shadowRoot.getElementById('mainContent');
     mainContent.style.width = `${videoElement.videoWidth}px`;
     mainContent.classList.remove('hidden');
-  
+
     this.shadowRoot.querySelector('.canvas-wrapper').style.height =
       `${videoElement.videoHeight}px`;
-  
+
     let resetButton = this.shadowRoot.querySelector('#resetButton');
     resetButton.classList.remove('hidden');
     resetButton.style.left = `${videoElement.videoWidth - resetButton.offsetWidth}px`;
     resetButton.style.bottom = `${videoElement.videoHeight}px`;
     resetButton.classList.add('hidden');
-  
+
     this.shadowRoot.getElementById('takePhotoButton').disabled = false;
 
     // Timeout needed in Chrome, see https://crbug.com/711524.
@@ -237,7 +275,7 @@ class CameraView extends LitElement {
   }
 
   render() {
-    return html`   
+    return html`
       <div id="mainContent" class="centered hidden">
         <div class="canvas-wrapper">
           <video id="videoInput"></video>
@@ -245,28 +283,28 @@ class CameraView extends LitElement {
           <button id="resetButton" class='hidden' @click=${this._onResetClicked}>
             Reset
           </button>
-    
+
           <div class="settings-wrapper">
             <settings-pane
               @click=${this._onSettingsBackgroundClicked}
               @constraintschange=${this._onConstraintsChange}>
             </settings-pane>
+
+            <div id="cameraBar">
+              <canvas id="gallery" class="camera-bar-icon"></canvas>
+              <div>
+              <button id="takePhotoButton" class="camera-bar-icon" disabled
+                @click=${this.takePhoto}>
+                <mwc-icon>photo_camera</mwc-icon>
+              </button>
+              <mwc-ripple unbounded></mwc-ripple>
+              </div>
+              <button id="facingModeButton" class="camera-bar-icon" disabled
+                @click=${this._onFacingModeClicked}>
+                <mwc-icon>${this.facingMode === "user" ? "camera_front" : "camera_rear"}</mwc-icon>
+              </button>
+            </div>
           </div>
-        </div>
-    
-        <div id="cameraBar">
-          <canvas id="gallery" class="camera-bar-icon"></canvas>
-          <div>
-          <button id="takePhotoButton" class="camera-bar-icon" disabled
-            @click=${this.takePhoto}>
-            <mwc-icon>photo_camera</mwc-icon>
-          </button>
-          <mwc-ripple unbounded></mwc-ripple>
-          </div>
-          <button id="facingModeButton" class="camera-bar-icon" disabled
-            @click=${this._onFacingModeClicked}>
-            <mwc-icon>camera_front</mwc-icon>
-          </button>
         </div>
       </div>
     `;

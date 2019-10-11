@@ -28,6 +28,26 @@ will also be useful for Focus Stacking.
 
 Implementation information for other properties can be found in [here](https://github.com/w3c/mediacapture-image/blob/master/implementation-status.md).
 
+## How to run
+
+To get the development dependencies (like local dev server) and project
+dependencies like the Material web components, please run
+
+`npm run install`
+
+To test locally run the below command. This will spin up a local dev server
+that opens the project in the browser tab and reloads it when changes are saved
+
+`npm run start`
+
+To build the project into /docs which GitHub pages supports, please run
+
+`npm run build`
+
+To check that the build is working perfectly, run
+
+`npm run start:build`
+
 
 ## Useful Links
 

@@ -27,20 +27,26 @@
     flex-wrap: wrap;
   }
 
-  #errorMessage {
-    position: relative;
-    top: 50px;
-    color: red;
-    font-weight: bold;
-    width: 300px;
-    margin: auto;
-  }
 </style>
 
 <body>
-  <p id="errorMessage" class="centered"></p>
+  <mwc-snackbar id="errorSnackbar"
+    labelText="Some internal error happened">
+  </mwc-snackbar>
   <camera-view></camera-view>
 </body>
-<script src="../../utils/utils.js"></script>
+<script type=module>
+  import '../../node_modules/@material/mwc-snackbar';
 
+  const snackbar = document.querySelector('#errorSnackbar');
+
+  let log = console.error;
+  console.error = (...messages) => {
+    snackbar.labelText = messages.join(" ");
+    snackbar.open();
+    log.call(console, ...messages);
+  }
+
+  customElements.whenDefined('mwc-snackbar');
+</script>
 </html>
