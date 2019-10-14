@@ -30,18 +30,6 @@ class CameraCapture extends LitElement {
       cursor: pointer;
     }
 
-    #resetButton {
-      position: relative;
-      padding: 15px;
-      color: white;
-      text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
-      font-size: 18px;
-      background: none;
-      border: none;
-      z-index: 15;
-      outline: none;
-    }
-
     .canvas-wrapper {
       position: relative;
       width: 100%;
@@ -97,14 +85,6 @@ class CameraCapture extends LitElement {
 
   facingMode = "user";
 
-  _onResetClicked(e) {
-    const settings = this.shadowRoot.querySelector('settings-pane');
-    settings.reset();
-
-    const resetButton = this.shadowRoot.querySelector('#resetButton');
-    resetButton.classList.add('hidden');
-  }
-
   async _onConstraintsChange(e) {
     try {
       await this.videoTrack.applyConstraints(e.detail.constraints);
@@ -114,17 +94,11 @@ class CameraCapture extends LitElement {
     } catch(err) {
       console.error(err);
     }
-
-    const resetButton = this.shadowRoot.querySelector('#resetButton');
-    resetButton.classList.remove('hidden');
   }
 
   _onSettingsBackgroundClicked(e) {
     const settings = this.shadowRoot.querySelector('settings-pane');
     settings.hide();
-
-    const resetButton = this.shadowRoot.querySelector('#resetButton');
-    resetButton.classList.add('hidden');
   }
 
   async _onFacingModeClicked() {
@@ -264,12 +238,6 @@ class CameraCapture extends LitElement {
     this.shadowRoot.querySelector('.canvas-wrapper').style.height =
       `${videoElement.videoHeight}px`;
 
-    let resetButton = this.shadowRoot.querySelector('#resetButton');
-    resetButton.classList.remove('hidden');
-    resetButton.style.left = `${videoElement.videoWidth - resetButton.offsetWidth}px`;
-    resetButton.style.bottom = `${videoElement.videoHeight}px`;
-    resetButton.classList.add('hidden');
-
     this.shadowRoot.getElementById('takePhotoButton').disabled = false;
 
     // Timeout needed in Chrome, see https://crbug.com/711524.
@@ -285,10 +253,6 @@ class CameraCapture extends LitElement {
       <div id="mainContent" class="centered hidden">
         <div class="canvas-wrapper">
           <video id="videoInput"></video>
-
-          <button id="resetButton" class='hidden' @click=${this._onResetClicked}>
-            Reset
-          </button>
 
           <div class="settings-wrapper">
             <settings-pane

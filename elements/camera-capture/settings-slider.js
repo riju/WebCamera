@@ -60,7 +60,7 @@ class SettingsSlider extends LitElement {
         min=${this.min || 0}
         max=${this.max || 10}
         step=${this.step || 1}
-        @MDCSlider:change=${this._onchange}>
+        @MDCSlider:input=${this._onchange}>
       </mwc-slider>
       <div class=${classMap({ value: true, disabled: this.disabled})}>
         ${this.value}

@@ -44,7 +44,7 @@ class SettingsPane extends LitElement {
       box-sizing: border-box;
     }
 
-    .settings, .pro-settings {
+    .settings, .settings-group {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -57,6 +57,20 @@ class SettingsPane extends LitElement {
     #wbIcon {
       display: inline;
       font-size: 16px;
+    }
+
+    #resetButton {
+      position: fixed;
+      top: 0px;
+      right: 0px;
+      padding: 16px;
+      color: white;
+      text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+      font-size: 18px;
+      background: none;
+      border: none;
+      z-index: 15;
+      outline: none;
     }
 
     @media screen and (max-width: 960px) {
@@ -125,6 +139,15 @@ class SettingsPane extends LitElement {
     });
   }
 
+  _onResetClicked(e) {
+    e.stopPropagation();
+
+    this.reset();
+
+    const resetButton = this.shadowRoot.querySelector('#resetButton');
+    resetButton.classList.add('hidden');
+  }
+
   _toggleGroup(e) {
     const id = e.target.getAttribute('for');
     if (!id) return;
@@ -143,7 +166,14 @@ class SettingsPane extends LitElement {
     }
 
     const bar = this.shadowRoot.querySelector('#settings-bar');
-    const pane = this.shadowRoot.querySelector(`#${id}Settings`);
+    const pane = this.shadowRoot.querySelector(`#${id}-group`);
+    const resetButton = this.shadowRoot.querySelector('#resetButton');
+
+    if (pane.hasAttribute("modified")) {
+      resetButton.classList.remove('hidden');
+    } else {
+      resetButton.classList.add('hidden');
+    }
 
     let panes = Array.from(bar.children).filter(el => el != pane);
     panes.forEach(pane => {
@@ -192,32 +222,41 @@ class SettingsPane extends LitElement {
   }
 
   firstUpdated() {
-    const controls = this.shadowRoot.querySelectorAll('settings-slider');
-    controls.forEach(control => {
-      control.onchange = e => {
-        const id = e.target.getAttribute('id');
-        const value = e.detail.value;
-        console.log(id, ":", value);
+    const groups = this.shadowRoot.querySelectorAll('.settings-group');
+    for (let group of groups) {
+      for (let slider of group.children) {
+        slider.onchange = e => {
+          const id = e.target.getAttribute('id');
+          const value = e.detail.value;
+          console.log(id, ":", value);
 
-        let constraints = { advanced: [{}] };
-        constraints.advanced[0][id] = value;
-        if (id == 'exposureTime') {
-          constraints.advanced[0]['exposureMode'] = 'manual';
-        } else if (id == 'focusDistance') {
-          constraints.advanced[0]['focusMode'] = 'manual';
-        } else if (id == 'colorTemperature') {
-          this._colorTemperatureChange(value);
-          constraints.advanced[0]['whiteBalanceMode'] = 'manual';
-        }
+          let constraints = { advanced: [{}] };
+          constraints.advanced[0][id] = value;
+          if (id == 'exposureTime') {
+            constraints.advanced[0]['exposureMode'] = 'manual';
+          } else if (id == 'focusDistance') {
+            constraints.advanced[0]['focusMode'] = 'manual';
+          } else if (id == 'colorTemperature') {
+            this._colorTemperatureChange(value);
+            constraints.advanced[0]['whiteBalanceMode'] = 'manual';
+          }
 
-        this.dispatchEvent(new CustomEvent('constraintschange', { detail: { constraints } }));
-      };
-    });
+          group.setAttribute("modified", "");
+
+          const resetButton = this.shadowRoot.querySelector('#resetButton');
+          resetButton.classList.remove('hidden');
+
+          this.dispatchEvent(new CustomEvent('constraintschange', { detail: { constraints } }));
+        };
+      }
+    }
   }
 
   reset() {
     const id = this.activePane.getAttribute("id");
     let constraints = { advanced: [{}] };
+
+    this.activePane.removeAttribute("modified");
 
     if (id == 'standardSettings') {
       Array.from(this.activePane.children).forEach(child => {
@@ -249,30 +288,33 @@ class SettingsPane extends LitElement {
   render() {
     return html`
       <link href="../css/google-icons.css" rel="stylesheet">
+      <button id="resetButton" class='hidden' @click=${this._onResetClicked}>
+        Reset
+      </button>
       <div id="settings-bar" @click=${e => e.stopPropagation()}>
-        <div id="isoSettings" class="pro-settings hidden">
-          <settings-slider label="ISO" id="iso" min="0" max="10" value="0" step="1"></settings-slider>
+        <div id="iso-group" class="settings-group hidden">
+          <settings-slider label="ISO" id="iso"></settings-slider>
         </div>
-        <div id="exposureTimeSettings" class="pro-settings hidden">
-          <settings-slider metering label="Exposure" id="exposureTime" min="0" max="10" value="0" step="1"></settings-slider>
+        <div id="exposureTime-group" class="settings-group hidden">
+          <settings-slider metering label="Exposure" id="exposureTime"></settings-slider>
         </div>
-        <div id="focusDistanceSettings" class="pro-settings hidden">
-          <settings-slider metering label="Focus distance" id="focusDistance" min="0" max="10" value="0" step="1"></settings-slider>
+        <div id="focusDistance-group" class="settings-group hidden">
+          <settings-slider metering label="Focus distance" id="focusDistance"></settings-slider>
         </div>
-        <div id="standardSettings" class="pro-settings hidden">
-          <settings-slider label="Contrast" id="contrast" min="0" max="10" value="0" step="1"></settings-slider>
-          <settings-slider label="Saturation" id="saturation" min="0" max="10" value="0" step="1"></settings-slider>
-          <settings-slider label="Sharpness" id="sharpness" min="0" max="10" value="0" step="1"></settings-slider>
-          <settings-slider label="Brightness" id="brightness" min="0" max="10" value="0" step="1"></settings-slider>
-          <settings-slider label="Exposure Compensation" id="exposureCompensation" min="-10" max="10" value="0" step="1"></settings-slider>
+        <div id="standard-group" class="settings-group hidden">
+          <settings-slider label="Contrast" id="contrast"></settings-slider>
+          <settings-slider label="Saturation" id="saturation"></settings-slider>
+          <settings-slider label="Sharpness" id="sharpness"></settings-slider>
+          <settings-slider label="Brightness" id="brightness"></settings-slider>
+          <settings-slider label="Exposure Compensation" id="exposureCompensation"></settings-slider>
         </div>
-        <div id="colorTemperatureSettings" class="pro-settings hidden">
-          <settings-slider metering label="Color Temperature" id="colorTemperature" min="0" max="9999" value="0" step="100">
+        <div id="colorTemperature-group" class="settings-group hidden">
+          <settings-slider metering label="Color Temperature" id="colorTemperature">
             <i id="wbIcon" class="material-icons">wb_auto</i>
           </settings-slider>
         </div>
-        <div id="zoomSettings" class="pro-settings hidden">
-          <settings-slider label="Zoom" id="zoom" min="0" max="10" value="0" step="1"></settings-slider>
+        <div id="zoom-group" class="settings-group hidden">
+          <settings-slider label="Zoom" id="zoom"></settings-slider>
         </div>
       </div>
       <div class="pro-icons" @click=${e => { this._toggleGroup(e); e.stopPropagation()}}>
