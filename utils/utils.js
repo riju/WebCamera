@@ -314,6 +314,27 @@ function getContourCoordinates(contour) {
   return sortedCoordinates;
 }
 
+function findMaxAreaContour(contours) {
+  let approxCnt = new cv.Mat();
+  let maxArea = 0;
+  let index;
+  for (let i = 0; i < contours.size(); ++i) {
+    let cnt = contours.get(i);
+    let perimeter = cv.arcLength(cnt, true);
+    // Approximate the contour with the (0.01 * perimeter) precision.
+    cv.approxPolyDP(cnt, approxCnt, 0.01 * perimeter, true);
+    let area = cv.contourArea(cnt);
+    // Check that contour has 4 angles.
+    if (approxCnt.rows == 4 && area > maxArea) {
+      maxArea = area;
+      index = i;
+    }
+    cnt.delete();
+  }
+  approxCnt.delete();
+  return { maxArea: maxArea, i: index };
+}
+
 function resizeImage(image, width = 'undefined', height = 'undefined') {
   let dim;
 

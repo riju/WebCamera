@@ -16,25 +16,26 @@
     <video id="video-tag" width="240" height="180" autoplay></video>
   </div>
   <div class="media">
-    <canvas id='takePhotoCanvas1' width="240" height="180"></canvas>
-    <canvas id='takePhotoCanvas2' width="240" height="180"></canvas>
-    <canvas id='takePhotoCanvas3' width="240" height="180"></canvas>
-    <br>
     <label for="exposure-slider">🔆 Exposure <output id="exposureTime-slider-value"></output>
       <input type="range" id="exposureTime-slider" min="0" max="0" style="display: block;">
     </label>
-      <button id="takePhotoButton">📷 Take photo</button>
+    <button id="takePhotoButton">📷 Take photo</button>
   </div>
   <div>
-    <canvas id='outputCanvasHDR' width="240" height="180"></canvas>
-    <canvas id='outputCanvasHDRnoColorspaceConversion' width="240" height="180"></canvas>
     <canvas id='outputCanvasLDR' width="240" height="180"></canvas>
     <p><button id="createHDRButton" onclick="createHDR()">✨ Create HDR</button></p>
+  </div>
+  <div>
+    <canvas id='takePhotoCanvas1' width="240" height="180"></canvas>
+    <canvas id='takePhotoCanvas2' width="240" height="180"></canvas>
+    <canvas id='takePhotoCanvas3' width="240" height="180"></canvas>
+    <canvas id='takePhotoCanvas4' width="240" height="180"></canvas>
+    <br>
   </div>
   <script src="../../libs/adapter-latest.js"></script>
   <script src="../../libs/stats.min.js"></script>
   <script src="../../libs/dat.gui.min.js"></script>
-  <script src="../../libs/utils.js"></script>
+  <script src="../../utils/utils.js"></script>
   <script>
     window.onload = () => {
       document.querySelector('#start').addEventListener('click', () => { startCamera() });
@@ -43,12 +44,11 @@
       addTextToCanvas('Photo 1', 'takePhotoCanvas1');
       addTextToCanvas('Photo 2 (tip: adjust exposure!)', 'takePhotoCanvas2');
       addTextToCanvas('Photo 3 (tip: adjust exposure again!)', 'takePhotoCanvas3');
+      addTextToCanvas('Photo 4 (tip: adjust exposure again!)', 'takePhotoCanvas4');
 
-      addTextToCanvas('High Dynamic Range', 'outputCanvasHDR');
-      addTextToCanvas('HDR no colorspace conversion', 'outputCanvasHDRnoColorspaceConversion');
       addTextToCanvas('Low Dynamic Range', 'outputCanvasLDR');
     };
-    </script>
+  </script>
   <script>
     var featuresReady = checkFeatures(document.getElementById("info"), {
       webrtc: true
@@ -69,7 +69,7 @@
   </script>
   <script async src="../../build/wasm/opencv.js"></script>
   -->
-  <script async src="../../build/asm.js/opencv.js" onload="opencvIsReady()"></script>
+  <script async src="../../build/wasm/desktop/opencv.js" onload="opencvIsReady()"></script>
 </body>
 
 </html>

@@ -1,27 +1,31 @@
 const constraints_general = {
   "video": {
-      width: {
-          exact: 240
-      }
+    width: {
+      exact: 240
+    }
   }
 };
 
 const constraints_mobile = {
-    video: {
-        facingMode: { exact: "environment" },
-        width : { exact:240
-        }
+  video: {
+    facingMode: { exact: "environment" },
+    width: {
+      exact: 240
     }
+  }
 };
+
+const NUMBER_OF_PHOTOS = 4;
 
 var videoTag = document.getElementById('video-tag');
 
 var takePhotoCanvas1 = document.getElementById('takePhotoCanvas1');
 var takePhotoCanvas2 = document.getElementById('takePhotoCanvas2');
 var takePhotoCanvas3 = document.getElementById('takePhotoCanvas3');
+var takePhotoCanvas4 = document.getElementById('takePhotoCanvas4');
 var takePhotoCanvasArray = new Array(takePhotoCanvas1, takePhotoCanvas2,
-  takePhotoCanvas3);
-var images_list = new Array(3);
+  takePhotoCanvas3, takePhotoCanvas4);
+var images_list = new Array(NUMBER_OF_PHOTOS);
 var imageHDR = document.getElementById('imageHDR');
 
 var exposureTimeSlider = document.getElementById("exposureTime-slider");
@@ -30,10 +34,10 @@ var exposureTimeSliderValue = document.getElementById(
 var takePhotoButton = document.getElementById('takePhotoButton');
 var imageCapturer;
 var counter = 0;
-//var exposureTimeArray = new Float32Array(3);
-var exposureTimeArray = new Uint8Array(3);
+var exposureTimeArray = new Float32Array(NUMBER_OF_PHOTOS);
+//var exposureTimeArray = new Uint8Array(3);
 
-// Assume there is a list of 3 images at various exposure time.
+// Assume there is a list of 4 images at various exposure time.
 
 function startCamera() {
   document.querySelector('#start').style.display = 'none';
@@ -43,15 +47,15 @@ function startCamera() {
     navigator.mediaDevices.getUserMedia(constraints_mobile)
       .then(gotMedia)
       .catch(e => {
-          console.error('getUserMedia() failed: ', e);
+        console.error('getUserMedia() failed: ', e);
       });
   } else {
-      navigator.mediaDevices.getUserMedia(constraints_general)
+    navigator.mediaDevices.getUserMedia(constraints_general)
       .then(gotMedia)
       .catch(e => {
-          console.error('getUserMedia() failed: ', e);
+        console.error('getUserMedia() failed: ', e);
       });
-    }
+  }
 }
 
 function gotMedia(mediastream) {
@@ -63,28 +67,29 @@ function gotMedia(mediastream) {
 
   // Timeout needed in Chrome, see https://crbug.com/711524
   setTimeout(() => {
-      const capabilities = videoTrack.getCapabilities()
-      // Check whether exposureTime is supported or not.
-      if (!capabilities.exposureTime) {
-          return;
-      }
+    const capabilities = videoTrack.getCapabilities()
+    // Check whether exposureTime is supported or not.
+    if (!capabilities.exposureTime) {
+      return;
+    }
 
-      exposureTimeSlider.min = capabilities.exposureTime.min;
-      exposureTimeSlider.max = capabilities.exposureTime.max;
-      exposureTimeSlider.step = capabilities.exposureTime.step;
+    exposureTimeSlider.min = capabilities.exposureTime.min;
+    exposureTimeSlider.max = capabilities.exposureTime.max;
+    exposureTimeSlider.step = capabilities.exposureTime.step;
 
-      exposureTimeSlider.value = exposureTimeSliderValue.value =
-          videoTrack.getSettings().exposureTime;
+    exposureTimeSlider.value = exposureTimeSliderValue.value =
+      videoTrack.getSettings().exposureTime;
+    exposureTimeSliderValue.value = exposureTimeSlider.value;
+
+    exposureTimeSlider.oninput = function () {
       exposureTimeSliderValue.value = exposureTimeSlider.value;
-
-      exposureTimeSlider.oninput = function() {
-          exposureTimeSliderValue.value = exposureTimeSlider.value;
-          videoTrack.applyConstraints({
-              advanced: [{
-                  exposureTime: exposureTimeSlider.value
-              }]
-          });
-      }
+      videoTrack.applyConstraints({
+        advanced: [{
+          exposureMode: "manual",
+          exposureTime: exposureTimeSlider.value
+        }]
+      });
+    }
 
   }, 500);
 }
@@ -92,9 +97,9 @@ function gotMedia(mediastream) {
 // TODO: process HDR in a dedicated worker to not block the main thread
 // process HDR
 function createHDR() {
-  if (counter < 3) {
-      console.log("3 pictures are needed");
-      return;
+  if (counter < NUMBER_OF_PHOTOS) {
+    console.log(`${NUMBER_OF_PHOTOS}`, " pictures are needed");
+    return;
   }
 
   console.log("createHDR is called !");
@@ -103,18 +108,20 @@ function createHDR() {
   let src1 = cv.imread(takePhotoCanvas1);
   let src2 = cv.imread(takePhotoCanvas2);
   let src3 = cv.imread(takePhotoCanvas3);
+  let src4 = cv.imread(takePhotoCanvas4);
   console.log('image width: ' + src1.cols + '\n' +
-      'image height: ' + src1.rows + '\n' +
-      'image size: ' + src1.size().width + '*' + src1.size().height +
-      '\n' +
-      'image depth: ' + src1.depth() + '\n' +
-      'image channels ' + src1.channels() + '\n' +
-      'image type: ' + src1.type() + '\n');
+    'image height: ' + src1.rows + '\n' +
+    'image size: ' + src1.size().width + '*' + src1.size().height +
+    '\n' +
+    'image depth: ' + src1.depth() + '\n' +
+    'image channels ' + src1.channels() + '\n' +
+    'image type: ' + src1.type() + '\n');
 
   let srcArray = new cv.MatVector();
   srcArray.push_back(src1);
   srcArray.push_back(src2);
   srcArray.push_back(src3);
+  srcArray.push_back(src4);
 
   // STEP 2. Align images , need to expose properly in Photo module JS bindings.
   /*
@@ -128,9 +135,9 @@ function createHDR() {
   let calibration = new cv.CalibrateDebevec();
   // let times = exposureTimeArray.slice();
   let times = new cv.matFromArray(exposureTimeArray.length, 1, cv.CV_32F,
-      exposureTimeArray);
-  exposureTimeArray.forEach(function(element) {
-      console.log(element);
+    exposureTimeArray);
+  exposureTimeArray.forEach(function (element) {
+    console.log(element);
   });
 
   // process (InputArrayOfArrays src, OutputArray dst, InputArray times)
@@ -150,15 +157,22 @@ function createHDR() {
   console.log("merge_debevec.process took " + (t1 - t0) + " milliseconds.");
   console.log("HDR done !! woooo ");
 
+  let dst = new cv.Mat();
+  cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGRA2RGBA, 0);
+
   // STEP 5. Tonemap HDR image if you don't have HDR screen to display.
   console.log("TonemapReinhard is called");
   let ldr = new cv.Mat();
-  tonemap_reinhard = new cv.TonemapReinhard(gamma = 2.2);
+  let tonemap_reinhard = new cv.TonemapReinhard(gamma = 2.2);
   t0 = performance.now();
-  res_debevec = tonemap_reinhard.process(hdr_debevec, ldr);
+  let hdr_debevec_dst = new cv.Mat();
+  cv.cvtColor(hdr_debevec, hdr_debevec_dst, cv.COLOR_BGRA2BGR);
+  tonemap_reinhard.process(hdr_debevec_dst, ldr);
   t1 = performance.now();
   console.log("tonemap_reinhard took " + (t1 - t0) + " milliseconds.");
   console.log("Tonemapping done !! woooo ");
+  // STEP 6. Display
+  cv.imshow('outputCanvasLDR', ldr);
 
   // Fusion : First align and then merge.
   // Align not properly exposed in JS, so ignore the align call now.
@@ -192,12 +206,6 @@ function createHDR() {
    data read from canvas is a Uint8ClampedArray.
    Mat used here is CV_32F
    */
-  // STEP 6. Display
-  let dst = new cv.Mat();
-  cv.imshow('outputCanvasHDRnoColorspaceConversion', hdr_debevec);
-  cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGRA2RGBA, 0);
-  cv.imshow('outputCanvasHDR', dst);
-  cv.imshow('outputCanvasLDR', ldr);
 
   //cv.imwrite("hdr.png", hdr_debevec);
 
@@ -205,23 +213,24 @@ function createHDR() {
   src1.delete();
   src2.delete();
   src3.delete();
+  src4.delete();
   srcArray.delete();
   dest.delete();
   hdr_debevec.delete();
   merge_debevec.delete();
   //merge_mertens.delete();
   //fusion.delete();
-  //ldr.delete();
+  ldr.delete();
   tonemap_reinhard.delete();
   dst.delete();
 }
 
 function checkCounter() {
-  if (counter > 3) {
-      takePhotoButton.text('3 pictures taken!');
-      takePhotoButton.disabled = true;
-      document.getElementById('createHDRButton').disabled = false;
-      return false;
+  if (counter > NUMBER_OF_PHOTOS) {
+    takePhotoButton.text(`${NUMBER_OF_PHOTOS}`, ' pictures taken!');
+    takePhotoButton.disabled = true;
+    document.getElementById('createHDRButton').disabled = false;
+    return false;
   }
 
   counter++;
@@ -230,19 +239,20 @@ function checkCounter() {
 
 function takePhoto() {
   imageCapturer.takePhoto()
-      // https://developers.google.com/web/updates/2016/03/createimagebitmap-in-chrome-50
-      .then(blob => createImageBitmap(blob))
-      .then((imageBitmap) => {
-          if (checkCounter()) {
-              drawCanvas(takePhotoCanvasArray[counter - 1], imageBitmap);
-              // exposure time values are in 100 µs units.
-              exposureTimeArray[counter - 1] = (10000 / exposureTimeSlider.value);
-              console.log("exposure Time = ", exposureTimeSlider.value);
-          }
-      })
-      .catch((err) => {
-          console.error("takePhoto() failed: ", err);
-      });
+    // https://developers.google.com/web/updates/2016/03/createimagebitmap-in-chrome-50
+    .then(blob => createImageBitmap(blob))
+    .then((imageBitmap) => {
+      if (checkCounter()) {
+        drawCanvas(takePhotoCanvasArray[counter - 1], imageBitmap);
+        // exposure time values are in 100 µs units.
+        exposureTimeArray[counter - 1] = exposureTimeSlider.value / 10000;
+        console.log("exposure Time Slider value = ", exposureTimeSlider.value);
+        console.log("exposure Time Calculated = ", exposureTimeArray[counter - 1]);
+      }
+    })
+    .catch((err) => {
+      console.error("takePhoto() failed: ", err);
+    });
 }
 
 function initUI() {
@@ -253,8 +263,8 @@ function initUI() {
 function opencvIsReady() {
   console.log('OpenCV.js is ready');
   if (!featuresReady) {
-      console.log('Requred features are not ready.');
-      return;
+    console.log('Requred features are not ready.');
+    return;
   }
   initUI();
   startCamera();
@@ -270,14 +280,14 @@ function drawCanvas(canvas, img) {
   let y = (canvas.height - img.height * ratio) / 2;
   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
   canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height,
-      x, y, img.width * ratio, img.height * ratio);
+    x, y, img.width * ratio, img.height * ratio);
 }
 
 function addTextToCanvas(text, canvasId) {
-    const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext("2d");
-    ctx.font= "14px Arial";
-    ctx.fillStyle = "gray";
-    ctx.textAlign = "center";
-    ctx.fillText(text, canvas.width/2, canvas.height/2);
-  }
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  ctx.font = "14px Arial";
+  ctx.fillStyle = "gray";
+  ctx.textAlign = "center";
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+}

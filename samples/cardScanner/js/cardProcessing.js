@@ -87,7 +87,7 @@ function applyFiltersToCard(grayCard, filteredCard) {
   // Scale image back into the range [0, 255].
   // See about this matter:
   // https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_imgproc/py_gradients/py_gradients.html#one-important-matter
-  cv.convertScaleAbs(gradX, gradX, 1, 0);
+  cv.convertScaleAbs(gradX, gradX);
   gradX.convertTo(gradX, cv.CV_8U);
   //outputToCanvas(gradX);
 
