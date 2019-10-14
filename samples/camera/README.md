@@ -35,16 +35,26 @@ dependencies like the Material web components, please run
 
 `npm run install`
 
-To test locally run the below command. This will spin up a local dev server
-that opens the project in the browser tab and reloads it when changes are saved
+This demo requires some web components (elements) from the elements/
+folder.
+
+As this demo is deployed on GitHub pages, it needs a bundled version
+of these elements, as GitHub pages doesn't work with ECMAScript modules
+as it serves the wrong MIME type of "text/html".
+
+To test the individual elements locally run the below command. This will
+spin up a local dev server that opens the elements directory in the browser
+tab and reloads it when changes are saved
 
 `npm run start`
 
-To build the project into /docs which GitHub pages supports, please run
+To bundle the elements into the build/ directory, which the samples
+depend on, run the below comment. This will additionally minify the
+elements.
 
 `npm run build`
 
-To check that the build is working perfectly, run
+To launch a local dev server from the actual samples, please run:
 
 `npm run start:build`
 
