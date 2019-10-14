@@ -1,5 +1,6 @@
 const resolve = require('rollup-plugin-node-resolve');
 const babel = require('rollup-plugin-babel');
+const { terser } = require('rollup-plugin-terser');
 const { DEFAULT_EXTENSIONS } = require('@babel/core');
 const { findSupportedBrowsers } = require('@open-wc/building-utils');
 const customMinifyCss = require('@open-wc/building-utils/custom-minify-css');
@@ -48,7 +49,10 @@ const plugins = [
         },
       ],
     ],
-  })
+  }),
+
+  // only minify if in production
+  production && terser()
 ];
 
 const outputOptions = [
