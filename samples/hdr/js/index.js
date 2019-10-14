@@ -150,11 +150,9 @@ function createHDR() {
   t1 = performance.now();
   console.log("merge_debevec.process took " + (t1 - t0) + " milliseconds.");
   console.log("HDR done !! woooo ");
-  cv.imshow('outputCanvasHDRnoColorspaceConversion', hdr_debevec);
 
   let dst = new cv.Mat();
   cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGRA2RGBA, 0);
-  cv.imshow('outputCanvasHDR', dst);
 
   // STEP 5. Tonemap HDR image if you don't have HDR screen to display.
   console.log("TonemapReinhard is called");
