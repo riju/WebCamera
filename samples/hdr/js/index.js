@@ -30,8 +30,8 @@ var exposureTimeSliderValue = document.getElementById(
 var takePhotoButton = document.getElementById('takePhotoButton');
 var imageCapturer;
 var counter = 0;
-//var exposureTimeArray = new Float32Array(3);
-var exposureTimeArray = new Uint8Array(3);
+var exposureTimeArray = new Float32Array(3);
+//var exposureTimeArray = new Uint8Array(3);
 
 // Assume there is a list of 3 images at various exposure time.
 
@@ -150,16 +150,25 @@ function createHDR() {
   t1 = performance.now();
   console.log("merge_debevec.process took " + (t1 - t0) + " milliseconds.");
   console.log("HDR done !! woooo ");
+  cv.imshow('outputCanvasHDRnoColorspaceConversion', hdr_debevec);
+
+  let dst = new cv.Mat();
+  cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGRA2RGBA, 0);
+  cv.imshow('outputCanvasHDR', dst);
 
   // STEP 5. Tonemap HDR image if you don't have HDR screen to display.
   console.log("TonemapReinhard is called");
   let ldr = new cv.Mat();
-  tonemap_reinhard = new cv.TonemapReinhard(gamma = 2.2);
+  let tonemap_reinhard = new cv.TonemapReinhard(gamma = 2.2);
   t0 = performance.now();
-  res_debevec = tonemap_reinhard.process(hdr_debevec, ldr);
+  let hdr_debevec_dst = new cv.Mat();
+  cv.cvtColor(hdr_debevec, hdr_debevec_dst, cv.COLOR_BGRA2BGR);
+  tonemap_reinhard.process(hdr_debevec_dst, ldr);
   t1 = performance.now();
   console.log("tonemap_reinhard took " + (t1 - t0) + " milliseconds.");
   console.log("Tonemapping done !! woooo ");
+  // STEP 6. Display
+  cv.imshow('outputCanvasLDR', ldr);
 
   // Fusion : First align and then merge.
   // Align not properly exposed in JS, so ignore the align call now.
@@ -193,12 +202,6 @@ function createHDR() {
    data read from canvas is a Uint8ClampedArray.
    Mat used here is CV_32F
    */
-  // STEP 6. Display
-  let dst = new cv.Mat();
-  cv.imshow('outputCanvasHDRnoColorspaceConversion', hdr_debevec);
-  cv.cvtColor(hdr_debevec, dst, cv.COLOR_BGRA2RGBA, 0);
-  cv.imshow('outputCanvasHDR', dst);
-  cv.imshow('outputCanvasLDR', ldr);
 
   //cv.imwrite("hdr.png", hdr_debevec);
 
@@ -212,7 +215,7 @@ function createHDR() {
   merge_debevec.delete();
   //merge_mertens.delete();
   //fusion.delete();
-  //ldr.delete();
+  ldr.delete();
   tonemap_reinhard.delete();
   dst.delete();
 }
@@ -237,8 +240,9 @@ function takePhoto() {
           if (checkCounter()) {
               drawCanvas(takePhotoCanvasArray[counter - 1], imageBitmap);
               // exposure time values are in 100 µs units.
-              exposureTimeArray[counter - 1] = (10000 / exposureTimeSlider.value);
-              console.log("exposure Time = ", exposureTimeSlider.value);
+              exposureTimeArray[counter - 1] = exposureTimeSlider.value / 10000;
+              console.log("exposure Time Slider value = ", exposureTimeSlider.value);
+              console.log("exposure Time Calculated = ", exposureTimeArray[counter - 1]);
           }
       })
       .catch((err) => {
