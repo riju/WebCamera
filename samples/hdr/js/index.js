@@ -1,17 +1,18 @@
 const constraints_general = {
   "video": {
-      width: {
-          exact: 240
-      }
+    width: {
+      exact: 240
+    }
   }
 };
 
 const constraints_mobile = {
-    video: {
-        facingMode: { exact: "environment" },
-        width : { exact:240
-        }
+  video: {
+    facingMode: { exact: "environment" },
+    width: {
+      exact: 240
     }
+  }
 };
 
 const NUMBER_OF_PHOTOS = 4;
@@ -46,15 +47,15 @@ function startCamera() {
     navigator.mediaDevices.getUserMedia(constraints_mobile)
       .then(gotMedia)
       .catch(e => {
-          console.error('getUserMedia() failed: ', e);
+        console.error('getUserMedia() failed: ', e);
       });
   } else {
-      navigator.mediaDevices.getUserMedia(constraints_general)
+    navigator.mediaDevices.getUserMedia(constraints_general)
       .then(gotMedia)
       .catch(e => {
-          console.error('getUserMedia() failed: ', e);
+        console.error('getUserMedia() failed: ', e);
       });
-    }
+  }
 }
 
 function gotMedia(mediastream) {
@@ -66,29 +67,29 @@ function gotMedia(mediastream) {
 
   // Timeout needed in Chrome, see https://crbug.com/711524
   setTimeout(() => {
-      const capabilities = videoTrack.getCapabilities()
-      // Check whether exposureTime is supported or not.
-      if (!capabilities.exposureTime) {
-          return;
-      }
+    const capabilities = videoTrack.getCapabilities()
+    // Check whether exposureTime is supported or not.
+    if (!capabilities.exposureTime) {
+      return;
+    }
 
-      exposureTimeSlider.min = capabilities.exposureTime.min;
-      exposureTimeSlider.max = capabilities.exposureTime.max;
-      exposureTimeSlider.step = capabilities.exposureTime.step;
+    exposureTimeSlider.min = capabilities.exposureTime.min;
+    exposureTimeSlider.max = capabilities.exposureTime.max;
+    exposureTimeSlider.step = capabilities.exposureTime.step;
 
-      exposureTimeSlider.value = exposureTimeSliderValue.value =
-          videoTrack.getSettings().exposureTime;
+    exposureTimeSlider.value = exposureTimeSliderValue.value =
+      videoTrack.getSettings().exposureTime;
+    exposureTimeSliderValue.value = exposureTimeSlider.value;
+
+    exposureTimeSlider.oninput = function () {
       exposureTimeSliderValue.value = exposureTimeSlider.value;
-
-      exposureTimeSlider.oninput = function() {
-          exposureTimeSliderValue.value = exposureTimeSlider.value;
-          videoTrack.applyConstraints({
-              advanced: [{
-                  exposureMode: "manual",
-                  exposureTime: exposureTimeSlider.value
-              }]
-          });
-      }
+      videoTrack.applyConstraints({
+        advanced: [{
+          exposureMode: "manual",
+          exposureTime: exposureTimeSlider.value
+        }]
+      });
+    }
 
   }, 500);
 }
@@ -96,9 +97,9 @@ function gotMedia(mediastream) {
 // TODO: process HDR in a dedicated worker to not block the main thread
 // process HDR
 function createHDR() {
-  if (counter < 4) {
-      console.log("4 pictures are needed");
-      return;
+  if (counter < NUMBER_OF_PHOTOS) {
+    console.log(`${NUMBER_OF_PHOTOS}`, " pictures are needed");
+    return;
   }
 
   console.log("createHDR is called !");
@@ -109,12 +110,12 @@ function createHDR() {
   let src3 = cv.imread(takePhotoCanvas3);
   let src4 = cv.imread(takePhotoCanvas4);
   console.log('image width: ' + src1.cols + '\n' +
-      'image height: ' + src1.rows + '\n' +
-      'image size: ' + src1.size().width + '*' + src1.size().height +
-      '\n' +
-      'image depth: ' + src1.depth() + '\n' +
-      'image channels ' + src1.channels() + '\n' +
-      'image type: ' + src1.type() + '\n');
+    'image height: ' + src1.rows + '\n' +
+    'image size: ' + src1.size().width + '*' + src1.size().height +
+    '\n' +
+    'image depth: ' + src1.depth() + '\n' +
+    'image channels ' + src1.channels() + '\n' +
+    'image type: ' + src1.type() + '\n');
 
   let srcArray = new cv.MatVector();
   srcArray.push_back(src1);
@@ -134,9 +135,9 @@ function createHDR() {
   let calibration = new cv.CalibrateDebevec();
   // let times = exposureTimeArray.slice();
   let times = new cv.matFromArray(exposureTimeArray.length, 1, cv.CV_32F,
-      exposureTimeArray);
-  exposureTimeArray.forEach(function(element) {
-      console.log(element);
+    exposureTimeArray);
+  exposureTimeArray.forEach(function (element) {
+    console.log(element);
   });
 
   // process (InputArrayOfArrays src, OutputArray dst, InputArray times)
@@ -226,10 +227,10 @@ function createHDR() {
 
 function checkCounter() {
   if (counter > NUMBER_OF_PHOTOS) {
-      takePhotoButton.text(`${NUMBER_OF_PHOTOS}`, ' pictures taken!');
-      takePhotoButton.disabled = true;
-      document.getElementById('createHDRButton').disabled = false;
-      return false;
+    takePhotoButton.text(`${NUMBER_OF_PHOTOS}`, ' pictures taken!');
+    takePhotoButton.disabled = true;
+    document.getElementById('createHDRButton').disabled = false;
+    return false;
   }
 
   counter++;
@@ -238,20 +239,20 @@ function checkCounter() {
 
 function takePhoto() {
   imageCapturer.takePhoto()
-      // https://developers.google.com/web/updates/2016/03/createimagebitmap-in-chrome-50
-      .then(blob => createImageBitmap(blob))
-      .then((imageBitmap) => {
-          if (checkCounter()) {
-              drawCanvas(takePhotoCanvasArray[counter - 1], imageBitmap);
-              // exposure time values are in 100 µs units.
-              exposureTimeArray[counter - 1] = exposureTimeSlider.value / 10000;
-              console.log("exposure Time Slider value = ", exposureTimeSlider.value);
-              console.log("exposure Time Calculated = ", exposureTimeArray[counter - 1]);
-          }
-      })
-      .catch((err) => {
-          console.error("takePhoto() failed: ", err);
-      });
+    // https://developers.google.com/web/updates/2016/03/createimagebitmap-in-chrome-50
+    .then(blob => createImageBitmap(blob))
+    .then((imageBitmap) => {
+      if (checkCounter()) {
+        drawCanvas(takePhotoCanvasArray[counter - 1], imageBitmap);
+        // exposure time values are in 100 µs units.
+        exposureTimeArray[counter - 1] = exposureTimeSlider.value / 10000;
+        console.log("exposure Time Slider value = ", exposureTimeSlider.value);
+        console.log("exposure Time Calculated = ", exposureTimeArray[counter - 1]);
+      }
+    })
+    .catch((err) => {
+      console.error("takePhoto() failed: ", err);
+    });
 }
 
 function initUI() {
@@ -262,8 +263,8 @@ function initUI() {
 function opencvIsReady() {
   console.log('OpenCV.js is ready');
   if (!featuresReady) {
-      console.log('Requred features are not ready.');
-      return;
+    console.log('Requred features are not ready.');
+    return;
   }
   initUI();
   startCamera();
@@ -279,14 +280,14 @@ function drawCanvas(canvas, img) {
   let y = (canvas.height - img.height * ratio) / 2;
   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
   canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height,
-      x, y, img.width * ratio, img.height * ratio);
+    x, y, img.width * ratio, img.height * ratio);
 }
 
 function addTextToCanvas(text, canvasId) {
-    const canvas = document.getElementById(canvasId);
-    const ctx = canvas.getContext("2d");
-    ctx.font= "14px Arial";
-    ctx.fillStyle = "gray";
-    ctx.textAlign = "center";
-    ctx.fillText(text, canvas.width/2, canvas.height/2);
-  }
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext("2d");
+  ctx.font = "14px Arial";
+  ctx.fillStyle = "gray";
+  ctx.textAlign = "center";
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+}
