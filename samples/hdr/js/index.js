@@ -14,14 +14,17 @@ const constraints_mobile = {
     }
 };
 
+const NUMBER_OF_PHOTOS = 4;
+
 var videoTag = document.getElementById('video-tag');
 
 var takePhotoCanvas1 = document.getElementById('takePhotoCanvas1');
 var takePhotoCanvas2 = document.getElementById('takePhotoCanvas2');
 var takePhotoCanvas3 = document.getElementById('takePhotoCanvas3');
+var takePhotoCanvas4 = document.getElementById('takePhotoCanvas4');
 var takePhotoCanvasArray = new Array(takePhotoCanvas1, takePhotoCanvas2,
-  takePhotoCanvas3);
-var images_list = new Array(3);
+  takePhotoCanvas3, takePhotoCanvas4);
+var images_list = new Array(NUMBER_OF_PHOTOS);
 var imageHDR = document.getElementById('imageHDR');
 
 var exposureTimeSlider = document.getElementById("exposureTime-slider");
@@ -30,10 +33,10 @@ var exposureTimeSliderValue = document.getElementById(
 var takePhotoButton = document.getElementById('takePhotoButton');
 var imageCapturer;
 var counter = 0;
-var exposureTimeArray = new Float32Array(3);
+var exposureTimeArray = new Float32Array(NUMBER_OF_PHOTOS);
 //var exposureTimeArray = new Uint8Array(3);
 
-// Assume there is a list of 3 images at various exposure time.
+// Assume there is a list of 4 images at various exposure time.
 
 function startCamera() {
   document.querySelector('#start').style.display = 'none';
@@ -93,8 +96,8 @@ function gotMedia(mediastream) {
 // TODO: process HDR in a dedicated worker to not block the main thread
 // process HDR
 function createHDR() {
-  if (counter < 3) {
-      console.log("3 pictures are needed");
+  if (counter < 4) {
+      console.log("4 pictures are needed");
       return;
   }
 
@@ -104,6 +107,7 @@ function createHDR() {
   let src1 = cv.imread(takePhotoCanvas1);
   let src2 = cv.imread(takePhotoCanvas2);
   let src3 = cv.imread(takePhotoCanvas3);
+  let src4 = cv.imread(takePhotoCanvas4);
   console.log('image width: ' + src1.cols + '\n' +
       'image height: ' + src1.rows + '\n' +
       'image size: ' + src1.size().width + '*' + src1.size().height +
@@ -116,6 +120,7 @@ function createHDR() {
   srcArray.push_back(src1);
   srcArray.push_back(src2);
   srcArray.push_back(src3);
+  srcArray.push_back(src4);
 
   // STEP 2. Align images , need to expose properly in Photo module JS bindings.
   /*
@@ -207,6 +212,7 @@ function createHDR() {
   src1.delete();
   src2.delete();
   src3.delete();
+  src4.delete();
   srcArray.delete();
   dest.delete();
   hdr_debevec.delete();
@@ -219,8 +225,8 @@ function createHDR() {
 }
 
 function checkCounter() {
-  if (counter > 3) {
-      takePhotoButton.text('3 pictures taken!');
+  if (counter > NUMBER_OF_PHOTOS) {
+      takePhotoButton.text(`${NUMBER_OF_PHOTOS}`, ' pictures taken!');
       takePhotoButton.disabled = true;
       document.getElementById('createHDRButton').disabled = false;
       return false;
