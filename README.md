@@ -54,6 +54,9 @@ Try out the demos (Chrome 72+):
       <b>Barcode/QRcode Scanning</b>
     </td>
     <td align="center" valign="center">
+      <img src="hdr.gif" alt="hdr.gif is not yet loaded" width="376"/>
+      <br />
+      <b>HDR</b>
     </td>
   </tr>
 </table>
