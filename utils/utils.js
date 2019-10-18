@@ -8,9 +8,13 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
   let self = this;
   this.errorOutput = document.getElementById(errorOutputId);
 
-  let opencvUrl = '../../build/wasm/desktop/opencv.js';
-  if (isMobileDevice()) opencvUrl = '../../build/wasm/mobile/opencv.js';
-  this.loadOpenCv = function (onloadCallback) {
+  const opencvSIMDthreadsUrl = '../../build/wasm/desktop/opencv.js';
+  const opencvScalarUrl = '../../build/wasm/mobile/opencv.js';
+
+  this.loadOpenCv = function (onloadCallback, scalar = false) {
+    let opencvUrl = opencvSIMDthreadsUrl;
+    if (isMobileDevice() || scalar) opencvUrl = opencvScalarUrl;
+
     let script = document.createElement('script');
     script.setAttribute('async', '');
     script.setAttribute('type', 'text/javascript');
