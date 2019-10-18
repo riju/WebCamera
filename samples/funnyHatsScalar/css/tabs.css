@@ -1,0 +1,29 @@
+.tabset > input[type="radio"] {
+  position: absolute;
+  left: -200vw;
+}
+.tabset {
+  position: absolute;
+  display: flex;
+  width: 640px;
+  padding-bottom: 5px;
+}
+.tabset > label {
+  position: relative;
+  display: inline-block;
+  font-size: 14px;
+  color: white;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  padding: 8px 10px 0px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  cursor: pointer;
+  border-radius: 10px;
+}
+.tabset > input:checked + label {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+#menuSelector {
+  font-size: 24px;
+  padding: 0px 10px 0px;
+}
