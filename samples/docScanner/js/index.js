@@ -9,8 +9,9 @@ let imageCapturer = null;
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
 let canvasContext = canvasOutput.getContext('2d');
+let canvasInput = null;
+let canvasInputCtx = null;
 
-let videoCapturer = null;
 let src = null;
 let dst = null;
 
@@ -18,7 +19,6 @@ let startDocProcessing = false;
 
 
 function initOpencvObjects() {
-  videoCapturer = new cv.VideoCapture(video);
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
 }
 
@@ -30,6 +30,13 @@ function completeStyling() {
 
   document.querySelector('.canvas-wrapper').style.height =
     `${video.videoHeight}px`;
+
+  // Extra canvas to get source image from video element
+  // (instead of cv.VideoCapture).
+  canvasInput = document.createElement('canvas');
+  canvasInput.width = video.width;
+  canvasInput.height = video.height;
+  canvasInputCtx = canvasInput.getContext('2d');
 
   mainContent.classList.remove('hidden');
 
@@ -44,7 +51,10 @@ function processVideo() {
     } else if (startDocProcessing) {
       return;
     }
-    videoCapturer.read(src);
+    canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
+    let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
+    src.data.set(imageData.data);
+
     cv.imshow('canvasOutput', src);
     requestAnimationFrame(processVideo);
   } catch (err) {

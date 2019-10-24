@@ -1,8 +1,8 @@
 # Goal
 
-Demonstrate barcode scanning using [Shape Detection API](https://wicg.github.io/shape-detection-api/).
+Demonstrate barcode and QRcode scanning using [Shape Detection API](https://wicg.github.io/shape-detection-api/).
 
-## Steps of barcode scanning
+## Steps of barcode/QRcode scanning
 
 **1. Grab frame using imageCapturer**
 

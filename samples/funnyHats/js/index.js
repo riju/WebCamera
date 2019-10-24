@@ -7,8 +7,9 @@ let videoTrack = null;
 
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
+let canvasInput = null;
+let canvasInputCtx = null;
 
-let videoCapturer = null;
 let src = null;
 let gray = null;
 
@@ -18,7 +19,6 @@ const imageHeight = 240;
 
 
 function initOpencvObjects() {
-  videoCapturer = new cv.VideoCapture(video);
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   gray = new cv.Mat();
 
@@ -62,6 +62,13 @@ function completeStyling() {
   // Remove "disabled" attr from the second input tab.
   document.getElementById("glassesTab").removeAttribute("disabled");
 
+  // Extra canvas to get source image from video element
+  // (instead of cv.VideoCapture).
+  canvasInput = document.createElement('canvas');
+  canvasInput.width = video.width;
+  canvasInput.height = video.height;
+  canvasInputCtx = canvasInput.getContext('2d');
+
   document.getElementById('takePhotoButton').disabled = false;
 }
 
@@ -72,7 +79,9 @@ function processVideo() {
       return;
     }
     stats.begin();
-    videoCapturer.read(src);
+    canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
+    let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
+    src.data.set(imageData.data);
 
     // Detect faces.
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);

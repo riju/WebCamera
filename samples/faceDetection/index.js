@@ -55,6 +55,8 @@ function completeStyling() {
   cameraBar.style.width = `${video.width}px`;
   document.getElementById('takePhotoButton').disabled = false;
 
+  // Extra canvas to get source image from video element
+  // (instead of cv.VideoCapture).
   canvasInput = document.createElement('canvas');
   canvasInput.width = video.width;
   canvasInput.height = video.height;
