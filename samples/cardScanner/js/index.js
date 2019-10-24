@@ -6,13 +6,13 @@ let streaming = false;
 let videoTrack = null;
 let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
-let videoCapturer = null;
+let canvasInput = null;
+let canvasInputCtx = null;
 let src = null;
 let dst = null;
 
 
 function initOpencvObjects() {
-  videoCapturer = new cv.VideoCapture(video);
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   dst = new cv.Mat();
 }
@@ -30,6 +30,13 @@ function completeStyling() {
 
   calculateRectCoordinates();
 
+  // Extra canvas to get source image from video element
+  // (instead of cv.VideoCapture).
+  canvasInput = document.createElement('canvas');
+  canvasInput.width = video.width;
+  canvasInput.height = video.height;
+  canvasInputCtx = canvasInput.getContext('2d');
+
   mainContent.classList.remove('hidden');
 }
 
@@ -40,7 +47,9 @@ function processVideo() {
       return;
     }
     stats.begin();
-    videoCapturer.read(src);
+    canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
+    let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
+    src.data.set(imageData.data);
 
     // Detect edges of the card before start card processing.
 

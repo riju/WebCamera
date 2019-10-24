@@ -8,8 +8,9 @@ let video = document.getElementById('videoInput');
 let canvasOutput = document.getElementById('canvasOutput');
 let smallCanvasInput = null;
 let smallCanvasInputCtx = null;
+let canvasInput = null;
+let canvasInputCtx = null;
 
-let videoCapturer = null;
 let src = null;
 let dstC1 = null;
 let dstC3 = null;
@@ -23,8 +24,6 @@ let dstC4Small = null;
 let previews = {};
 
 function initOpencvObjects() {
-  videoCapturer = new cv.VideoCapture(video);
-
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   dstC1 = new cv.Mat(video.height, video.width, cv.CV_8UC1);
   dstC3 = new cv.Mat(video.height, video.width, cv.CV_8UC3);
@@ -80,6 +79,13 @@ function completeStyling() {
   smallCanvasInput.height = previews.finalWidth;
   smallCanvasInputCtx = smallCanvasInput.getContext('2d');
 
+  // Extra canvas to get source image from video element
+  // (instead of cv.VideoCapture).
+  canvasInput = document.createElement('canvas');
+  canvasInput.width = video.width;
+  canvasInput.height = video.height;
+  canvasInputCtx = canvasInput.getContext('2d');
+
   document.getElementById('takePhotoButton').disabled = false;
 }
 
@@ -111,16 +117,18 @@ function processVideo() {
     return;
   }
   stats.begin();
-  videoCapturer.read(src);
+  canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
+  let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
+  src.data.set(imageData.data);
   cv.imshow('canvasOutput', applyCurrentFilter());
 
   // Resize original image for processing of filtered previews.
   smallCanvasInputCtx.drawImage(video, previews.x, previews.y,
     previews.originalWidth, previews.originalWidth,
     0, 0, previews.finalWidth, previews.finalWidth);
-  let imageData = smallCanvasInputCtx
+  let smallImageData = smallCanvasInputCtx
     .getImageData(0, 0, previews.finalWidth, previews.finalWidth);
-  srcSmall.data.set(imageData.data);
+  srcSmall.data.set(smallImageData.data);
 
   // Show filtered previews.
   cv.imshow('passThroughCanvas', passThrough(srcSmall));
