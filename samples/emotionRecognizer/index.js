@@ -18,8 +18,8 @@ let fisherFaceRecognizer = null;
 
 const faceModelPath = 'haarcascade_frontalface_default.xml';
 const faceModelUrl = '../../data/classifiers/haarcascade_frontalface_default.xml';
-const emojiModelPath = 'emotion_detection_model.xml';
-const emojiModelUrl = '../../data/classifiers/emotion_detection_model.xml';
+const emotionModelPath = 'emotion_detection_model.xml';
+const emotionModelUrl = '../../data/classifiers/emotion_detection_model.xml';
 
 // emoticons will have the same order as emotions.
 let emoticons = [];
@@ -46,7 +46,7 @@ function initOpencvObjects() {
     emoticonImg.src = '../../data/emoticons/' + emotion + '.png';
   });
   fisherFaceRecognizer = new cv.face_FisherFaceRecognizer();
-  fisherFaceRecognizer.read(emojiModelPath);
+  fisherFaceRecognizer.read(emotionModelPath);
 }
 
 function createImgNode(id) {
@@ -121,12 +121,9 @@ function processVideo() {
     for (let i = 0; i < faceVec.size(); ++i) {
       let face = faceVec.get(i);
       // Recognize emotion.
-
-      // Detect eyes in face ROI.
       let faceGray = gray.roi(face);
       cv.resize(faceGray, faceGray, new cv.Size(350, 350));
       let prediction = fisherFaceRecognizer.predict_label(faceGray);
-      //console.log(prediction);
       let emoticon = emoticons[prediction];
       let newEmoticonSize = new cv.Size(face.width, face.height);
       let resizedEmoticon = new cv.Mat();
@@ -167,7 +164,7 @@ function onVideoStartedCustom() {
   document.getElementById('mainContent').classList.remove('hidden');
   completeStyling();
   initOpencvObjects();
-  requestAnimationFrame(waitForResources);
+  waitForResources();
 }
 
 function cleanupAndStop() {
@@ -227,7 +224,7 @@ function initUI() {
 
 utils.loadOpenCv(() => {
   utils.createFileFromUrl(faceModelPath, faceModelUrl, () => {
-    utils.createFileFromUrl(emojiModelPath, emojiModelUrl, () => {
+    utils.createFileFromUrl(emotionModelPath, emotionModelUrl, () => {
       initUI();
       initCameraSettingsAndStart();
     });
