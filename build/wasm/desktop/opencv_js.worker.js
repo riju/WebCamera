@@ -12,17 +12,7 @@ var threadInfoStruct = 0; // Info area for this thread in Emscripten HEAP (share
 var selfThreadId = 0; // The ID of this thread. 0 if not hosting a pthread.
 var parentThreadId = 0; // The ID of the parent pthread that launched this thread.
 
-// Thread-local: Each thread has its own allocated stack space.
-var STACK_BASE = 0;
-var STACKTOP = 0;
-var STACK_MAX = 0;
-
-// These are system-wide memory area parameters that are set at main runtime startup in main thread, and stay constant throughout the application.
-var buffer; // All pthreads share the same Emscripten HEAP as SharedArrayBuffer with the main execution thread.
-var DYNAMICTOP_PTR = 0;
-var DYNAMIC_BASE = 0;
-
-var PthreadWorkerInit = {};
+var noExitRuntime;
 
 // performance.now() is specced to return a wallclock time in msecs since that Web Worker/main thread launched. However for pthreads this can cause
 // subtle problems in emscripten_get_now() as this essentially would measure time from pthread_create(), meaning that the clocks between each threads
@@ -77,41 +67,27 @@ function resetPrototype(constructor, attrs) {
 Module['instantiateWasm'] = function(info, receiveInstance) {
   // Instantiate from the module posted from the main thread.
   // We can just use sync instantiation in the worker.
-  var instance = new WebAssembly.Instance(wasmModule, info);
+  var instance = new WebAssembly.Instance(Module['wasmModule'], info);
   // We don't need the module anymore; new threads will be spawned from the main thread.
-  wasmModule = null;
+  Module['wasmModule'] = null;
   receiveInstance(instance); // The second 'module' parameter is intentionally null here, we don't need to keep a ref to the Module object from here.
   return instance.exports;
 };
 
-var wasmModule;
-var wasmMemory;
 
 this.onmessage = function(e) {
   try {
     if (e.data.cmd === 'load') { // Preload command that is called once per worker to parse and load the Emscripten code.
 
       // Initialize the global "process"-wide fields:
-      Module['DYNAMIC_BASE'] = DYNAMIC_BASE = e.data.DYNAMIC_BASE;
-      Module['DYNAMICTOP_PTR'] = DYNAMICTOP_PTR = e.data.DYNAMICTOP_PTR;
-
-      // The Wasm module will have import fields for STACKTOP and STACK_MAX. At 'load' stage of Worker startup, we are just
-      // spawning this Web Worker to act as a host for future created pthreads, i.e. we do not have a pthread to start up here yet.
-      // (A single Worker can also host multiple pthreads throughout its lifetime, shutting down a pthread will not shut down its hosting Worker,
-      // but the Worker is reused for later spawned pthreads). The 'run' stage below will actually start running a pthread.
-      // The stack space for a pthread is allocated and deallocated when a pthread is actually run, not yet at Worker 'load' stage.
-      // However, the WebAssembly module we are loading up here has import fields for STACKTOP and STACK_MAX, which it needs to get filled in
-      // immediately at Wasm Module instantiation time. The values of these will not get used until pthread is actually running some code, so
-      // we'll proceed to set up temporary invalid values for these fields for import purposes. Then whenever a pthread is launched at 'run' stage
-      // below, these values are rewritten to establish proper stack area for the particular pthread.
-      Module['STACK_MAX'] = Module['STACKTOP']  = 0x7FFFFFFF;
+      Module['DYNAMIC_BASE'] = e.data.DYNAMIC_BASE;
+      Module['DYNAMICTOP_PTR'] = e.data.DYNAMICTOP_PTR;
 
       // Module and memory were sent from main thread
-      Module['wasmModule'] = wasmModule = e.data.wasmModule;
-      Module['wasmMemory'] = wasmMemory = e.data.wasmMemory;
-      Module['buffer'] = buffer = Module['wasmMemory'].buffer;
+      Module['wasmModule'] = e.data.wasmModule;
+      Module['wasmMemory'] = e.data.wasmMemory;
+      Module['buffer'] = Module['wasmMemory'].buffer;
 
-      Module['PthreadWorkerInit'] = PthreadWorkerInit = e.data.PthreadWorkerInit;
       Module['ENVIRONMENT_IS_PTHREAD'] = true;
 
       if (typeof e.data.urlOrBlob === 'string') {
@@ -139,9 +115,7 @@ this.onmessage = function(e) {
       // The stack grows downwards
       var max = e.data.stackBase;
       var top = e.data.stackBase + e.data.stackSize;
-      Module['STACK_BASE'] = STACK_BASE = top;
-      Module['STACKTOP'] = STACKTOP = top;
-      Module['STACK_MAX'] = STACK_MAX = max;
+      Module['applyStackValues'](top, top, max);
       // Call inside asm.js/wasm module to set up the stack frame for this pthread in asm.js/wasm module scope
       Module['establishStackSpace'](e.data.stackBase, e.data.stackBase + e.data.stackSize);
       // Also call inside JS module to set up the stack frame for this pthread in JS module scope
@@ -177,9 +151,9 @@ this.onmessage = function(e) {
       }
       // The thread might have finished without calling pthread_exit(). If so, then perform the exit operation ourselves.
       // (This is a no-op if explicit pthread_exit() had been called prior.)
-      if (!Module['noExitRuntime']) PThread.threadExit(result);
+      if (!noExitRuntime) PThread.threadExit(result);
     } else if (e.data.cmd === 'cancel') { // Main thread is asking for a pthread_cancel() on this thread.
-      if (threadInfoStruct && PThread.thisThreadCancelState == 0/*PTHREAD_CANCEL_ENABLE*/) {
+      if (threadInfoStruct) {
         PThread.threadCancel();
       }
     } else if (e.data.target === 'setimmediate') {
