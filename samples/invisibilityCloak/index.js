@@ -11,60 +11,34 @@ let canvasInput = null;
 let canvasInputCtx = null;
 
 let src = null;
-let gray = null;
-let faceVec = null;
-let faceCascade = null;
-let fisherFaceRecognizer = null;
+let background = null;
+let dst = null;
+let lowerRedRange = null;
+let upperRedRange = null;
 
-const faceModelPath = 'haarcascade_frontalface_default.xml';
-const faceModelUrl = '../../data/classifiers/haarcascade_frontalface_default.xml';
-const emotionModelPath = 'emotion_detection_model.xml';
-const emotionModelUrl = '../../data/classifiers/emotion_detection_model.xml';
-
-// emoticons will have the same order as emotions.
-let emoticons = [];
-const emotions = ['neutral', 'anger', 'disgust', 'fear', 'happiness', 'sadness', 'surprise']
-let nImagesLoaded = 0;
-const N_IMAGES = emotions.length;
+// Camera parameters are not stable when the camera is just getting started.
+// So we execute a loop where we capture background and use the last frame
+// as a stable background.
+const BACKGROUND_CAPTURE_ITERATIONS = 300;
 
 
 function initOpencvObjects() {
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
-  gray = new cv.Mat();
+  background = new cv.Mat(video.height, video.width, cv.CV_8UC4);
+  dst = new cv.Mat();
 
-  faceVec = new cv.RectVector();
-  faceCascade = new cv.CascadeClassifier();
-  // TODO(sasha): Use Web Workers to load files.
-  faceCascade.load(faceModelPath);
-
-  emotions.forEach(emotion => {
-    let emoticonImg = createImgNode(emotion + '-emoticon');
-
-    emoticonImg.onload = function () {
-      ++nImagesLoaded;
-    };
-    emoticonImg.src = '../../data/emoticons/' + emotion + '.png';
-  });
-  fisherFaceRecognizer = new cv.face_FisherFaceRecognizer();
-  fisherFaceRecognizer.read(emotionModelPath);
-}
-
-function createImgNode(id) {
-  let imgNode = document.createElement('img');
-  imgNode.id = id;
-  imgNode.classList.add('hidden');
-  document.getElementsByTagName('body')[0].appendChild(imgNode);
-  return imgNode;
+  // In OpenCV, Hue range is [0,179], Saturation range is [0,255]
+  // and Value range is [0,255]. We use 5-55 range for blue color,
+  // 50-255 for saturation and 50-255 for brigtness.
+  lowerRedRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
+    new cv.Scalar(0, 100, 70, 255));
+  upperRedRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
+    new cv.Scalar(33, 255, 255, 255));
 }
 
 function deleteOpencvObjects() {
-  src.delete(); gray.delete();
-  faceVec.delete(); faceCascade.delete();
-
-  emoticons.forEach(emoticon => {
-    emoticon.src.delete();
-    emoticon.mask.delete();
-  });
+  src.delete(); background.delete(); dst.delete();
+  lowerRedRange.delete(); upperRedRange.delete();
 }
 
 function completeStyling() {
@@ -83,31 +57,48 @@ function completeStyling() {
   canvasOutput.height = video.height;
 }
 
-function waitForResources() {
-  if (nImagesLoaded == N_IMAGES) {
-    emotions.forEach(emotion => {
-      let emoticonImg = document.getElementById(emotion + '-emoticon');
-      let rgbaVector = new cv.MatVector();
-      let emoticon = {};
-      emoticon.src = cv.imread(emoticonImg);
-      cv.split(emoticon.src, rgbaVector); // Create mask from alpha channel.
-      emoticon.mask = rgbaVector.get(3);
-      emoticon.name = emotion;
-      emoticons.push(emoticon);
-      rgbaVector.delete();
-    });
-
-    requestAnimationFrame(processVideo);
-    return;
+function captureBackground() {
+  for (let i = 0; i < BACKGROUND_CAPTURE_ITERATIONS; ++i) {
+    canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
+    let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
+    background.data.set(imageData.data);
+    cv.imshow(canvasOutput, background);
   }
+  document.getElementById("demoState").innerText = "Ready for magic! Put on your blue cloak!"
+  requestAnimationFrame(processVideo);
+}
 
-  // Show video stream while we are waiting for resources.
-  canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
-  let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
-  src.data.set(imageData.data);
-  cv.imshow(canvasOutput, src);
+function removeBlueColor(source, destination) {
+  let hsv = new cv.Mat();
+  let mask = new cv.Mat();
+  let maskInv = new cv.Mat();
+  let sourceResult = new cv.Mat();
+  let backgroundResult = new cv.Mat();
 
-  requestAnimationFrame(waitForResources);
+  // Convert source image to HSV color space.
+  // HSV - Hue (color information), Saturation (intensity), Value (brightness).
+  cv.cvtColor(source, hsv, cv.COLOR_BGR2HSV);
+
+  // Apply lower and upper boundary of a blue color to inRange filter.
+  cv.inRange(hsv, lowerRedRange, upperRedRange, mask);
+
+  // Dilation increases area of filtered object.
+  let kernel = cv.Mat.ones(5, 5, cv.CV_32F);
+  cv.morphologyEx(mask, mask, cv.MORPH_DILATE, kernel);
+
+  // Apply mask to background image.
+  cv.bitwise_and(background, background, sourceResult, mask);
+
+  // Create an inverted mask of a filtered object and apply it to source image.
+  cv.bitwise_not(mask, maskInv);
+  cv.bitwise_and(source, source, backgroundResult, maskInv);
+
+  // Generating the final augmented output.
+  cv.addWeighted(backgroundResult, 1, sourceResult, 1, 0, destination);
+
+  hsv.delete();
+  mask.delete(); maskInv.delete();
+  sourceResult.delete(); backgroundResult.delete();
 }
 
 function processVideo() {
@@ -117,34 +108,14 @@ function processVideo() {
       return;
     }
     stats.begin();
+
     canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
     let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
     src.data.set(imageData.data);
 
-    // Detect faces.
-    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
-    faceCascade.detectMultiScale(gray, faceVec);
+    removeBlueColor(src, dst);
 
-    for (let i = 0; i < faceVec.size(); ++i) {
-      let face = faceVec.get(i);
-      // Recognize emotion.
-      let faceGray = gray.roi(face);
-      cv.resize(faceGray, faceGray, new cv.Size(350, 350));
-      let prediction = fisherFaceRecognizer.predict_label(faceGray);
-      let emoticon = emoticons[prediction];
-      let newEmoticonSize = new cv.Size(face.width, face.height);
-      let resizedEmoticon = new cv.Mat();
-      let resizedMask = new cv.Mat();
-      cv.resize(emoticon.src, resizedEmoticon, newEmoticonSize);
-      cv.resize(emoticon.mask, resizedMask, newEmoticonSize);
-      resizedEmoticon.copyTo(src.rowRange(face.y, face.y + face.height)
-        .colRange(face.x, face.x + face.width), resizedMask);
-
-      faceGray.delete();
-      resizedEmoticon.delete();
-      resizedMask.delete();
-    }
-    cv.imshow(canvasOutput, src);
+    cv.imshow(canvasOutput, dst);
 
     stats.end();
     requestAnimationFrame(processVideo);
@@ -171,7 +142,7 @@ function onVideoStartedCustom() {
   document.getElementById('mainContent').classList.remove('hidden');
   completeStyling();
   initOpencvObjects();
-  requestAnimationFrame(waitForResources);
+  captureBackground();
 }
 
 function cleanupAndStop() {
@@ -230,10 +201,6 @@ function initUI() {
 }
 
 utils.loadOpenCv(() => {
-  utils.createFileFromUrl(faceModelPath, faceModelUrl, () => {
-    utils.createFileFromUrl(emotionModelPath, emotionModelUrl, () => {
-      initUI();
-      initCameraSettingsAndStart();
-    });
-  });
+  initUI();
+  initCameraSettingsAndStart();
 });
