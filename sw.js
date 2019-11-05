@@ -26,20 +26,28 @@ self.addEventListener('message', (event) => {
  */
 self.__precacheManifest = [
   {
+    "url": "build/wasm/desktop/opencv_js.js",
+    "revision": "133eea79a1b9902c06705a57cd9a6945"
+  },
+  {
     "url": "build/wasm/desktop/opencv_js.worker.js",
-    "revision": "f95a202fe0e8fa623bb12f96ccdd2178"
+    "revision": "4d533a1f0a1b4d79d5a72698ccc03e90"
   },
   {
     "url": "build/wasm/desktop/opencv.js",
-    "revision": "1f1ec76d2afb0a91ca267610e25d0b0f"
+    "revision": "de9627204e7d8a2255d89a84a730fe50"
   },
   {
     "url": "build/wasm/mobile/opencv_js.js",
-    "revision": "dde8b81808a09bef12c299d62edf2662"
+    "revision": "5a7047374c1413f27bd81280e8bf1aa5"
   },
   {
     "url": "build/wasm/mobile/opencv.js",
-    "revision": "0d450250f1648b3131eefc06e55aab50"
+    "revision": "8d5021159a11e38741ca5be6234a1006"
+  },
+  {
+    "url": "data/classifiers/emotion_detection_model.xml",
+    "revision": "4ec1e7872b1541223e8a61317e6b1ec4"
   },
   {
     "url": "data/classifiers/haarcascade_eye.xml",
@@ -48,6 +56,38 @@ self.__precacheManifest = [
   {
     "url": "data/classifiers/haarcascade_frontalface_default.xml",
     "revision": "663f963eabf3df6eb215c50ff06bcc22"
+  },
+  {
+    "url": "data/emoticons/anger.png",
+    "revision": "3865b2fc2e2f53e2a8ef2a7a4e80e3f9"
+  },
+  {
+    "url": "data/emoticons/contempt.png",
+    "revision": "c359cb4d61cb8254cfa8e4501ad5ab1f"
+  },
+  {
+    "url": "data/emoticons/disgust.png",
+    "revision": "b3315b787fdccf4522e409e92c546856"
+  },
+  {
+    "url": "data/emoticons/fear.png",
+    "revision": "e9647097fb2df6b8bd68fb8b8db8adbd"
+  },
+  {
+    "url": "data/emoticons/happiness.png",
+    "revision": "235f12edb85a4fad98ccbca1f7e38b38"
+  },
+  {
+    "url": "data/emoticons/neutral.png",
+    "revision": "2d4774f1799fd7f9ecc9fdb2bf94467a"
+  },
+  {
+    "url": "data/emoticons/sadness.png",
+    "revision": "cf63cf64b9922ea677dfe80d92e5ed7b"
+  },
+  {
+    "url": "data/emoticons/surprise.png",
+    "revision": "1961b1e03223373a01af88320cc2eba8"
   },
   {
     "url": "data/google_icons_font.woff2",
@@ -70,6 +110,18 @@ self.__precacheManifest = [
     "revision": "929122621ee5a424a212bfdb62288c7d"
   },
   {
+    "url": "samples/barcodeScanner/index.html",
+    "revision": "e0b4772d5acfb10edb0366d69efe20cd"
+  },
+  {
+    "url": "samples/barcodeScanner/js/barcodeProcessing.js",
+    "revision": "4437fa098d50da1d19197619f5733238"
+  },
+  {
+    "url": "samples/barcodeScanner/js/index.js",
+    "revision": "180db82e38ce499c16a0894d8ebc607f"
+  },
+  {
     "url": "samples/camera/index.html",
     "revision": "d25636e20299a4658f7cf0981d5b3c33"
   },
@@ -83,15 +135,15 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/cardScanner/index.html",
-    "revision": "58827dddfdc8ff6f48d1e4d573e5542f"
+    "revision": "ea302d4116f483739ba59ddebbecc2a5"
   },
   {
     "url": "samples/cardScanner/js/cardProcessing.js",
-    "revision": "3ef137d875542bd97f3c526837fa44e1"
+    "revision": "7a9081fee42840baa12f4fcb25b07629"
   },
   {
     "url": "samples/cardScanner/js/index.js",
-    "revision": "19703183f2bff8f244eca22d9999e307"
+    "revision": "40f82cdbb5c6b6175a285b7392eb945b"
   },
   {
     "url": "samples/cardScanner/resources/card_1.png",
@@ -115,7 +167,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/css/base.css",
-    "revision": "94bfb3785de9d6cf9a518b2d123755ec"
+    "revision": "24686ee05ce888543ccb13194b83fb39"
   },
   {
     "url": "samples/css/camera-bar.css",
@@ -135,7 +187,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/css/settings.css",
-    "revision": "190e10486aa5bb56bcbc0a0ab6211d11"
+    "revision": "ea1a979157604659a8042905db6f138a"
   },
   {
     "url": "samples/css/style.css",
@@ -143,15 +195,23 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/docScanner/index.html",
-    "revision": "8db980b677d4f90b539330b0afcc4714"
+    "revision": "5bcceeadbb8687660650ec1955f47143"
   },
   {
     "url": "samples/docScanner/js/docProcessing.js",
-    "revision": "c004aa5ae43b8ab7f273c9ad60546055"
+    "revision": "eacb931396318db8778c9b578862b94f"
   },
   {
     "url": "samples/docScanner/js/index.js",
-    "revision": "204e08dc253651f3a2676a30eace6288"
+    "revision": "1b3fe59b36c4c789ab0c6bbb05446c5b"
+  },
+  {
+    "url": "samples/emotionRecognizer/index.html",
+    "revision": "0635d561b65434630e968e8dbe69068f"
+  },
+  {
+    "url": "samples/emotionRecognizer/index.js",
+    "revision": "e5ff55a37d45faba794183c175c14918"
   },
   {
     "url": "samples/exposureTime/index.html",
@@ -163,7 +223,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/faceDetection/index.js",
-    "revision": "96994b2981767ea5a88ce3182740dceb"
+    "revision": "e723e95072c3b3db8fbe17b2e88bae7a"
   },
   {
     "url": "samples/filters/index.html",
@@ -175,7 +235,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/filters/js/index.js",
-    "revision": "22d4ac0e4eddf0b65ebb37bb8964e974"
+    "revision": "9d77162f558f750cf68b3a55de11d760"
   },
   {
     "url": "samples/filters/js/ui.js",
@@ -191,7 +251,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/funnyHats/index.html",
-    "revision": "814ca6774984f50c052757d75b5501b7"
+    "revision": "333855fcde66201588aeae11aa17784d"
   },
   {
     "url": "samples/funnyHats/js/hatsAndGlassesProcessing.js",
@@ -199,7 +259,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/funnyHats/js/index.js",
-    "revision": "a0efa3b6bb2ce1e151d9f79af2eb06ef"
+    "revision": "332ecd0f54c7a8b1cbffd449c2b9e4e9"
   },
   {
     "url": "samples/funnyHats/js/ui.js",
@@ -343,15 +403,15 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/hdr/index.html",
-    "revision": "932bfa1e18a4a848fbf977cb9e67e7b2"
+    "revision": "bc12fabbc9b5e4192c2368de5c9b0c40"
   },
   {
     "url": "samples/hdr/js/index.js",
-    "revision": "fbf73df0036700b735f3b663d86bc2b2"
+    "revision": "9c7d58535116314fcaf85d44ec194318"
   },
   {
     "url": "samples/index.html",
-    "revision": "e66db9713c364c0beec49701bdbd27da"
+    "revision": "27ac6ccfc20c2a9e8a1386179e1fd09c"
   },
   {
     "url": "samples/panTilt/index.html",
@@ -367,7 +427,7 @@ self.__precacheManifest = [
   },
   {
     "url": "utils/utils.js",
-    "revision": "9232d3ca9cd45dae151ca7cac4de7e4e"
+    "revision": "423adb43c96c8290764d9f3cc0528c51"
   },
   {
     "url": "workbox-config.js",
