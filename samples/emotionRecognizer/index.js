@@ -121,22 +121,29 @@ function processVideo() {
     let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
     src.data.set(imageData.data);
 
+    // Create small copy of source.
+    let srcSmall = new cv.Mat();
+    cv.resize(src, srcSmall, new cv.Size(parseInt(src.cols / 4), parseInt(src.rows / 4)));
+
     // Detect faces.
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
     faceCascade.detectMultiScale(gray, faceVec);
 
     for (let i = 0; i < faceVec.size(); ++i) {
+      // Prepare face for recognition model.
       let face = faceVec.get(i);
-      // Recognize emotion.
       let faceGray = gray.roi(face);
       cv.resize(faceGray, faceGray, new cv.Size(350, 350));
+      // Recognize emotion.
       let prediction = fisherFaceRecognizer.predict_label(faceGray);
       let emoticon = emoticons[prediction];
+      // Resize emoticon source and mask.
       let newEmoticonSize = new cv.Size(face.width, face.height);
       let resizedEmoticon = new cv.Mat();
       let resizedMask = new cv.Mat();
       cv.resize(emoticon.src, resizedEmoticon, newEmoticonSize);
       cv.resize(emoticon.mask, resizedMask, newEmoticonSize);
+      // Copy emoticon to video stream.
       resizedEmoticon.copyTo(src.rowRange(face.y, face.y + face.height)
         .colRange(face.x, face.x + face.width), resizedMask);
 
@@ -144,8 +151,12 @@ function processVideo() {
       resizedEmoticon.delete();
       resizedMask.delete();
     }
+
+    // Show small source image (without emoticon over a face) in the top left corner.
+    srcSmall.copyTo(src.rowRange(0, srcSmall.rows).colRange(0, srcSmall.cols));
     cv.imshow(canvasOutput, src);
 
+    srcSmall.delete();
     stats.end();
     requestAnimationFrame(processVideo);
   } catch (err) {
