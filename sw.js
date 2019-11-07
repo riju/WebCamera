@@ -167,7 +167,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/css/base.css",
-    "revision": "24686ee05ce888543ccb13194b83fb39"
+    "revision": "5fcdd1568f436587b760cc291d034616"
   },
   {
     "url": "samples/css/camera-bar.css",
@@ -207,11 +207,11 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/emotionRecognizer/index.html",
-    "revision": "0635d561b65434630e968e8dbe69068f"
+    "revision": "048a3c2a0158a463a46be8a50cdc02ca"
   },
   {
     "url": "samples/emotionRecognizer/index.js",
-    "revision": "e5ff55a37d45faba794183c175c14918"
+    "revision": "95b1a5477f5123002e94b2a6bb0d7d12"
   },
   {
     "url": "samples/exposureTime/index.html",
@@ -219,7 +219,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/faceDetection/index.html",
-    "revision": "5606908a9e654c9761aee78515dbe74a"
+    "revision": "ce3dc90e831d7cca410e2509ca475553"
   },
   {
     "url": "samples/faceDetection/index.js",
@@ -411,7 +411,15 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/index.html",
-    "revision": "27ac6ccfc20c2a9e8a1386179e1fd09c"
+    "revision": "5f2325396f9853d7d414491c65dd2c32"
+  },
+  {
+    "url": "samples/invisibilityCloak/index.html",
+    "revision": "7c3a9d4310fd0d99bf1aa726989ec775"
+  },
+  {
+    "url": "samples/invisibilityCloak/index.js",
+    "revision": "3499bb1c1f0b237933ebd328b40b930c"
   },
   {
     "url": "samples/panTilt/index.html",

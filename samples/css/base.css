@@ -19,7 +19,7 @@ body {
 }
 
 .stats-settings, .threads-control, .jitter-limit, .edge-error,
-.downscale-level, .threshold-block-size, .threshold-offset {
+.downscale-level, .threshold-block-size, .threshold-offset, .demo-state {
   padding: 10px;
   width: 100%;
   border-bottom: dotted silver 1px;
