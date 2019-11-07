@@ -28,8 +28,8 @@ function initOpencvObjects() {
   dst = new cv.Mat();
 
   // In OpenCV, Hue range is [0,179], Saturation range is [0,255]
-  // and Value range is [0,255]. We use 5-55 range for blue color,
-  // 50-255 for saturation and 50-255 for brigtness.
+  // and Value range is [0,255]. We use 0-33 range for blue color,
+  // 100-255 for saturation and 70-255 for brigtness.
   lowerRedRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
     new cv.Scalar(0, 100, 70, 255));
   upperRedRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
@@ -83,7 +83,7 @@ function removeBlueColor(source, destination) {
   cv.inRange(hsv, lowerRedRange, upperRedRange, mask);
 
   // Dilation increases area of filtered object.
-  let kernel = cv.Mat.ones(5, 5, cv.CV_32F);
+  let kernel = cv.Mat.ones(3, 3, cv.CV_32F);
   cv.morphologyEx(mask, mask, cv.MORPH_DILATE, kernel);
 
   // Apply mask to background image.
@@ -93,7 +93,7 @@ function removeBlueColor(source, destination) {
   cv.bitwise_not(mask, maskInv);
   cv.bitwise_and(source, source, backgroundResult, maskInv);
 
-  // Generating the final augmented output.
+  // Combine source and background images.
   cv.addWeighted(backgroundResult, 1, sourceResult, 1, 0, destination);
 
   hsv.delete();
