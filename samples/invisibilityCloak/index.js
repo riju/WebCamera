@@ -17,7 +17,7 @@ let dst = null;
 // Camera parameters are not stable when the camera is just getting started.
 // So we execute a loop where we capture background and use the last frame
 // as a stable background.
-const BACKGROUND_CAPTURE_ITERATIONS = 300;
+const BACKGROUND_CAPTURE_ITERATIONS = 30;
 
 // In OpenCV, Hue range is [0,179], Saturation range is [0,255]
 // and Value range is [0,255]. We use ~0-33 range for blue color as default.
@@ -81,18 +81,29 @@ function completeStyling() {
   canvasOutput.height = video.height;
 }
 
-function captureBackground() {
-  for (let i = 0; i < BACKGROUND_CAPTURE_ITERATIONS; ++i) {
+let backgroundCaptureCounter = 0;
+function runCapturingRound() {
+  if (backgroundCaptureCounter < BACKGROUND_CAPTURE_ITERATIONS) {
+    ++backgroundCaptureCounter;
+
     canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
     let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
     background.data.set(imageData.data);
     cv.imshow(canvasOutput, background);
+
+    requestAnimationFrame(runCapturingRound);
+    return;
   }
-  document.getElementById("demoState").innerText = "Ready for magic! Put on your blue cloak!"
+  backgroundCaptureCounter = 0;
+  document.getElementById("demoState").innerText = "Ready for magic! You may adjust color range below.";
   requestAnimationFrame(processVideo);
 }
+function captureBackground() {
+  document.getElementById("demoState").innerText = "Capturing background...";
+  requestAnimationFrame(runCapturingRound);
+}
 
-function removeBlueColor(source, destination) {
+function applyColorSegmentation(source, destination) {
   let hsv = new cv.Mat(video.height, video.width, cv.CV_8UC3);
   let mask = new cv.Mat();
   let maskInv = new cv.Mat();
@@ -137,7 +148,7 @@ function processVideo() {
     let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
     src.data.set(imageData.data);
 
-    removeBlueColor(src, dst);
+    applyColorSegmentation(src, dst);
 
     cv.imshow(canvasOutput, dst);
 
@@ -166,7 +177,13 @@ function onVideoStartedCustom() {
   document.getElementById('mainContent').classList.remove('hidden');
   completeStyling();
   initOpencvObjects();
-  captureBackground();
+  requestAnimationFrame(captureBackground);
+}
+
+function startVideoProcessingCustom() {
+  videoTrack = video.srcObject.getVideoTracks()[0];
+  imageCapturer = new ImageCapture(videoTrack);
+  requestAnimationFrame(captureBackground);
 }
 
 function cleanupAndStop() {

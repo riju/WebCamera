@@ -40,7 +40,7 @@
     </div>
 
     <div class="demo-state centered">
-      <label id="demoState">Capture background...</label>
+      <label id="demoState">Capturing background...</label>
     </div>
 
     <div class="stats-settings centered">
@@ -53,35 +53,39 @@
       <input type="number" id="threadsNum" min="1" max="16">
     </div>
 
+    <div class="background-control centered">
+      <button onclick="requestAnimationFrame(captureBackground)">Capture background</button>
+    </div>
+
     <div class="lower-hue-control centered">
       <label for="lowerHue">Lower value of Hue channel:
         <output id="lowerHueOutput">0</output></label>
-        <input type="range" id="lowerHue" value="0" min="0" max="179" step="1">
+      <input type="range" id="lowerHue" value="0" min="0" max="179" step="1">
     </div>
     <div class="upper-hue-control centered">
       <label for="upperHue">Upper value of Hue channel:
         <output id="upperHueOutput">33</output></label>
-        <input type="range" id="upperHue" value="33" min="0" max="179" step="1">
+      <input type="range" id="upperHue" value="33" min="0" max="179" step="1">
     </div>
     <div class="lower-saturation-control centered">
       <label for="lowerSaturation">Lower value of Saturation channel:
         <output id="lowerSaturationOutput">100</output></label>
-        <input type="range" id="lowerSaturation" value="100" min="0" max="255" step="1">
+      <input type="range" id="lowerSaturation" value="100" min="0" max="255" step="1">
     </div>
     <div class="upper-saturation-control centered">
       <label for="upperSaturation">Upper value of Saturation channel:
         <output id="upperSaturationOutput">255</output></label>
-        <input type="range" id="upperSaturation" value="255" min="0" max="255" step="1">
+      <input type="range" id="upperSaturation" value="255" min="0" max="255" step="1">
     </div>
     <div class="lower-value-control centered">
       <label for="lowerValue">Lower value of Brigtness channel:
         <output id="lowerValueOutput">70</output></label>
-        <input type="range" id="lowerValue" value="70" min="0" max="255" step="1">
+      <input type="range" id="lowerValue" value="70" min="0" max="255" step="1">
     </div>
     <div class="upper-value-control centered">
       <label for="upperValue">Upper value of Brigtness channel:
         <output id="upperValueOutput">255</output></label>
-        <input type="range" id="upperValue" value="255" min="0" max="255" step="1">
+      <input type="range" id="upperValue" value="255" min="0" max="255" step="1">
     </div>
   </div>
 
