@@ -19,7 +19,9 @@ body {
 }
 
 .stats-settings, .threads-control, .jitter-limit, .edge-error,
-.downscale-level, .threshold-block-size, .threshold-offset, .demo-state {
+.downscale-level, .threshold-block-size, .threshold-offset, .demo-state,
+.lower-hue-control, .upper-hue-control, .lower-saturation-control,
+.upper-saturation-control, .lower-value-control, .upper-value-control {
   padding: 10px;
   width: 100%;
   border-bottom: dotted silver 1px;

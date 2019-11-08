@@ -13,8 +13,6 @@ let canvasInputCtx = null;
 let src = null;
 let background = null;
 let dst = null;
-let lowerRedRange = null;
-let upperRedRange = null;
 
 // Camera parameters are not stable when the camera is just getting started.
 // So we execute a loop where we capture background and use the last frame
@@ -26,19 +24,32 @@ function initOpencvObjects() {
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   background = new cv.Mat(video.height, video.width, cv.CV_8UC4);
   dst = new cv.Mat();
+}
 
+function inRange(hsv, mask) {
   // In OpenCV, Hue range is [0,179], Saturation range is [0,255]
-  // and Value range is [0,255]. We use 0-33 range for blue color,
-  // 100-255 for saturation and 70-255 for brigtness.
-  lowerRedRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
-    new cv.Scalar(0, 100, 70, 255));
-  upperRedRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
-    new cv.Scalar(33, 255, 255, 255));
+  // and Value range is [0,255]. We use 0-33 range for BLUE color,
+  // 100-255 for saturation and 70-255 for brigtness as default settings.
+
+  let lh = parseInt(document.getElementById('lowerHue').value);
+  let uh = parseInt(document.getElementById('upperHue').value);
+  let ls = parseInt(document.getElementById('lowerSaturation').value);
+  let us = parseInt(document.getElementById('upperSaturation').value);
+  let lv = parseInt(document.getElementById('lowerValue').value);
+  let uv = parseInt(document.getElementById('upperValue').value);
+
+  let lowerRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
+    new cv.Scalar(lh, ls, lv, 255));
+  let upperRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
+    new cv.Scalar(uh, us, uv, 255));
+
+  cv.inRange(hsv, lowerRange, upperRange, mask);
+
+  lowerRange.delete(); upperRange.delete();
 }
 
 function deleteOpencvObjects() {
   src.delete(); background.delete(); dst.delete();
-  lowerRedRange.delete(); upperRedRange.delete();
 }
 
 function completeStyling() {
@@ -69,7 +80,7 @@ function captureBackground() {
 }
 
 function removeBlueColor(source, destination) {
-  let hsv = new cv.Mat();
+  let hsv = new cv.Mat(video.height, video.width, cv.CV_8UC3);
   let mask = new cv.Mat();
   let maskInv = new cv.Mat();
   let sourceResult = new cv.Mat();
@@ -79,8 +90,8 @@ function removeBlueColor(source, destination) {
   // HSV - Hue (color information), Saturation (intensity), Value (brightness).
   cv.cvtColor(source, hsv, cv.COLOR_BGR2HSV);
 
-  // Apply lower and upper boundary of a blue color to inRange filter.
-  cv.inRange(hsv, lowerRedRange, upperRedRange, mask);
+  // Apply lower and upper boundaries of HSV channels to inRange filter.
+  inRange(hsv, mask);
 
   // Dilation increases area of filtered object.
   let kernel = cv.Mat.ones(3, 3, cv.CV_32F);

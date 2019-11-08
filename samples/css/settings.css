@@ -78,7 +78,8 @@
   display: block;
   position: relative;
 }
-#jitterLimit, #edgeError, #thresholdBlockSize, #thresholdOffset {
+#jitterLimit, #edgeError, #thresholdBlockSize, #thresholdOffset,
+#lowerHue, #upperHue, #lowerSaturation, #upperSaturation, #lowerValue, #upperValue {
   width: 130px;
 }
 #downscaleLevel {
@@ -89,7 +90,8 @@
 }
 .settings-bar input[type=range],
 #jitterLimit, #edgeError, #downscaleLevel,
-#thresholdBlockSize,#thresholdOffset {
+#thresholdBlockSize,#thresholdOffset,
+#lowerHue, #upperHue, #lowerSaturation, #upperSaturation, #lowerValue, #upperValue {
   display: block;
   -webkit-appearance: none;
   margin: 7px 2px;
@@ -99,7 +101,9 @@
 }
 .settings-bar input[type=range]:focus,
 #jitterLimit:focus, #edgeError:focus, #downscaleLevel:focus,
-#thresholdBlockSize:focus, #thresholdOffset:focus {
+#thresholdBlockSize:focus, #thresholdOffset:focus,
+#lowerHue:focus, #upperHue:focus, #lowerSaturation:focus,
+#upperSaturation:focus, #lowerValue:focus, #upperValue:focus {
   outline: none;
 }
 .settings-bar input[type=range]::-webkit-slider-runnable-track,
@@ -107,7 +111,10 @@
 #edgeError::-webkit-slider-runnable-track,
 #downscaleLevel::-webkit-slider-runnable-track,
 #thresholdBlockSize::-webkit-slider-runnable-track,
-#thresholdOffset::-webkit-slider-runnable-track {
+#thresholdOffset::-webkit-slider-runnable-track,
+#lowerHue::-webkit-slider-runnable-track, #upperHue::-webkit-slider-runnable-track,
+#lowerSaturation::-webkit-slider-runnable-track, #upperSaturation::-webkit-slider-runnable-track,
+#lowerValue::-webkit-slider-runnable-track, #upperValue::-webkit-slider-runnable-track {
   width: 100%;
   height: 4px;
   background: white;
@@ -121,7 +128,10 @@
 #edgeError::-webkit-slider-thumb,
 #downscaleLevel::-webkit-slider-thumb,
 #thresholdBlockSize::-webkit-slider-thumb,
-#thresholdOffset::-webkit-slider-thumb {
+#thresholdOffset::-webkit-slider-thumb,
+#lowerHue::-webkit-slider-thumb, #upperHue::-webkit-slider-thumb,
+#lowerSaturation::-webkit-slider-thumb, #upperSaturation::-webkit-slider-thumb,
+#lowerValue::-webkit-slider-thumb, #upperValue::-webkit-slider-thumb {
   width: 9px;
   height: 20px;
   -webkit-appearance: none;
@@ -137,7 +147,10 @@
 #edgeError:focus::-webkit-slider-runnable-track,
 #downscaleLevel:focus::-webkit-slider-runnable-track,
 #thresholdBlockSize:focus::-webkit-slider-runnable-track,
-#thresholdOffset:focus::-webkit-slider-runnable-track {
+#thresholdOffset:focus::-webkit-slider-runnable-track,
+#lowerHue:focus::-webkit-slider-runnable-track, #upperHue:focus::-webkit-slider-runnable-track,
+#lowerSaturation:focus::-webkit-slider-runnable-track, #upperSaturation:focus::-webkit-slider-runnable-track,
+#lowerValue:focus::-webkit-slider-runnable-track, #upperValue:focus::-webkit-slider-runnable-track {
   background: white;
 }
 @media screen and (max-width: 960px) {

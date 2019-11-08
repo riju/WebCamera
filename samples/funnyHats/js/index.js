@@ -20,7 +20,7 @@ const imageHeight = 240;
 let nImagesLoaded = 0;
 // NOTE! Update this value if you add or remove files
 // from hatsData and glassesData in ui.js.
-const N_IMAGES = 34;
+const N_IMAGES = 33;
 
 
 function initOpencvObjects() {
