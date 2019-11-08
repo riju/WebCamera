@@ -167,7 +167,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/css/base.css",
-    "revision": "5fcdd1568f436587b760cc291d034616"
+    "revision": "1b349b9143bc26122d6a4a3693261b21"
   },
   {
     "url": "samples/css/camera-bar.css",
@@ -187,7 +187,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/css/settings.css",
-    "revision": "ea1a979157604659a8042905db6f138a"
+    "revision": "23ba0d8b4d684f46ab42e7935e7941fc"
   },
   {
     "url": "samples/css/style.css",
@@ -211,7 +211,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/emotionRecognizer/index.js",
-    "revision": "95b1a5477f5123002e94b2a6bb0d7d12"
+    "revision": "f43670f4f1961c04d33da6d421e24c69"
   },
   {
     "url": "samples/exposureTime/index.html",
@@ -223,11 +223,11 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/faceDetection/index.js",
-    "revision": "e723e95072c3b3db8fbe17b2e88bae7a"
+    "revision": "4aed50b3b465e06ab8ebbf0887efb9e0"
   },
   {
     "url": "samples/filters/index.html",
-    "revision": "a8c7521e82c31d4eaedeeb1b4becd3c6"
+    "revision": "44aed7616d94e7de329a5297c3dc7617"
   },
   {
     "url": "samples/filters/js/filters.js",
@@ -239,7 +239,7 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/filters/js/ui.js",
-    "revision": "8d1b3d57758d31b4605fc22322b3f651"
+    "revision": "babedadc04edd3a826b68fc8ce20cbdd"
   },
   {
     "url": "samples/focusDistance/index.html",
@@ -259,11 +259,11 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/funnyHats/js/index.js",
-    "revision": "332ecd0f54c7a8b1cbffd449c2b9e4e9"
+    "revision": "ea749898d93f8bca1cb19ae0ce6fa35f"
   },
   {
     "url": "samples/funnyHats/js/ui.js",
-    "revision": "5c00683a4b45007ed9ae927748b64e25"
+    "revision": "d7c3f6a10531e7906b865a62e022a531"
   },
   {
     "url": "samples/funnyHats/resources/glasses/0.png",
@@ -415,11 +415,11 @@ self.__precacheManifest = [
   },
   {
     "url": "samples/invisibilityCloak/index.html",
-    "revision": "7c3a9d4310fd0d99bf1aa726989ec775"
+    "revision": "588033d29475bf0b6f2644122e70114b"
   },
   {
     "url": "samples/invisibilityCloak/index.js",
-    "revision": "3499bb1c1f0b237933ebd328b40b930c"
+    "revision": "97edff5336c48304438b5742302dd1d6"
   },
   {
     "url": "samples/panTilt/index.html",
@@ -435,7 +435,7 @@ self.__precacheManifest = [
   },
   {
     "url": "utils/utils.js",
-    "revision": "423adb43c96c8290764d9f3cc0528c51"
+    "revision": "bbde79c9b05aa6a90956d25dbd14c32d"
   },
   {
     "url": "workbox-config.js",
