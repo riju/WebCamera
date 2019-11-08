@@ -19,6 +19,24 @@ let dst = null;
 // as a stable background.
 const BACKGROUND_CAPTURE_ITERATIONS = 300;
 
+// In OpenCV, Hue range is [0,179], Saturation range is [0,255]
+// and Value range is [0,255]. We use ~0-33 range for blue color as default.
+const LOWER_HUE_DEFAULT = 0;
+const UPPER_HUE_DEFAULT = 33;
+const LOWER_SATURATION_DEFAULT = 100;
+const UPPER_SATURATION_DEFAULT = 255;
+const LOWER_VALUE_DEFAULT = 7;
+const UPPER_VALUE_DEFAULT = 255;
+
+let HSVranges = {
+  lowerHue: LOWER_HUE_DEFAULT,
+  upperHue: UPPER_HUE_DEFAULT,
+  lowerSaturation: LOWER_SATURATION_DEFAULT,
+  lowerSaturation: UPPER_SATURATION_DEFAULT,
+  lowerValue: LOWER_VALUE_DEFAULT,
+  upperValue: UPPER_VALUE_DEFAULT,
+}
+
 
 function initOpencvObjects() {
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
@@ -27,21 +45,12 @@ function initOpencvObjects() {
 }
 
 function inRange(hsv, mask) {
-  // In OpenCV, Hue range is [0,179], Saturation range is [0,255]
-  // and Value range is [0,255]. We use 0-33 range for BLUE color,
-  // 100-255 for saturation and 70-255 for brigtness as default settings.
-
-  let lh = parseInt(document.getElementById('lowerHue').value);
-  let uh = parseInt(document.getElementById('upperHue').value);
-  let ls = parseInt(document.getElementById('lowerSaturation').value);
-  let us = parseInt(document.getElementById('upperSaturation').value);
-  let lv = parseInt(document.getElementById('lowerValue').value);
-  let uv = parseInt(document.getElementById('upperValue').value);
-
   let lowerRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
-    new cv.Scalar(lh, ls, lv, 255));
+    new cv.Scalar(HSVranges.lowerHue, HSVranges.lowerSaturation,
+      HSVranges.lowerValue, 255));
   let upperRange = new cv.Mat(video.height, video.width, cv.CV_8UC3,
-    new cv.Scalar(uh, us, uv, 255));
+    new cv.Scalar(HSVranges.upperHue, HSVranges.upperSaturation,
+      HSVranges.upperValue, 255));
 
   cv.inRange(hsv, lowerRange, upperRange, mask);
 
@@ -63,6 +72,10 @@ function completeStyling() {
   canvasInput.width = video.width;
   canvasInput.height = video.height;
   canvasInputCtx = canvasInput.getContext('2d');
+
+  let resetButton = document.querySelector('.reset-button');
+  resetButton.style.left = `${video.videoWidth - resetButton.offsetWidth}px`;
+  resetButton.style.bottom = `${video.videoHeight}px`;
 
   canvasOutput.width = video.width;
   canvasOutput.height = video.height;
@@ -161,11 +174,101 @@ function cleanupAndStop() {
   utils.stopCamera(); onVideoStopped();
 }
 
+function resetHSVsettings() {
+  document.getElementById('lowerHue').value =
+    document.getElementById('lowerHueOutput').value =
+    HSVranges.lowerHue = LOWER_HUE_DEFAULT;
+  document.getElementById('upperHue').value =
+    document.getElementById('upperHueOutput').value =
+    HSVranges.upperHue = UPPER_HUE_DEFAULT;
+  document.getElementById('lowerSaturation').value =
+    document.getElementById('lowerSaturationOutput').value =
+    HSVranges.lowerSaturation = LOWER_SATURATION_DEFAULT;
+  document.getElementById('upperSaturation').value =
+    document.getElementById('upperSaturationOutput').value =
+    HSVranges.upperSaturation = UPPER_SATURATION_DEFAULT;
+  document.getElementById('lowerValue').value =
+    document.getElementById('lowerValueOutput').value =
+    HSVranges.lowerValue = LOWER_VALUE_DEFAULT;
+  document.getElementById('upperValue').value =
+    document.getElementById('upperValueOutput').value =
+    HSVranges.upperValue = UPPER_VALUE_DEFAULT;
+}
+
 function initUI() {
   let menuHeight = parseInt(getComputedStyle(
     document.querySelector('.camera-bar-wrapper')).height);
   getVideoConstraint(menuHeight);
   initStats();
+
+  // Event for reset button.
+  let resetButton = document.querySelector('.reset-button');
+  resetButton.addEventListener('click', function () {
+    resetHSVsettings();
+  });
+
+  // Initialize values for HSV sliders.
+  resetHSVsettings();
+
+  // Event listeners for HSV sliders.
+
+  // Hue.
+  let lowerHueSlider = document.getElementById('lowerHue');
+  let lowerHueOutput = document.getElementById('lowerHueOutput');
+  lowerHueSlider.addEventListener('input', function () {
+    HSVranges.lowerHue = lowerHueOutput.value = parseInt(lowerHueSlider.value);
+  });
+  lowerHueSlider.addEventListener('change', function () {
+    HSVranges.lowerHue = lowerHueOutput.value = parseInt(lowerHueSlider.value);
+  });
+  let upperHueSlider = document.getElementById('upperHue');
+  let upperHueOutput = document.getElementById('upperHueOutput');
+  upperHueSlider.addEventListener('input', function () {
+    HSVranges.upperHue = upperHueOutput.value = parseInt(upperHueSlider.value);
+  });
+  upperHueSlider.addEventListener('change', function () {
+    HSVranges.upperHue = upperHueOutput.value = parseInt(upperHueSlider.value);
+  });
+
+  // Saturation.
+  let lowerSaturationSlider = document.getElementById('lowerSaturation');
+  let lowerSaturationOutput = document.getElementById('lowerSaturationOutput');
+  lowerSaturationSlider.addEventListener('input', function () {
+    HSVranges.lowerSaturation = lowerSaturationOutput.value =
+      parseInt(lowerSaturationSlider.value);
+  });
+  lowerSaturationSlider.addEventListener('change', function () {
+    HSVranges.lowerSaturation = lowerSaturationOutput.value =
+      parseInt(lowerSaturationSlider.value);
+  });
+  let upperSaturationSlider = document.getElementById('upperSaturation');
+  let upperSaturationOutput = document.getElementById('upperSaturationOutput');
+  upperSaturationSlider.addEventListener('input', function () {
+    HSVranges.upperSaturation = upperSaturationOutput.value =
+      parseInt(upperSaturationSlider.value);
+  });
+  upperSaturationSlider.addEventListener('change', function () {
+    HSVranges.upperSaturation = upperSaturationOutput.value =
+      parseInt(upperSaturationSlider.value);
+  });
+
+  // Value (brightness).
+  let lowerValueSlider = document.getElementById('lowerValue');
+  let lowerValueOutput = document.getElementById('lowerValueOutput');
+  lowerValueSlider.addEventListener('input', function () {
+    HSVranges.lowerValue = lowerValueOutput.value = parseInt(lowerValueSlider.value);
+  });
+  lowerValueSlider.addEventListener('change', function () {
+    HSVranges.lowerValue = lowerValueOutput.value = parseInt(lowerValueSlider.value);
+  });
+  let upperValueSlider = document.getElementById('upperValue');
+  let upperValueOutput = document.getElementById('upperValueOutput');
+  upperValueSlider.addEventListener('input', function () {
+    HSVranges.upperValue = upperValueOutput.value = parseInt(upperValueSlider.value);
+  });
+  upperValueSlider.addEventListener('change', function () {
+    HSVranges.upperValue = upperValueOutput.value = parseInt(upperValueSlider.value);
+  });
 
   // TakePhoto event by clicking takePhotoButton.
   let takePhotoButton = document.getElementById('takePhotoButton');

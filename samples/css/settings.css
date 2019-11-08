@@ -8,6 +8,7 @@
   border: none;
   font-family: "Times New Roman";
   z-index: 15;
+  outline: none;
 }
 .settings-wrapper {
   position: relative;
