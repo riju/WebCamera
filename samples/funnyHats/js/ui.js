@@ -208,6 +208,7 @@ function loadHats() {
     });
 
     hatImage.onload = function () {
+      ++nImagesLoaded;
       let rgbaVector = new cv.MatVector();
       hatSrc = cv.imread(hatImage);
       cv.split(hatSrc, rgbaVector); // Create mask from alpha channel.
@@ -236,6 +237,7 @@ function loadGlasses() {
     });
 
     glassesImage.onload = function () {
+      ++nImagesLoaded;
       let rgbaVector = new cv.MatVector();
       glassesSrc = cv.imread(glassesImage);
       cv.split(glassesSrc, rgbaVector); // Create mask from alpha channel.
