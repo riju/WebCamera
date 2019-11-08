@@ -137,7 +137,6 @@ function initUI() {
   });
 
   enableThreads();
-  }
 
   // Event listener for dowscale parameter.
   let downscaleLevelInput = document.getElementById('downscaleLevel');

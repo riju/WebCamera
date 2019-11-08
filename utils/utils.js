@@ -380,7 +380,6 @@ function addButtonToCameraBar(id, text, maxItems) {
 
 function enableThreads() {
   if (!isMobileDevice()) {
-    // Init threads number.
     let threadsControl = document.getElementsByClassName('threads-control')[0];
     threadsControl.classList.remove('hidden');
     let threadsNumLabel = document.getElementById('threadsNumLabel');
