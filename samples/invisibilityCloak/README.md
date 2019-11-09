@@ -10,7 +10,7 @@ Demonstrate color detection and segmentation using OpenCV.js.
 Camera parameters are not stable when the camera is just getting started. So we execute a loop where we capture background and use the last frame as a stable background.
 
 ```javascript
-const BACKGROUND_CAPTURE_ITERATIONS = 300;
+const BACKGROUND_CAPTURE_ITERATIONS = 50;
 
 for (let i = 0; i < BACKGROUND_CAPTURE_ITERATIONS; ++i) {
   ...
@@ -22,7 +22,7 @@ for (let i = 0; i < BACKGROUND_CAPTURE_ITERATIONS; ++i) {
 2. Create HSV ranges for blue color
 
 In OpenCV, Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255].
-We use 0-33 range for blue color, 100-255 for saturation and 70-255 for brigtness.
+We apply range values from sliders but let's see example for blue color.
 
 ```javascript
 lowerRedRange = new cv.Mat(video.height, video.width, cv.CV_8UC3, new cv.Scalar(0, 100, 70, 255));

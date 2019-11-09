@@ -17,6 +17,11 @@ let gray = null;
 const imageWidth = 320;
 const imageHeight = 240;
 
+let nImagesLoaded = 0;
+// NOTE! Update this value if you add or remove files
+// from hatsData and glassesData in ui.js.
+const N_IMAGES = 33;
+
 
 function initOpencvObjects() {
   src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
@@ -70,6 +75,21 @@ function completeStyling() {
   canvasInputCtx = canvasInput.getContext('2d');
 
   document.getElementById('takePhotoButton').disabled = false;
+}
+
+function waitForResources() {
+  if (nImagesLoaded == N_IMAGES) {
+    requestAnimationFrame(processVideo);
+    return;
+  }
+
+  // Show video stream while we are waiting for resources.
+  canvasInputCtx.drawImage(video, 0, 0, video.width, video.height);
+  let imageData = canvasInputCtx.getImageData(0, 0, video.width, video.height);
+  src.data.set(imageData.data);
+  cv.imshow(canvasOutput, src);
+
+  requestAnimationFrame(waitForResources);
 }
 
 function processVideo() {
@@ -145,11 +165,22 @@ function processVideo() {
 function startCamera() {
   if (!streaming) {
     utils.clearError();
-    utils.startCamera(videoConstraint, 'videoInput', onVideoStarted);
+    utils.startCamera(videoConstraint, 'videoInput', onVideoStartedCustom);
   } else {
     utils.stopCamera();
     onVideoStopped();
   }
+}
+
+function onVideoStartedCustom() {
+  streaming = true;
+  setMainCanvasProperties(video);
+  videoTrack = video.srcObject.getVideoTracks()[0];
+  imageCapturer = new ImageCapture(videoTrack);
+  document.getElementById('mainContent').classList.remove('hidden');
+  completeStyling();
+  initOpencvObjects();
+  requestAnimationFrame(waitForResources);
 }
 
 function cleanupAndStop() {

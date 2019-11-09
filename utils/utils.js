@@ -4,6 +4,8 @@ const resolutions = {
   'vga': { width: { exact: 640 }, height: { exact: 480 } }
 };
 
+const DEFAULT_THREADS_NUM = 3;
+
 function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
   let self = this;
   this.errorOutput = document.getElementById(errorOutputId);
@@ -374,4 +376,24 @@ function addButtonToCameraBar(id, text, maxItems) {
   divElement.appendChild(button);
   liElement.appendChild(divElement);
   cameraBar.appendChild(liElement);
+}
+
+function enableThreads() {
+  if (!isMobileDevice()) {
+    let threadsControl = document.getElementsByClassName('threads-control')[0];
+    threadsControl.classList.remove('hidden');
+    let threadsNumLabel = document.getElementById('threadsNumLabel');
+    let threadsNum = document.getElementById('threadsNum');
+    threadsNum.max = navigator.hardwareConcurrency;
+    threadsNumLabel.innerHTML = `Number of threads (1 - ${threadsNum.max}):&nbsp;`;
+    if (DEFAULT_THREADS_NUM <= threadsNum.max) threadsNum.value = DEFAULT_THREADS_NUM;
+    else threadsNum.value = 1;
+    cv.parallel_pthreads_set_threads_num(parseInt(threadsNum.value));
+    threadsNum.addEventListener('change', () => {
+      if (Number(threadsNum.value) <= Number(threadsNum.max) &&
+        Number(threadsNum.value) >= Number(threadsNum.min)) {
+        cv.parallel_pthreads_set_threads_num(parseInt(threadsNum.value));
+      }
+    });
+  }
 }
