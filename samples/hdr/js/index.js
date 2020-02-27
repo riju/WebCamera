@@ -63,7 +63,15 @@ function gotMedia(mediastream) {
   document.getElementById('start').disabled = true;
 
   var videoTrack = mediastream.getVideoTracks()[0];
-  imageCapturer = new ImageCapture(videoTrack);
+  try {
+    imageCapturer = new ImageCapture(videoTrack);
+  } catch(error) {
+    document.getElementById("mainContent").classList.add("hidden");
+    document.getElementById("errorMessage").innerText =
+      "ImageCapture API is not supported in this browser version.";
+    console.error(error);
+    return;
+  }
 
   // Timeout needed in Chrome, see https://crbug.com/711524
   setTimeout(() => {
@@ -252,6 +260,8 @@ function takePhoto() {
     })
     .catch((err) => {
       console.error("takePhoto() failed: ", err);
+      document.getElementById("mainContent").classList.add("hidden");
+      document.getElementById("errorMessage").innerText = err;
     });
 }
 

@@ -173,16 +173,10 @@ function onVideoStartedCustom() {
   streaming = true;
   setMainCanvasProperties(video);
   videoTrack = video.srcObject.getVideoTracks()[0];
-  imageCapturer = new ImageCapture(videoTrack);
   document.getElementById('mainContent').classList.remove('hidden');
   completeStyling();
   initOpencvObjects();
-  requestAnimationFrame(captureBackground);
-}
-
-function startVideoProcessingCustom() {
-  videoTrack = video.srcObject.getVideoTracks()[0];
-  imageCapturer = new ImageCapture(videoTrack);
+  // Capture background first.
   requestAnimationFrame(captureBackground);
 }
 

@@ -109,6 +109,13 @@ function initUI() {
   // TakePhoto event by clicking takePhotoButton.
   let takePhotoButton = document.getElementById('takePhotoButton');
   takePhotoButton.addEventListener('click', function () {
+    if (imageCapturer === null) {
+      document.getElementById("mainContent").classList.add("hidden");
+      document.getElementById("errorMessage").innerText =
+        "ImageCapture is not inilialized.";
+      console.error("ImageCapture is not inilialized.");
+      return;
+    }
     takePhoto();
   });
 
@@ -133,7 +140,15 @@ function initUI() {
 
 function startCameraProcessing() {
   videoTrack = video.srcObject.getVideoTracks()[0];
-  imageCapturer = new ImageCapture(videoTrack);
+  try {
+    imageCapturer = new ImageCapture(videoTrack);
+  } catch(error) {
+    document.getElementById("mainContent").classList.add("hidden");
+    document.getElementById("errorMessage").innerText =
+      "ImageCapture API is not supported in this browser version.";
+    console.error(error);
+    return;
+  }
   // Timeout needed in Chrome, see https://crbug.com/711524.
   setTimeout(() => {
     applyInitialSettings();
