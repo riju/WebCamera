@@ -5,6 +5,7 @@ function startProcessing() {
     // TODO(sasha): Provide polyfill detection preferably
     // using opencv.js for browsers not yet implementing
     // Shape Detection API.
+    document.getElementById("mainContent").classList.add("hidden");
     document.getElementById("errorMessage").innerText =
       "barcodeDetector API is not supported in this browser version.";
     return;
@@ -13,6 +14,13 @@ function startProcessing() {
   // TODO(sasha): We are doing detection on image.
   // Later on we are planning to implement live detection
   // and use worker for this.
+  if (imageCapturer === null) {
+    document.getElementById("mainContent").classList.add("hidden");
+    document.getElementById("errorMessage").innerText =
+      "ImageCapture is not inilialized.";
+    console.error("ImageCapture is not inilialized.");
+    return;
+  }
   imageCapturer.grabFrame()
     .then(imageBitmap => {
       return createBarcodeDetector(imageBitmap);
@@ -35,6 +43,7 @@ function startProcessing() {
           barcodes[0].rawValue;
       }
     }).catch((e) => {
+      document.getElementById("mainContent").classList.add("hidden");
       document.getElementById('errorMessage').innerText =
         'Error in barcode detection process: ' + e;
     })

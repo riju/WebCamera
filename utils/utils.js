@@ -74,6 +74,7 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
   };
 
   this.printError = function (err) {
+    document.getElementById("mainContent").classList.add("hidden");
     if (typeof err === 'undefined') {
       err = '';
     } else if (typeof err === 'number') {
@@ -90,7 +91,7 @@ function Utils(errorOutputId) { // eslint-disable-line no-unused-vars
         }
       }
     } else if (err instanceof Error) {
-      err = err.stack.replace(/\n/g, '<br>');
+      err = err.toString().replace(/\n/g, '<br>');
     }
     this.errorOutput.innerHTML = err;
   };
@@ -213,10 +214,15 @@ function onVideoStarted() {
   streaming = true;
   setMainCanvasProperties(video);
   videoTrack = video.srcObject.getVideoTracks()[0];
-  imageCapturer = new ImageCapture(videoTrack);
+  try {
+    imageCapturer = new ImageCapture(videoTrack);
+  } catch (error) {
+    console.error(error);
+  }
   document.getElementById('mainContent').classList.remove('hidden');
   completeStyling();
   initOpencvObjects();
+  // Start processing.
   requestAnimationFrame(processVideo);
 }
 
@@ -228,7 +234,11 @@ function onVideoStopped() {
 
 function startVideoProcessing() {
   videoTrack = video.srcObject.getVideoTracks()[0];
-  imageCapturer = new ImageCapture(videoTrack);
+  try {
+    imageCapturer = new ImageCapture(videoTrack);
+  } catch (error) {
+    console.error(error);
+  }
   requestAnimationFrame(processVideo);
 }
 
