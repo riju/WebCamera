@@ -26,7 +26,7 @@
     const supports = navigator.mediaDevices.getSupportedConstraints();
     console.log("supports = ", JSON.parse(JSON.stringify(supports)));
     navigator.mediaDevices.getUserMedia({
-      video: true
+      video: { pan: true, tilt: true, zoom: true }
     }).then((mediaStream) => {
       gotStream(mediaStream);
       return navigator.mediaDevices.enumerateDevices()
@@ -50,12 +50,16 @@
       const inputTiltRange = document.getElementById('tiltRange');
       const inputZoomRange = document.getElementById('zoomRange');
       // Check whether pan is supported or not.
-      if (!('pan' in capabilities)) {
+      if (!('pan' in settings)) {
         return Promise.reject('pan is not supported by ' + track.label);
       }
-      // Check whether pan is supported or not.
-      if (!('tilt' in capabilities)) {
+      // Check whether tilt is supported or not.
+      if (!('tilt' in settings)) {
         return Promise.reject('tilt is not supported by ' + track.label);
+      }
+      // Check whether zoom is supported or not.
+      if (!('zoom' in settings)) {
+        return Promise.reject('zoom is not supported by ' + track.label);
       }
       // Map pan to a slider element.
       inputPanRange.min = capabilities.pan.min + 0.00001;
