@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title
+			data-i18n-fi="Puheentunnistus"
+			>Speech To Text</title>
+		<meta charset="UTF-8" />
+		<script type="text/javascript">/*<![CDATA[>*/
+function get_parent_table(element) {
+	const re = /^table$/i;
+	while (!re.test(element.tagName))
+		element = element.parentElement;
+	return element;
+}
+function parse_constraint_input(constraints, constraintName, input) {
+	const constraintValue = parse_constraint_input_value(input);
+	if (constraintValue === "")
+		return;
+	constraints[constraintName] = constraintValue;
+	if (!constraints.advanced)
+		constraints.advanced = [{}];
+	constraints.advanced[0][constraintName] = {exact: constraintValue};
+}
+function parse_constraint_input_value(input) {
+	switch (input.type) {
+	case 'checkbox':
+		return input.indeterminate ? "" : input.checked;
+	case 'radio':
+		return input.checked ? input.value : "";
+	default:
+		return input.value;
+	}
+}
+function apply_constraint(input) {
+	const table = get_parent_table(input);
+	const data = table.data;
+	if (!data)
+		return;
+	for (const track of data.stream.getTracks()) {
+		const constraintName = input.dataset[track.kind + 'Constraint'];
+		if (!constraintName)
+			continue;
+		const constraints = {};
+		parse_constraint_input(
+			constraints,
+			constraintName,
+			input
+			);
+		console.log(constraints);
+		track
+		.applyConstraints(constraints)
+		.catch(e => alert(e));
+	}
+}
+function form_reset(form) {
+	for (const input of form.querySelectorAll('input[data-indeterminate]'))
+		input.indeterminate = true;
+	setTimeout(() => {
+		for (const input of form.querySelectorAll('input[oninput]'))
+			input.oninput();
+	}, 0);
+}
+function set_audio_node_property(input) {
+	const table = get_parent_table(input);
+	const data = table.data;
+	let value = +input.value;
+	if (input.dataset.scale == 'log_10') {
+		if (value == input.min)
+			value = 0
+		else
+			value = +Math.pow(10, value).toFixed(Math.max(Math.round(-input.min) + 2, 0));
+	}
+	if (data) {
+		const nodeName = input.dataset.audioNode;
+		const propertyName = input.dataset.audioNodeProperty || nodeName;
+		console.log(value);
+		data[nodeName][propertyName].setValueAtTime(value, data.ctx.currentTime);
+	}
+	for (const output of document.querySelectorAll('output[for="' + input.id +'"]'))
+		output.value = value;
+}
+function start(startButton) {
+	const table = get_parent_table(startButton);
+	const delayInput = table.querySelector('input[data-audio-node="delay"]');
+	const gainInput = table.querySelector('input[data-audio-node="gain"]');
+	const stopButton = startButton.nextElementSibling;
+	if (table.data)
+		stop(stopButton);
+	console.log('start');
+	const audioConstraints = {};
+	for (const input of table.querySelectorAll('*[data-audio-constraint]'))
+		parse_constraint_input(
+			audioConstraints,
+			input.dataset.audioConstraint, 
+			input
+			);
+	console.log(audioConstraints);
+	navigator.mediaDevices.getUserMedia({
+		audio:	audioConstraints,
+		video:	false
+	})
+	.then(stream => {
+		const audioTrack = stream.getAudioTracks()[0];
+		const audioCapabilities = audioTrack.getCapabilities ? audioTrack.getCapabilities() : undefined;
+		const audioSettings = audioTrack.getSettings();
+		update_device_lists(audioSettings.deviceId);
+		console.log(audioTrack);
+		console.log(audioCapabilities);
+		console.log(audioSettings);
+		return audioTrack.applyConstraints(audioConstraints).then(() => stream);
+	})
+	.then(stream => {
+		const audioTrack = stream.getAudioTracks()[0];
+		audioTrack.onspeechrecognitionresult = event => {
+			console.log(event);
+			table.querySelector('textarea').textContent =
+				event.results[0][0].transcript;
+		};
+		const ctx = new AudioContext();
+		const delay = ctx.createDelay(+delayInput.max);
+		const destination = ctx.createMediaStreamDestination();
+		const gain = ctx.createGain();
+		const source = ctx.createMediaStreamSource(stream);
+		delay.delayTime.value = +delayInput.value;
+		gain.gain.value = +Math.pow(10, gainInput.value);
+		if (table.data)
+			stop(stopButton);
+		stopButton.disabled = false;
+		table.data = {ctx, delay, gain, stream};
+		source.connect(delay).connect(gain).connect(ctx.destination);
+	})
+	.catch(e => alert(e));
+}
+function stop(stopButton) {
+	const table = get_parent_table(stopButton);
+	const data = table.data;
+	if (data) {
+		console.log('stop');
+		data.ctx.close();
+		for (const track of data.stream.getTracks())
+			track.stop();
+	}
+	stopButton.disabled = true;
+	table.data = null;
+}
+function update_device_lists(currentAudioDeviceId, currentVideoDeviceId) {
+	const selects = document.querySelectorAll(
+		'*[data-audio-constraint="deviceId"],' +
+		'*[data-video-constraint="deviceId"]'
+		);
+	for (const select of selects) {
+		while (select.firstChild)
+			select.removeChild(select.firstChild);
+	}
+	navigator.mediaDevices.enumerateDevices()
+	.then(devices => {
+		devices.forEach(device => {
+			if (device.label == "")
+				return;
+			let dataName;
+			let selected;
+			switch (device.kind) {
+			case 'audioinput':
+				dataName = 'audioConstraint';
+				selected = device.deviceId == currentAudioDeviceId;
+				break;
+			case 'videoinput':
+				dataName = 'videoConstraint';
+				selected = device.deviceId == currentVideoDeviceId;
+				break;
+			default:
+				return;
+			}
+			for (const select of selects) {
+				if (!(select.dataset[dataName] == 'deviceId'))
+					continue;
+				const option = document.createElementNS(
+					document.documentElement.namespaceURI,
+					'option'
+					);
+				option.label = device.label;
+				option.value = device.deviceId;
+				option.selected = selected;
+				select.appendChild(option);
+				select.disabled = false;
+			}
+		});
+	})
+	.catch(e => alert(e));
+}
+window.onload = e => {
+	const url = new URL(location);
+	const params = url.searchParams;
+	const languages = params.getAll('language');
+	for (const lang of (
+		(languages.length && languages) ||
+		navigator.languages ||
+		[navigator.language]
+		)) {
+		if (!/^[\w-]+$/.test(lang))
+			continue;
+		const attributeName = 'data-i18n-' + lang;
+		const elems = document.querySelectorAll('[' + attributeName + ']');
+		if (!elems.length)
+			continue;
+		for (const elem of elems)
+			elem.firstChild.data = elem.getAttribute(attributeName);
+		break;
+	}
+	for (const form of document.getElementsByTagName('form'))
+		form_reset(form);
+	update_device_lists();
+};
+		/*<]]>*/</script>
+		<style type="text/css">/*<![CDATA[>*/
+body > p > * {
+	display:	block;
+}
+form table tr th {
+	font-weight:	normal;
+	text-align:	right;
+	vertical-align:	top;
+}
+table tr td input[type="range"] {
+	width:		75%;
+}
+table tr td textarea {
+	height:		10em;
+	width:		100%;
+}
+		/*<]]>*/</style>
+	</head>
+	<body>
+		<p><audio id="audio"></audio></p>
+		<form onreset="form_reset(this);" onsubmit="return false;"><table><tbody>
+			<tr>
+				<th><label for="audio-device-id">
+					<span
+						data-i18n-fi="Äänilaite"
+						>Audio device</span>
+					(deviceId):
+				</label></th>
+				<td><select
+					data-audio-constraint="deviceId"
+					disabled="disabled"
+					id="audio-device-id"
+					onchange="return apply_constraint(this);"
+					></select></td>
+				<td></td>
+			</tr>
+			<!--<tr>
+				<th><label for="video-device-id">
+					<span
+						data-i18n-fi="Videolaite"
+						>Video device</span>
+					(deviceId):
+				</label></th>
+				<td><select
+					data-video-constraint="deviceId"
+					disabled="disabled"
+					id="video-device-id"
+					onchange="return apply_constraint(this);"
+					></select></td>
+				<td></td>
+			</tr>-->
+			<tr>
+				<th></th>
+				<td><label for="auto-gain-control">
+					<input
+						data-audio-constraint="autoGainControl"
+						data-indeterminate="indeterminate"
+						id="auto-gain-control"
+						onclick="return apply_constraint(this);"
+						type="checkbox"
+						/>
+					<span
+						data-i18n-fi="Automaattinen vahvistuksen hallinta"
+						>Automatic gain control</span>
+					(autoGainControl)
+				</label></td>
+			</tr>
+			<tr>
+				<th></th>
+				<td><label for="echo-cancellation">
+					<input
+						data-audio-constraint="echoCancellation"
+						data-indeterminate="indeterminate"
+						id="echo-cancellation"
+						onclick="return apply_constraint(this);"
+						type="checkbox"
+						/>
+					<span
+						data-i18n-fi="Kaiunpoisto"
+						>Echo cancellation</span>
+					(echoCancellation)
+				</label></td>
+			</tr>
+			<tr>
+				<th></th>
+				<td><label for="noise-suppression">
+					<input
+						data-audio-constraint="noiseSuppression"
+						data-indeterminate="indeterminate"
+						id="noise-suppression"
+						onclick="return apply_constraint(this);"
+						type="checkbox"
+						/>
+					<span
+						data-i18n-fi="Kohinanpoisto"
+						>Noise suppression</span>
+					(noiseSuppression)
+				</label></td>
+			</tr>
+			<tr>
+				<th><label for="transcript"><span
+					data-i18n-fi="Tekstitys"
+					>Transcript</span>:</label></th>
+				<td><textarea id="transcript"></textarea></td>
+			</tr>
+			<tr>
+				<th><label for="audio-delay"><span
+					data-i18n-fi="Silmukkaviive"
+					>Loopback delay</span>:</label></th>
+				<td>
+					<input
+						data-audio-node="delay"
+						data-audio-node-property="delayTime"
+						id="audio-delay"
+						max="10.0"
+						min="0.0"
+						oninput="return set_audio_node_property(this);"
+						step="0.1"
+						type="range"
+						value="2.5"
+						/>
+					<output for="audio-delay">2.5</output> s
+				</td>
+			</tr>
+			<tr>
+				<th><label for="audio-gain"><span
+					data-i18n-fi="Silmukkavahvistus"
+					>Loopback gain</span>:</label></th>
+				<td>
+					<input
+						data-audio-node="gain"
+						data-scale="log_10"
+						id="audio-gain"
+						max="1.0"
+						min="-1.02"
+						oninput="return set_audio_node_property(this);"
+						step="0.02"
+						type="range"
+						value="-1.05"
+						/>
+					<output for="audio-gain">0.0</output>
+				</td>
+			</tr>
+			<tr>
+				<th></th>
+				<td>
+					<button
+						data-i18n-fi="Aloita"
+						onclick="return start(this);"
+						type="button"
+						>Start</button>
+					<button
+						data-i18n-fi="Pysäytä"
+						disabled="disabled"
+						onclick="return stop(this);"
+						type="button"
+						>Stop</button>
+					<input type="reset" />
+				</td>
+			</tr>
+		</tbody></table></form>
+	</body>
+</html>
