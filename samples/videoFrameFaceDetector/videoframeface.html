@@ -1,0 +1,109 @@
+<!doctype html>
+<head>
+ 	<title>WebCodecs webcam stream</title>
+</head>
+<video height="50%" id="vPreview" autoplay muted></video>
+<br/></br>
+<canvas id="myCanvas" style="border:1px solid #000000;"></canvas>
+<br/></br>
+<button onclick="stop();">Stop</button>
+
+<script>
+const width = 640;
+const height = 480;
+const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+ctx.canvas.width  = width;
+ctx.canvas.height = height;
+var wantStop = false;
+let framecount = 0;
+
+function stop() {
+	wantStop = true;
+}
+
+document.addEventListener('DOMContentLoaded', function(event) {
+	if (typeof MediaStreamTrackProcessor === 'undefined' ||
+	    typeof MediaStreamTrackGenerator === 'undefined') {
+		console.log('error: no MediaStreamTrackProcessor/Generator');
+		return;
+	}
+
+	var supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
+	console.log("supportedConstraints");
+	console.log(supportedConstraints);
+
+	var constraints = { audio: false,
+	                    video: {
+			        frameRate: { exact: 30 },
+			        width: { ideal: width },
+				height: { ideal: height },
+				faceDetectionMode: { exact: ['contour', 'landmarks', 'expressions' ]},
+				faceDetectionNumFaces: { ideal: 10 },
+				//faceDetectionNumContourPoints: { ideal: 4 },
+				//faceDetectionNumLandmarkPoints: { ideal: 1 },
+			     }
+			   };
+	navigator.mediaDevices.getUserMedia(constraints).then(function(mediaStream) {
+		//document.querySelector('video').srcObject = mediaStream;
+		var track = mediaStream.getVideoTracks()[0];
+		var constraints = track.getConstraints();
+		console.log("constraints");
+		console.log(constraints);
+		const capabilities = track.getCapabilities();
+		console.log("capabilities");
+		console.log(capabilities);
+		var settings = track.getSettings();
+		console.log("settings");
+		console.log(settings);
+		var processor = new MediaStreamTrackProcessor(track);
+		var frameStream = processor.readable;
+		const frameReader = frameStream.getReader();  // ReadableStreamDefaultReader
+
+		frameReader.read().then(function processFrame({done, value}) {
+			if (done) {
+				console.log('Stream is done');
+				return;
+			}
+
+			var frame = value;
+
+			if (wantStop) {
+				frameReader.releaseLock();
+				frameStream.cancel();
+				frame.close();
+				return;
+			}
+
+			framecount++;
+			console.warn("framecount= " + framecount);
+
+			ctx.drawImage(frame, 0, 0);
+			//ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			if (frame.detectedFaces !== undefined && frame.detectedFaces !== null) {
+				ctx.beginPath();
+				ctx.strokeStyle = "#FF0000";
+				for (const f of frame.detectedFaces) {
+					if (f.contour.length > 0) {
+						ctx.moveTo(f.contour[0].x, f.contour[0].y);
+						for (let i = 0; i < f.contour.length; i++) {
+							ctx.lineTo(f.contour[i].x, f.contour[i].y);
+						}
+						ctx.lineTo(f.contour[0].x, f.contour[0].y);
+					}
+				}
+				ctx.stroke();
+			} else {
+				console.log("error: no detectedFaces");
+			}
+
+			frame.close();
+			frameReader.read().then(processFrame);
+		});
+	}).catch(function(err) {
+		console.log(err.name + ': ' + err.message);
+	});
+});
+
+</script>
