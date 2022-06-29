@@ -23,14 +23,14 @@
 <h2>metadata</h2>
 <p><pre id="info_metadata">-</pre></p>
 
-<h2>properties</h2>
-<p><pre id="info_properties">-</pre></p>
-
 <h2>settings</h2>
 <p><pre id="info_settings">-</pre></p>
 
-<h2>mediaDevices.getSupportedConstraints</h2>
+<h2>constraints</h2>
 <p><pre id="info_constraints">-</pre></p>
+
+<h2>mediaDevices.getSupportedConstraints</h2>
+<p><pre id="info_supported_constraints">-</pre></p>
 
 <h2>videoTrack.getCapabilities()</h2>
 <p><pre id="info_capabilities">-</pre></p>
@@ -45,15 +45,16 @@ const startDrawing = () => {
   const canvas = document.querySelector("canvas");
   const ctx = canvas.getContext("2d");
   const info_metadata = document.querySelector("#info_metadata");
-  const info_properties = document.querySelector("#info_properties");
   const info_settings = document.querySelector("#info_settings");
-  const info_constraints = document.querySelector("#info_constraints");
+  const info_constraints = document.querySelector("#info_properties");
+  const info_supported_constraints = document.querySelector("#info_supported_constraints");
   const info_capabilities = document.querySelector("#info_capabilities");
 
   const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();        // getSupportedConstraints
-  info_constraints.innerText = JSON.stringify(supportedConstraints, null, 2);
+  info_supported_constraints.innerText = JSON.stringify(supportedConstraints, null, 2);
 
   let videoTracks = null;
+  let videoTrack = null;
   const constraints = {
     video: {
       backgroundBlur: 0.0,
@@ -66,13 +67,17 @@ const startDrawing = () => {
     video.srcObject = stream;
     videoTracks = stream.getVideoTracks();
     if (videoTracks.length) {
-      videoTrack = videoTracks[0];
+      console.log('Number of videoTracks: ' + videoTracks.length);
+      videoTrack = videoTracks[0];							// MediaStreamTrack
     }
     const capabilities = videoTrack.getCapabilities();                                  // getCapabilities
     info_capabilities.innerText = JSON.stringify(capabilities, null, 2);
 
     const settings = videoTrack.getSettings();                                          // getSettings
     info_settings.innerText = JSON.stringify(settings, null, 2);
+
+    const constraints = videoTrack.getConstraints();                                    // getConstraints
+    info_constraints.innerText = JSON.stringify(constraints, null, 2);
   }).catch((error) => {
     info_errors.innerText = info_errors.innerText + ',' + JSON.stringify(error, null, 2);
   });
@@ -88,20 +93,6 @@ const startDrawing = () => {
 
   const updateCanvas = (now, metadata) => {
     info_metadata.innerText = JSON.stringify(metadata, null, 2);
-
-    videoTrack.getProperties().then((properties) => {                                   // getProperties
-      info_properties.innerText = JSON.stringify(properties, null, 2);
-      // Draw detected faces onto canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const faces = properties.detectedFaces;
-      ctx.beginPath();
-      ctx.strokeStyle = "#FF0000";
-      for (let face of faces) {
-         ctx.rect(face.boundingBox.x, face.boundingBox.y, face.boundingBox.width, face.boundingBox.height);
-      }
-      ctx.stroke();
-    });
-
     video.requestVideoFrameCallback(updateCanvas);
   };  
 
