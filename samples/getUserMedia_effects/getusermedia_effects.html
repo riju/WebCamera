@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+
+<body>
+<h1>getUserMedia Camera Constraint Effects Test</h1>
+
+<h2>video</h2>
+<p><video width="640" height="480" controls playsinline autoplay></video></p>
+</div>
+</div>
+
+<h2>controls</h2>
+<table>
+<tr><td>backgroundBlur</td><td><pre id="checkbox_backgroundblur"><input type="checkbox" onclick='clickBackgroundBlur(this);'></pre></td></tr>
+</table>
+
+<h2>metadata</h2>
+<p><pre id="info_metadata">-</pre></p>
+
+<h2>settings</h2>
+<p><pre id="info_settings">-</pre></p>
+
+<h2>mediaDevices.getSupportedConstraints</h2>
+<p><pre id="info_constraints">-</pre></p>
+
+<h2>videoTrack.getCapabilities()</h2>
+<p><pre id="info_capabilities">-</pre></p>
+
+<h2>errors</h2>
+<p><pre id="info_errors">-</pre></p>
+
+<script>
+
+const constraints_init = {
+  video: {  },
+};
+
+let constraints = {
+  advanced: [{
+    backgroundBlur: false,
+  } ],
+};
+
+let videoTrack = null;
+
+const startTest = () => { 
+  const video = document.querySelector("video");
+  const info_metadata = document.querySelector("#info_metadata");
+  const info_settings = document.querySelector("#info_settings");
+  const info_constraints = document.querySelector("#info_constraints");
+  const info_capabilities = document.querySelector("#info_capabilities");
+  const checkbox_backgroundblur = document.querySelector("#checkbox_backgroundblur");
+
+  const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();        // getSupportedConstraints
+  info_constraints.innerText = JSON.stringify(supportedConstraints, null, 2);
+  if (!supportedConstraints.backgroundBlur) checkbox_backgroundblur.innerText = 'N/A';
+
+  let videoTracks = null;
+
+  navigator.mediaDevices.getUserMedia(constraints_init).then((stream) => {                   // getUserMedia
+    video.srcObject = stream;
+    videoTracks = stream.getVideoTracks();
+    if (videoTracks.length) {
+      videoTrack = videoTracks[0];
+    }
+    const capabilities = videoTrack.getCapabilities();                                  // getCapabilities
+    info_capabilities.innerText = JSON.stringify(capabilities, null, 2);
+
+    const settings = videoTrack.getSettings();                                          // getSettings
+    info_settings.innerText = JSON.stringify(settings, null, 2);
+  }).catch((error) => {
+    info_errors.innerText = info_errors.innerText + ',' + JSON.stringify(error, null, 2);
+  });
+
+  video.addEventListener('play', () => {
+    if (!('requestVideoFrameCallback' in HTMLVideoElement.prototype)) {
+      info_errors.innerText = info_errors.innerText + ',requestVideoFrameCallback API not supported';
+    }
+  });
+
+  const videoFrameCallback = (now, metadata) => {
+    info_metadata.innerText = JSON.stringify(metadata, null, 2);
+    video.requestVideoFrameCallback(videoFrameCallback);
+  };  
+
+  video.requestVideoFrameCallback(videoFrameCallback);  
+};
+
+window.addEventListener('load', startTest);
+
+function updateConstraints() {
+  if (videoTrack) {
+    videoTrack.applyConstraints(constraints).then(() => {
+      console.log('Applied constraints successfully');
+    }).catch((error) => {
+      console.log('Failed to apply constraints');
+      info_errors.innerText = info_errors.innerText + ',' + JSON.stringify(error, null, 2);
+    });
+  }
+}
+
+function clickBackgroundBlur(cb) {
+  constraints.advanced[0].backgroundBlur = cb.checked;
+  updateConstraints();
+}
+
+</script>
+</body>
+</html>
