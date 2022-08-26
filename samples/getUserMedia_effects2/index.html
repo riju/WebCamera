@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>gUM</title>
+		<script src="constraints.js" type="text/javascript"></script>
+		<script src="gum.js" type="text/javascript"></script>
+		<script type="text/javascript">/*<![CDATA[>*/
+'use strict';
+document.documentElement.className += ' js';
+document.addEventListener('DOMContentLoaded', event => {
+	for (const h2 of document.querySelectorAll('section > h2')) {
+		h2.addEventListener('click', event => {
+			const section = event.target.parentNode;
+			section.className =
+				section.className
+				.replace(/( unfolding)*$/, ' folding')
+				.replace(/ fold(ed|ing) folding$/, ' unfolding');
+		});
+	}
+	info_supported_constraints.innerText = `navigator.mediaDevices.getSupportedConstraints() = ${JSON.stringify(navigator.mediaDevices.getSupportedConstraints(), null, 2)}`;
+	document.addEventListener('appliedConstraint', updateInfos);
+	document.addEventListener('startedUserMedia', updateInfos);
+	for (const button of document.querySelectorAll('#info_metadata_start, button.startUserMedia'))
+		button.click();
+}, {once: true});
+function startMetadata(event, button) {
+	info_metadata_start.disabled = true;
+	info_metadata_stop.disabled = false;
+	for (const video of document.querySelectorAll('video')) {
+		video.requestVideoFrameCallback(function callback(now, metadata) {
+			info_metadata.innerText = `now = ${now}\nmetadata = ${JSON.stringify(metadata, null, 2)}`;
+			if (info_metadata_start.disabled)
+				video.requestVideoFrameCallback(callback);
+		});
+	}
+	return false;
+}
+function stopMetadata(event, button) {
+	info_metadata_start.disabled = false;
+	info_metadata_stop.disabled = true;
+	return false;
+}
+function updateInfos(event, table) {
+	table ||= event.target;
+	info_capabilities.innerText = '';
+	info_settings.innerText = '';
+	for (const kind in table.mediaSourceTracks || {}) {
+		let nl = '';
+		table.mediaSourceTracks[kind].forEach(track => {
+			info_capabilities.innerText += `${nl}${kind}Track.getCapabilities() = ${JSON.stringify(track.capabilities, null, 2)}`;
+			info_settings.innerText += `${nl}${kind}Track.getSettings() = ${JSON.stringify(track.settings, null, 2)}`;
+			nl = '\n';
+		});
+	}
+}
+		/*<!]]>*/</script>
+		<style type="text/css">/*<![CDATA[>*/
+html {
+	background:	#000;
+	display:	flex;
+	justify-content:center;
+}
+body {
+	margin:		0;
+	max-width:	100%;
+}
+.video,
+.video video {
+	display:	block;
+	margin:		0 auto 1.25em auto;
+	max-width:	100%;
+}
+button {
+	border-radius:	1em;
+}
+pre {
+	white-space:	pre-wrap;
+}
+section {
+	background:	#fff;
+	border-radius:	1em;
+	box-shadow:	0 0 0.25em 0.25em #fff;
+	color:		#000;
+	margin:		0em 0.75em 1.5em 0.75em;
+	max-width:	100%;
+	padding:	0.25em;
+	overflow-x:	auto;
+}
+section.foldable {
+	clear:		both;
+}
+section.foldable > h2 {
+	margin:		0;
+	padding:	0 0.25em;
+	text-align:	center;
+}
+section.foldable > h2 + * {
+	margin-top:	1em;
+}
+.js section.foldable.folded {
+	clear:		none;
+	float:		left;
+}
+.js section.foldable.folding {
+	animation:	folding-section 500ms ease forwards;
+}
+.js section.foldable         > h2 {
+	cursor:		pointer;
+}
+.js section.foldable         > h2::before {
+	border:		0.6ex solid;
+	border-color:	currentColor transparent transparent transparent;
+	content:	" ";
+	display:	inline-block;
+	margin:		0 0.6ex 0 0;
+	position:	relative;
+	top:		0.3ex;
+}
+.js section.foldable.folded  > h2::before,
+.js section.foldable.folding > h2::before {
+	border-color:	transparent transparent transparent currentColor;
+	top:		0;
+}
+.js section.foldable.folded    > h2 ~ * {
+	display:	none;
+}
+.js section.foldable.folding   > h2 ~ * {
+	animation:	folding-section-content 500ms ease forwards;
+}
+.js section.foldable.unfolding > h2 ~ * {
+	animation:	unfolding-section-content 500ms ease none;
+}
+@keyframes folding-section {
+	0%	{ clear: both; float: none; }
+	99.9%	{ clear: both; float: none; }
+	100%	{ clear: none; float: left; }
+}
+@keyframes folding-section-content {
+	0%	{ opacity: 1;                     visibility: visible; }
+	99.9%	{ opacity: 0; position: static;   visibility: visible; }
+	100%	{ opacity: 0; position: absolute; visibility: hidden;  }
+}
+@keyframes unfolding-section-content {
+	0%	{ opacity: 0; }
+	100%	{ opacity: 1; }
+}
+table tr th {
+	font-weight:	normal;
+	text-align:	left;
+	vertical-align:	top;
+}
+label {
+	display:	block;
+	min-height:	1em;
+}
+label.radio {
+	display:	inline;
+}
+		/*<!]]>*/</style>
+	</head>
+	<body>
+		<div class="video"><video autoplay="autoplay" controls="controls" playsinline="playsinline"></video></div>
+		<section class="foldable">
+			<h2>Controls</h2>
+			<table class="constraints">
+				<tbody>
+					<tr>
+						<th><label for="video-deviceId">Device:</label></th>
+						<td><label for="video-deviceId"><select id="video-deviceId">
+							<option value="">-- Please select --</option>
+						</select></label></td>
+					</tr>
+				<tbody>
+				</tbody>
+					<tr>
+						<th><label for="video-0-backgroundBlur">Background blur:</label></th>
+						<td><label for="video-0-backgroundBlur"><input disabled="disabled" id="video-0-backgroundBlur" type="checkbox" /></label></td>
+					</tr>
+					<tr>
+						<th><label for="video-0-brightness">Brightness:</label></th>
+						<td><label for="video-0-brightness"><input disabled="disabled" id="video-0-brightness" type="range" /></label></td>
+					</tr>
+					<tr>
+						<th><label for="video-0-colorTemperature">Color temperature:</label></th>
+						<td><label for="video-0-colorTemperature"><input disabled="disabled" id="video-0-colorTemperature" type="range" /></label></td>
+					</tr>
+					<tr>
+						<th><label for="video-0-contrast">Contrast:</label></th>
+						<td><label for="video-0-contrast"><input disabled="disabled" id="video-0-contrast" type="range" /></label></td>
+					</tr>
+					<tr>
+						<th><label for="video-0-saturation">Saturation:</label></th>
+						<td><label for="video-0-saturation"><input disabled="disabled" id="video-0-saturation" type="range" /></label></td>
+					</tr>
+					<tr>
+						<th><label for="video-0-sharpness">Sharpness:</label></th>
+						<td><label for="video-0-sharpness"><input disabled="disabled" id="video-0-sharpness" type="range" /></label></td>
+					</tr>
+					<tr>
+						<th><label for="video-0-whiteBalanceMode">White balance mode:</label></th>
+						<td><label for="video-0-whiteBalanceMode"><select id="video-0-whiteBalanceMode">
+							<option value="">-- Please select --</option>
+							<option value="continuous">Continuous</option>
+							<option value="manual">Manual</option>
+						</select></label></td>
+					</tr>
+				<tbody>
+				</tbody>
+					<tr>
+						<th></th>
+						<td>
+							<button class="startUserMedia" onclick="return startUserMedia(event, this);">Start</button>
+							<button class="stopUserMedia" onclick="return stopUserMedia(event, this);">Stop</button>
+						</td>
+					</tr>
+				<tbody>
+			</table>
+		</section>
+		<section class="foldable folded">
+			<h2>Metadata</h2>
+			<pre id="info_metadata"></pre>
+			<div>
+				<button id="info_metadata_start" onclick="return startMetadata(event, this);">Start</button>
+				<button id="info_metadata_stop" disabled="disabled" onclick="return stopMetadata(event, this);">Stop</button>
+			</div>
+		</section>
+		<section class="foldable folded">
+			<h2>Supported constraints</h2>
+			<pre id="info_supported_constraints"></pre>
+		</section>
+		<section class="foldable folded">
+			<h2>Capabilities</h2>
+			<pre id="info_capabilities"></pre>
+		</section>
+		<section class="foldable folded">
+			<h2>Settings</h2>
+			<pre id="info_settings"></pre>
+		</section>
+	</body>
+</html>
