@@ -75,6 +75,13 @@ body {
 button {
 	border-radius:	1em;
 }
+label {
+	display:	block;
+	min-height:	1em;
+}
+label.radio {
+	display:	inline;
+}
 pre {
 	white-space:	pre-wrap;
 }
@@ -146,24 +153,59 @@ section.foldable > h2 + * {
 	0%	{ opacity: 0; }
 	100%	{ opacity: 1; }
 }
-table tr th {
+table.constraints tr th {
 	font-weight:	normal;
 	text-align:	left;
 	vertical-align:	top;
 }
-label {
+/*
+table.constraints tbody tr[title]::after {
+	color:		orange;
+	content:	attr(title);
 	display:	block;
-	min-height:	1em;
 }
-label.radio {
-	display:	inline;
+*/
+.video {
+	display:	table;
+	position:	relative;
+}
+.video video + table.constraints {
+	display:	block;
+	max-width:	640px;
+	position:	absolute;
+	top:		25%;
+}
+.video:hover video + table.constraints {
+	display:	block;
+}
+.video video + table.constraints tbody {
+	display:	flex;
+	flex-wrap:	wrap;
+	justify-content:center;
+}
+.video video + table.constraints tbody tr,
+.video video + table.constraints tbody tr td,
+.video video + table.constraints tbody tr th {
+	display:	block;
+	text-align:	center;
+}
+.video video + table.constraints tbody tr {
+	padding:	0.5em;
+}
+.video video + table.constraints tbody tr td button {
+	background:	rgba(100%, 100%, 100%, 25%);
+}
+.video video + table.constraints tbody tr th label {
+	background:	rgba(100%, 100%, 100%, 25%);
+	box-shadow:	0 0 0.5em 0.25em rgba(100%, 100%, 100%, 25%);
+	display:	table;
+	margin:		0 auto;
 }
 		/*<!]]>*/</style>
 	</head>
 	<body>
-		<div class="video"><video autoplay="autoplay" controls="controls" playsinline="playsinline"></video></div>
-		<section class="foldable">
-			<h2>Controls</h2>
+		<div class="video">
+			<video autoplay="autoplay" controls="controls" playsinline="playsinline"></video>
 			<table class="constraints">
 				<tbody>
 					<tr>
@@ -217,7 +259,7 @@ label.radio {
 					</tr>
 				<tbody>
 			</table>
-		</section>
+		</div>
 		<section class="foldable folded">
 			<h2>Metadata</h2>
 			<pre id="info_metadata"></pre>
