@@ -13,7 +13,10 @@
 
 <h2>controls</h2>
 <table>
-<tr><td>backgroundBlur</td><td><pre id="checkbox_backgroundblur"><input type="checkbox" onclick='clickBackgroundBlur(this);'></pre></td></tr>
+<tr><td>backgroundBlur</td><td><pre id="container_backgroundblur"><input type="checkbox" id="control_backgroundblur" onclick='clickBackgroundBlur(this);'></pre></td></tr>
+<tr><td>backgroundBlurLevel</td><td><pre id="container_backgroundblurlevel"><input type="range" id="control_backgroundblurlevel" min="0" max="1" step="0.1" oninput='clickBackgroundBlurLevel(this);'></pre></td></tr>
+<tr><td>faceFraming</td><td><pre id="container_faceframing"><input type="checkbox" id="control_faceframing" onclick='clickFaceFraming(this);'></pre></td></tr>
+<tr><td>lightingCorrection</td><td><pre id="container_lightingcorrection"><input type="checkbox" id="control_lightingcorrection" onclick='clickLightingCorrection(this);'></pre></td></tr>
 </table>
 
 <h2>metadata</h2>
@@ -39,7 +42,6 @@ const constraints_init = {
 
 let constraints = {
   advanced: [{
-    backgroundBlur: false,
   } ],
 };
 
@@ -51,11 +53,13 @@ const startTest = () => {
   const info_settings = document.querySelector("#info_settings");
   const info_constraints = document.querySelector("#info_constraints");
   const info_capabilities = document.querySelector("#info_capabilities");
-  const checkbox_backgroundblur = document.querySelector("#checkbox_backgroundblur");
+  const container_backgroundblur = document.querySelector("#container_backgroundblur");
+  const container_backgroundblurlevel = document.querySelector("#container_backgroundblurlevel");
+  const container_faceframing = document.querySelector("#container_faceframing");
+  const container_lightingcorrection = document.querySelector("#container_lightingcorrection");
 
   const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();        // getSupportedConstraints
   info_constraints.innerText = JSON.stringify(supportedConstraints, null, 2);
-  if (!supportedConstraints.backgroundBlur) checkbox_backgroundblur.innerText = 'N/A';
 
   let videoTracks = null;
 
@@ -70,6 +74,26 @@ const startTest = () => {
 
     const settings = videoTrack.getSettings();                                          // getSettings
     info_settings.innerText = JSON.stringify(settings, null, 2);
+
+    if (supportedConstraints.backgroundBlur) {
+	constraints.advanced[0].backgroundBlur = settings.backgroundBlur;
+	document.getElementById("control_backgroundblur").checked = settings.backgroundBlur;
+    } else container_backgroundblur.innerText = 'N/A';
+    if (supportedConstraints.backgroundBlurLevel) {
+	constraints.advanced[0].backgroundBlurLevel = settings.backgroundBlurLevel;
+        document.getElementById("control_backgroundblurlevel").value = settings.backgroundBlurLevel;
+        document.getElementById("control_backgroundblurlevel").min   = capabilities.backgroundBlurLevel.min;
+        document.getElementById("control_backgroundblurlevel").max   = capabilities.backgroundBlurLevel.max;
+        document.getElementById("control_backgroundblurlevel").step  = capabilities.backgroundBlurLevel.step;
+    } else container_backgroundblurlevel.innerText = 'N/A';
+    if (supportedConstraints.faceFraming) {
+      constraints.advanced[0].faceFraming = settings.faceFraming;
+      document.getElementById("control_faceframing").checked = settings.faceFraming;
+    } else container_faceframing.innerText = 'N/A';
+    if (supportedConstraints.lightingCorrection) {
+      constraints.advanced[0].lightingCorrection = settings.lightingCorrection;
+      document.getElementById("control_lightingcorrection").checked = settings.lightingCorrection;
+    } else container_lightingcorrection.innerText = 'N/A';
   }).catch((error) => {
     info_errors.innerText = info_errors.innerText + ',' + JSON.stringify(error, null, 2);
   });
@@ -95,7 +119,7 @@ function updateConstraints() {
     videoTrack.applyConstraints(constraints).then(() => {
       console.log('Applied constraints successfully');
     }).catch((error) => {
-      console.log('Failed to apply constraints');
+      console.log('Failed to apply constraints: ' + JSON.stringify(constraints, null, 2));
       info_errors.innerText = info_errors.innerText + ',' + JSON.stringify(error, null, 2);
     });
   }
@@ -103,6 +127,25 @@ function updateConstraints() {
 
 function clickBackgroundBlur(cb) {
   constraints.advanced[0].backgroundBlur = cb.checked;
+  console.log('Set backgroundBlur to ' + cb.checked);
+  updateConstraints();
+}
+
+function clickBackgroundBlurLevel(cb) {
+  constraints.advanced[0].backgroundBlurLevel = cb.value;
+  console.log('Set backgroundBlurLevel to ' + cb.value);
+  updateConstraints();
+}
+
+function clickFaceFraming(cb) {
+  constraints.advanced[0].faceFraming = cb.checked;
+  console.log('Set faceFraming to ' + cb.checked);
+  updateConstraints();
+}
+
+function clickLightingCorrection(cb) {
+  constraints.advanced[0].lightingCorrection = cb.checked;
+  console.log('Set lightingCorrection to ' + cb.checked);
   updateConstraints();
 }
 
