@@ -2,7 +2,7 @@
 <html>
 <head></head>
 
-<body style="background-color:#010101;">
+<body style="background-color:#010101; font-family: Sans-serif">
 <h1 style="color:White;">getUserMedia Camera Constraint Effects Test</h1>
 
 <table style="color:White;">
@@ -10,25 +10,24 @@
     <td><video width="640" height="480" controls playsinline autoplay></video></td>
     <td><table id="effects"></table></td>
   </tr>
-  <tr>
-    <td>
-      <h2>metadata</h2>
-      <p><pre id="info_metadata">-</pre></p>
-
-      <h2>settings</h2>
-      <p><pre id="info_settings">-</pre></p>
-
-      <h2>mediaDevices.getSupportedConstraints</h2>
-      <p><pre id="info_constraints">-</pre></p>
-
-      <h2>videoTrack.getCapabilities()</h2>
-      <p><pre id="info_capabilities">-</pre></p>
-
-      <h2>errors</h2>
-      <p><pre id="info_errors">-</pre></p>
-    </td>
-  </tr>
 </table>
+
+<div style="color:White;">
+  <h2 onclick="toggleVisibility('info_metadata')">metadata</h2>
+  <p id="info_metadata" style="max-height: 0; overflow: hidden;">-</p>
+
+  <h2 onclick="toggleVisibility('info_settings')">settings</h2>
+  <p id="info_settings" style="max-height: 0; overflow: hidden;">-</p>
+
+  <h2 onclick="toggleVisibility('info_constraints')">mediaDevices.getSupportedConstraints</h2>
+  <p id="info_constraints" style="max-height: 0; overflow: hidden;">-</p>
+
+  <h2 onclick="toggleVisibility('info_capabilities')">videoTrack.getCapabilities()</h2>
+  <p id="info_capabilities" style="max-height: 0; overflow: hidden;">-</p>
+
+  <h2 onclick="toggleVisibility('info_errors')">errors</h2>
+  <p id="info_errors" style="max-height: 0; overflow: hidden;">-</p>
+</div>
 
 <script>
 
@@ -37,6 +36,7 @@ const effect_names = [
   'faceFraming',
   'lightingCorrection'
 ];
+var toggles = { };
 var effects = [ ];
 const effects_table = document.getElementById('effects');
 
@@ -147,6 +147,18 @@ function effectClick(i) {
       console.log('Failed to apply constraints: ' + JSON.stringify(constraints, null, 2));
       info_errors.innerText = info_errors.innerText + ',' + JSON.stringify(error, null, 2);
     });
+  }
+}
+
+function toggleVisibility(t) {
+  if (!t in toggles) {
+    toggles[t] = false;
+  }
+  toggles[t] = !toggles[t];
+  if (toggles[t]) {
+    document.getElementById(t).style.removeProperty('max-height');
+  } else {
+    document.getElementById(t).style['max-height'] = '0';
   }
 }
 
