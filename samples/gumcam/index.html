@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+
+<body style="background-color:#010101;">
+<h1 style="color:White;">getUserMedia Camera Constraint Effects Test</h1>
+
+<table style="color:White;">
+  <tr>
+    <td><video width="640" height="480" controls playsinline autoplay></video></td>
+    <td><table id="effects"></table></td>
+  </tr>
+  <tr>
+    <td>
+      <h2>metadata</h2>
+      <p><pre id="info_metadata">-</pre></p>
+
+      <h2>settings</h2>
+      <p><pre id="info_settings">-</pre></p>
+
+      <h2>mediaDevices.getSupportedConstraints</h2>
+      <p><pre id="info_constraints">-</pre></p>
+
+      <h2>videoTrack.getCapabilities()</h2>
+      <p><pre id="info_capabilities">-</pre></p>
+
+      <h2>errors</h2>
+      <p><pre id="info_errors">-</pre></p>
+    </td>
+  </tr>
+</table>
+
+<script>
+
+const effect_names = [
+  'backgroundBlur',
+  'faceFraming',
+  'lightingCorrection'
+];
+var effects = [ ];
+const effects_table = document.getElementById('effects');
+
+// Initialize effects
+
+function setEffectState(i, s) {
+  if (typeof s === 'boolean') {
+    if (s) {
+      s = 'on';
+    } else {
+      s = 'off';
+    }
+  }
+  effects[i].cell.innerHTML = ' <img ' +
+    'src="' + effects[i].icons[s] + '" ' +
+    'alt="' + effects[i].tooltip + '" ' +
+    'title="' + effects[i].tooltip + '" ' +
+    'onclick="effectClick(' + i + ')"> ';
+  effects[i].state = s;
+};
+
+for (var i = 0; i < effect_names.length; i++) {
+  const cell = effects_table.insertRow(i).insertCell(0);
+  effects.push({
+    name:     effect_names[i],
+    tooltip:  effect_names[i].
+      replace(/[A-Z]/g, function(m) { return ' '+m; }).
+      replace(/^[a-z]/g, function(m) { return m.toUpperCase(); }),
+    icons:    { 'off': 'effects-' + effect_names[i].toLowerCase() + '_off.png',
+                'on':  'effects-' + effect_names[i].toLowerCase() + '_on.png',
+                'na':  'effects-' + effect_names[i].toLowerCase() + '_na.png' },
+    cell:     cell,
+  });
+  setEffectState(i, 'na');
+};
+
+const constraints_init = {
+  video: {  },
+};
+
+let constraints = {
+  advanced: [{
+  } ],
+};
+
+const video = document.querySelector('video');
+const info_metadata = document.querySelector('#info_metadata');
+const info_settings = document.querySelector('#info_settings');
+const info_constraints = document.querySelector('#info_constraints');
+const info_capabilities = document.querySelector('#info_capabilities');
+
+const onLoad = () => { 
+  const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();        // getSupportedConstraints
+  info_constraints.innerText = JSON.stringify(supportedConstraints, null, 2);
+
+  let videoTracks = null;
+
+  navigator.mediaDevices.getUserMedia(constraints_init).then((stream) => {                   // getUserMedia
+    video.srcObject = stream;
+    videoTracks = stream.getVideoTracks();
+    if (videoTracks.length) {
+      videoTrack = videoTracks[0];
+    }
+    const capabilities = videoTrack.getCapabilities();                                  // getCapabilities
+    info_capabilities.innerText = JSON.stringify(capabilities, null, 2);
+
+    const settings = videoTrack.getSettings();                                          // getSettings
+    info_settings.innerText = JSON.stringify(settings, null, 2);
+
+    for (var i = 0; i < effects.length; i++) {
+      if (typeof settings[effects[i].name] === 'boolean') {
+        setEffectState(i, settings[effects[i].name]);
+      }
+    }
+
+  }).catch((error) => {
+    info_errors.innerText = info_errors.innerText + ',' + JSON.stringify(error, null, 2);
+  });
+
+  video.addEventListener('play', () => {
+    if (!('requestVideoFrameCallback' in HTMLVideoElement.prototype)) {
+      info_errors.innerText = info_errors.innerText + ',requestVideoFrameCallback API not supported';
+    }
+  });
+
+  const videoFrameCallback = (now, metadata) => {
+    info_metadata.innerText = JSON.stringify(metadata, null, 2);
+    video.requestVideoFrameCallback(videoFrameCallback);
+  };  
+
+  video.requestVideoFrameCallback(videoFrameCallback);  
+};
+
+window.addEventListener('load', onLoad);
+
+function effectClick(i) {
+  if (effects[i].state === 'na')
+    return;
+  let new_state = true;
+  if (effects[i].state === 'on')
+    new_state = false;
+  constraints.advanced[0][effects[i].name] = new_state;
+  if (videoTrack) {
+    videoTrack.applyConstraints(constraints).then(() => {
+      setEffectState(i, new_state);
+      console.log('Applied constraints successfully');
+    }).catch((error) => {
+      console.log('Failed to apply constraints: ' + JSON.stringify(constraints, null, 2));
+      info_errors.innerText = info_errors.innerText + ',' + JSON.stringify(error, null, 2);
+    });
+  }
+}
+
+</script>
+</body>
+</html>
